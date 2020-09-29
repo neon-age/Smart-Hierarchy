@@ -1,0 +1,20 @@
+{
+  "name": "com.av.smart-hierarchy",
+  "version": "0.1.0",
+  "displayName": "Smart Hierarchy",
+  "description": "Human readable hierarchy with icons and folders support.\nHelps you to organize your scene properly, without getting lost in objects mess.",
+  "keywords": [
+    "editor",
+    "smart",
+    "hierarchy",
+    "tools",
+    "utility",
+    "extensions"
+  ],
+  "author": {
+    "name": "Alternative Visual",
+    "email": "alternativevisualgames@gmail.com",
+    "url": "alternativevisual.dev"
+  },
+  "unity": "2019.3"
+}
