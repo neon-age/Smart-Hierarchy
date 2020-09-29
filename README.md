@@ -1,6 +1,6 @@
 # Smart-Hierarchy
 Human readable hierarchy with icons and folders for Unity.\
-Helps you to organize your scene properly, without getting lost in objects mess.\
+Helps you to organize your scene properly, without getting lost in objects mess.
 
 ![Smart Hierarchy](https://i.imgur.com/oebJPv9.png)
 
