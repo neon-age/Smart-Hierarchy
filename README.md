@@ -4,6 +4,13 @@ Helps you to organize your scene properly, without getting lost in objects mess.
 
 ![Smart Hierarchy](https://i.imgur.com/oebJPv9.png)
 
+## Test status:
+* Made in Unity 2019.4
+* Not tested with Unity 2020.1
+* Not tested with sub-scenes
+* Not tested with other workflow extensions like Peek
+
+
 ## How folder works?
 Folder disables transform and detaches it's children on scene process. That's it
 
