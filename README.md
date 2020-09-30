@@ -37,5 +37,6 @@ You'll always see where's all you lights, enemies, particles and cameras.
 
 ## Todo:
 * Full customization
+* Select all child components of type in folder inspector
 * Object components on hover
 * Object preview icon
