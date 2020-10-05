@@ -136,14 +136,19 @@ namespace AV.Editor.Hierarchy
                 };
                 var components = gameObject.GetComponents<Component>();
                 
-                if (components.Length > 0)
+                if (components.Length > 1)
                 {
-                    // Usually, main component is at the top, but for UI it's the opposite
-                    var isUI = components.Length > 1 && components[1] is CanvasRenderer;
-                    var component = components[isUI ? components.Length - 1 : components.Length > 1 ? 1 : 0];
-                    
-                    item.icon = EditorGUIUtility.ObjectContent(component, component.GetType()).image as Texture2D;
-                    item.hasIcon = item.icon != null;
+                    var firstComponent = components[1];
+                    if (firstComponent)
+                    {
+                        // Usually, main component is at the top, but for UI it's the opposite
+                        var isUI = components.Length > 1 && components[1] is CanvasRenderer;
+                        var component = components[isUI ? components.Length - 1 : components.Length > 1 ? 1 : 0];
+                        
+                        if(component)
+                        item.icon = EditorGUIUtility.ObjectContent(component, component.GetType()).image as Texture2D;
+                        item.hasIcon = item.icon != null;
+                    }
                 }
                 
                 ItemsData.Add(gameObject, item);
