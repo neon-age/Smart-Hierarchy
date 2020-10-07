@@ -127,6 +127,10 @@ namespace AV.Editor.Hierarchy
             
             var view = FindItem(instanceId);
             
+            // Happens to be null when entering prefab mode
+            if (view == null)
+                return;
+            
             if (!ItemsData.TryGetValue(gameObject, out var item))
             {
                 item = new ItemData()
