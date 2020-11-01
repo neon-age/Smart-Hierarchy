@@ -6,7 +6,7 @@ Helps you to organize your scene properly, without getting lost in objects mess.
 
 ## Test status:
 * Made in Unity 2019.4
-* Not tested with Unity 2020.1
+* Tested with Unity 2020.1
 * Not tested with sub-scenes
 * Not tested with other workflow extensions like Peek
 
@@ -30,13 +30,13 @@ You'll always see where's all you lights, enemies, particles and cameras.
 * Playmode hierarchy depth does not account sub-folders
 * Playmode reordering doesn't update view depth
 
-## Not implemented yet:
-* Folding in playmode
-* Warning about components on folder object
-* Create folder context menu
-
 ## Todo:
-* Full customization
-* Select all child components of type in folder inspector
-* Object components on hover
-* Object preview icon
+* Preferences
+* "Create Folder" menu
+* One-click expanding
+* Decorator folders
+* Folding in playmode
+* Components-bar
+* Child-objects filter
+* Object preview
+* Alternating Lines
