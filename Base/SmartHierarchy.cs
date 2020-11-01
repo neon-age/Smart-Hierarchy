@@ -14,7 +14,7 @@ namespace AV.Editor.Hierarchy
     [InitializeOnLoad]
     internal static class SmartHierarchy
     {
-        //private static HierarchySettings.Preferences preferences;
+        private static HierarchyPreferences preferences;
         private static Texture2D folderIcon;
         private static Texture2D folderEmptyIcon;
         private static GUIStyle iconStyle;
@@ -42,10 +42,10 @@ namespace AV.Editor.Hierarchy
 
         static SmartHierarchy()
         {
-            //var settingsProvider = HierarchySettings.GetProvider();
-            //preferences = settingsProvider.preferences;
+            var settingsProvider = HierarchySettingsProvider.GetProvider();
+            preferences = settingsProvider.preferences;
             
-            //settingsProvider.onChange += Reinitialize;
+            settingsProvider.onChange += Reinitialize;
             EditorApplication.hierarchyChanged += Reinitialize;
             Reflected.onExpandedStateChange = ClearViewData;
             
@@ -71,8 +71,8 @@ namespace AV.Editor.Hierarchy
 
         private static void OnHierarchyItemGUI(int instanceId, Rect rect)
         {
-            //if (!preferences.enableSmartHierarchy)
-            //    return;
+            if (!preferences.enableSmartHierarchy)
+                return;
             
             if (iconStyle == null)
             {
@@ -136,30 +136,39 @@ namespace AV.Editor.Hierarchy
 
             if (item.isFolder)
             {
-                if (!FoldersData.TryGetValue(instanceId, out var data))
+                if (!FoldersData.TryGetValue(instanceId, out var folder))
                 {
-                    data = new FolderData
+                    folder = new FolderData
                     {
                         isEmpty = instance.transform.childCount == 0
                     };
                     
-                    if (!data.isEmpty)
+                    if (!folder.isEmpty)
                     {
-                        data.mainGameObject = instance.transform.GetChild(0).gameObject;
+                        folder.mainGameObject = instance.transform.GetChild(0).gameObject;
                     }
                     
-                    FoldersData.Add(instanceId, data);
+                    FoldersData.Add(instanceId, folder);
                 }
                 
-                item.view.icon = data.isEmpty ? folderEmptyIcon : folderIcon;
+                item.view.icon = folder.isEmpty ? folderEmptyIcon : folderIcon;
             }
             else
             {
-                //if (preferences.displayMainComponentIcon)
-                //{
-                    if (item.hasIcon)
-                        item.view.icon = item.icon;
-                //}
+                if (item.hasIcon)
+                {
+                    switch (preferences.stickComponentIcon)
+                    {
+                        case StickIcon.Never: break;
+                        case StickIcon.OnAnyObject:
+                            item.view.icon = item.icon;
+                            break;
+                        case StickIcon.NotOnPrefabs:
+                            if (PrefabUtility.GetPrefabAssetType(instance) == PrefabAssetType.NotAPrefab)
+                                item.view.icon = item.icon;
+                            break;
+                    }
+                }
 
                 if (Application.isPlaying)
                     item.view.depth = item.initialDepth + 1;
@@ -171,6 +180,9 @@ namespace AV.Editor.Hierarchy
                 //    GUI.Label(iconRect, mainItem.icon, iconStyle);
                 //}
             }
+
+            if (!instance)
+                return;
             
             if (IsHoveringItem(fullWidthRect))
             {
@@ -283,7 +295,7 @@ namespace AV.Editor.Hierarchy
             {
                 var action = (Action)expandedStateChanged.GetValue(treeView);
                 
-                Debug.Log(action);
+                //Debug.Log(action);
                 action += onExpandedStateChanged;
                 expandedStateChanged.SetValue(treeView, action);
             }

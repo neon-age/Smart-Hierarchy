@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement style="margin-left: 7px; margin-top: 2px;">
+        <ui:Label text="Smart Hierarchy" style="font-size: 19px; -unity-font-style: bold; margin-left: 2px; margin-bottom: 12px;" />
+        <ui:Toggle label="Enable Smart Hierarchy" binding-path="enableSmartHierarchy" />
+        <ui:Foldout text="Icons">
+            <uie:EnumField label="Sticky Component Icon" binding-path="stickComponentIcon" />
+        </ui:Foldout>
+    </ui:VisualElement>
+</ui:UXML>
