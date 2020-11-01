@@ -6,7 +6,7 @@ using UnityEditor.Build.Reporting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace AV.Editor.Hierarchy
+namespace AV.Hierarchy
 {
     internal class DetachOnBuildProcess : IProcessSceneWithReport
     {

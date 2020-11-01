@@ -9,7 +9,7 @@ using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using Object = UnityEngine.Object;
 
-namespace AV.Editor.Hierarchy
+namespace AV.Hierarchy
 {
     [InitializeOnLoad]
     internal static class SmartHierarchy

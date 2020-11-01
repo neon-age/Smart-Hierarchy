@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using static UnityEditor.EditorGUI;
 
-namespace AV.Editor.Hierarchy
+namespace AV.Hierarchy
 {
     internal enum StickIcon
     {

@@ -9,10 +9,10 @@ using UnityEditor.Callbacks;
 using UnityEngine;
 using static UnityEditor.EditorGUIUtility;
 
-namespace AV.Editor.Hierarchy
+namespace AV.Hierarchy
 {
     [CustomEditor(typeof(Folder))]
-    internal class FolderEditor : UnityEditor.Editor
+    internal class FolderEditor : Editor
     {
         private static class Reflected
         {
