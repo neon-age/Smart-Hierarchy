@@ -357,9 +357,7 @@ namespace AV.Hierarchy
             {
                 var sceneHierarchyWindowType = typeof(Editor).Assembly.GetType("UnityEditor.SceneHierarchyWindow");
                 var sceneHierarchyType = typeof(Editor).Assembly.GetType("UnityEditor.SceneHierarchy");
-                var treeViewControllerType =
-                    typeof(TreeViewState).Assembly.GetType("UnityEditor.IMGUI.Controls.TreeViewController");
-
+                
                 // As all required types are internal, we need to do some reflection
                 // See https://github.com/Unity-Technologies/UnityCsReference/blob/2020.1/Editor/Mono/SceneHierarchyWindow.cs
 
@@ -380,8 +378,16 @@ namespace AV.Hierarchy
                 var row = TreeViewController.GetRow(controller.data, id);
                 if (row == -1)
                     return null;
-                
-                return TreeViewController.GetItem(controller.data, row);
+
+                // There's an error during undo
+                try
+                {
+                    return TreeViewController.GetItem(controller.data, row);
+                }
+                catch
+                {
+                    return null;
+                }
             }
             
             public static TreeViewController GetLastTreeViewController()
