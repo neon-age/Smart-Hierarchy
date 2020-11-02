@@ -26,7 +26,7 @@ namespace AV.Hierarchy
     internal class HierarchyPreferences : ScriptableObject
     {
         public bool enableSmartHierarchy = true;
-        public StickyIcon stickyComponentIcon = StickyIcon.OnAnyObject;
+        public StickyIcon stickyComponentIcon = StickyIcon.NotOnPrefabs;
         public TransformIcon transformIcon = TransformIcon.OnUniqueOrigin;
     }
     
