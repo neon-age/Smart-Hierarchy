@@ -1,0 +1,11 @@
+
+.unity-foldout .unity-toggle__input:hover {
+    background-color: #b6b6b6;
+}
+.unity-foldout .unity-toggle__input:hover {
+    background-color: #444444;
+}
+
+.unity-foldout .unity-toggle__input:focus > .unity-toggle__text {
+    color: #81b4ff;
+}

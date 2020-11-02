@@ -31,12 +31,12 @@ namespace AV.Hierarchy
         }
         
         private const string Path = "Preferences/Workflow/Smart Hierarchy";
+        
         private static HierarchySettingsProvider provider;
         
         public HierarchyPreferences preferences { get; private set; }
         public event Action onChange;
 
-        private SerializedObject serializedObject;
 
         private HierarchySettingsProvider(string path, SettingsScope scope)
             : base(path, scope){}
@@ -45,15 +45,22 @@ namespace AV.Hierarchy
         {
             LoadFromJson();
             
-            serializedObject = new SerializedObject(preferences);
+            const string UiPath = "Packages/com.av.smart-hierarchy/UI/";
             
-            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Packages/com.av.smart-hierarchy/UI/nice-foldout-header.uss");
-            var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Packages/com.av.smart-hierarchy/UI/smart_hierarchy_settings.uxml");
+            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(UiPath + "nice-foldout-header.uss");
+            var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(UiPath + "smart_hierarchy_settings.uxml");
 
             root.styleSheets.Add(styleSheet);
+
+            if (EditorGUIUtility.isProSkin)
+            {
+                var darkStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>(UiPath + "nice-foldout-header_dark.uss");
+                root.styleSheets.Add(darkStyle);
+            }
             
             visualTree.CloneTree(root);
-            root.Bind(serializedObject);
+            
+            root.Bind(new SerializedObject(preferences));
             
             // this is stupid
             root.RegisterCallback<ChangeEvent<bool>>(evt => SaveToJson());
