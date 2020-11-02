@@ -28,6 +28,7 @@ namespace AV.Hierarchy
             internal TreeViewItem view;
             internal Texture2D icon;
             internal int initialDepth;
+            internal int lastViewId;
             
             internal bool isPrefab;
             internal bool isRootPrefab;
@@ -39,8 +40,8 @@ namespace AV.Hierarchy
             internal GameObject mainGameObject;
         }
 
-        private static readonly Dictionary<int, ItemData> ItemsData = new Dictionary<int, ItemData>();
-        private static readonly Dictionary<int, FolderData> FoldersData = new Dictionary<int, FolderData>();
+        private static readonly Dictionary<GameObject, ItemData> ItemsData = new Dictionary<GameObject, ItemData>();
+        private static readonly Dictionary<GameObject, FolderData> FoldersData = new Dictionary<GameObject, FolderData>();
 
         static SmartHierarchy()
         {
@@ -48,7 +49,7 @@ namespace AV.Hierarchy
             preferences = settingsProvider.preferences;
             
             settingsProvider.onChange += Reinitialize;
-            EditorApplication.hierarchyChanged += Reinitialize;
+            //EditorApplication.hierarchyChanged += Reinitialize;
             Reflected.onExpandedStateChange = ClearViewData;
             
             EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyItemGUI;
@@ -59,10 +60,10 @@ namespace AV.Hierarchy
 
         private static void ClearViewData()
         {
-            foreach (var item in ItemsData.Values)
-            {
-                item.view = null;
-            }
+            //foreach (var item in ItemsData.Values)
+            //{
+            //    item.view = null;
+            //}
         }
         
         private static void Reinitialize()
@@ -84,12 +85,13 @@ namespace AV.Hierarchy
                 };
             }
 
-            GameObject instance;
+            var instance = EditorUtility.InstanceIDToObject(instanceId) as GameObject;
             
-            if (!ItemsData.TryGetValue(instanceId, out var item))
+            if (instance == null)
+                return;
+            
+            if (!ItemsData.TryGetValue(instance, out var item))
             {
-                instance = EditorUtility.InstanceIDToObject(instanceId) as GameObject;
-
                 if (instance == null)
                     return;
                 
@@ -106,32 +108,29 @@ namespace AV.Hierarchy
                 if (mainComponent != null)
                     item.icon = EditorGUIUtility.ObjectContent(mainComponent, mainComponent.GetType()).image as Texture2D;
                 
-                ItemsData.Add(instanceId, item);
+                ItemsData.Add(instance, item);
             }
-
-            if (item == null)
-                return;
 
             var fullWidthRect = GetFullWidthRect(rect);
             instance = item.instance;
             
-            if (!instance)
-                return;
-
-            if (item.view == null || item.view.id != instanceId)
+            if (item.lastViewId != instanceId)
             {
                 item.view = Reflected.FindItem(instanceId);
-
-                // Happens to be null when entering prefab mode
-                if (item.view == null)
-                    return;
-                
+                item.lastViewId = item.view.id;
                 item.initialDepth = item.view.depth;
+            }
+            
+            // Happens to be null when entering prefab mode
+            if (item.view == null)
+            {
+                ItemsData.Remove(instance);
+                return;
             }
 
             if (item.isFolder)
             {
-                if (!FoldersData.TryGetValue(instanceId, out var folder))
+                if (!FoldersData.TryGetValue(instance, out var folder))
                 {
                     folder = new FolderData
                     {
@@ -143,7 +142,7 @@ namespace AV.Hierarchy
                         folder.mainGameObject = instance.transform.GetChild(0).gameObject;
                     }
                     
-                    FoldersData.Add(instanceId, folder);
+                    FoldersData.Add(instance, folder);
                 }
                 
                 item.view.icon = folder.isEmpty ? folderEmptyIcon : folderIcon;
@@ -289,10 +288,7 @@ namespace AV.Hierarchy
 
             // Takes hierarchy TreeViewController and instance ID
             private static readonly Func<object, int, TreeViewItem> FindHierarchyItem;
-
-            // Caches hierarchies tree views
-            private static readonly Dictionary<object, object> HierarchyTreeViews = new Dictionary<object, object>();
-
+            
             static Reflected()
             {
                 var sceneHierarchyWindowType = typeof(UnityEditor.Editor).Assembly.GetType("UnityEditor.SceneHierarchyWindow");
@@ -335,18 +331,13 @@ namespace AV.Hierarchy
             {
                 var hierarchyWindow = GetLastHierarchyWindow();
 
-                if (!HierarchyTreeViews.TryGetValue(hierarchyWindow, out var treeView))
-                {
-                    var sceneHierarchy = getSceneHierarchy.GetValue(hierarchyWindow);
-                    treeView = getTreeView.GetValue(sceneHierarchy);
+                // TreeView is rebuilding when entering/exiting Prefab Mode, so we can't simply cache it
+                // Reflection performance is not so bad, comparing to FindItem.. 
+                var sceneHierarchy = getSceneHierarchy.GetValue(hierarchyWindow);
+                var treeView = getTreeView.GetValue(sceneHierarchy);
 
-                    // For god sake, I forgot to add this line previously..
-                    HierarchyTreeViews.Add(hierarchyWindow, treeView);
-
-                    SetOnExpandedStateChanged(treeView, onExpandedStateChange);
-                    return treeView;
-                }
-
+                SetOnExpandedStateChanged(treeView, onExpandedStateChange);
+                
                 return treeView;
             }
             
