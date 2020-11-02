@@ -9,27 +9,29 @@ using static UnityEditor.EditorGUI;
 
 namespace AV.Hierarchy
 {
-    internal enum StickIcon
+    internal enum StickyIcon
     {
         Never,
         OnAnyObject,
         NotOnPrefabs
     }
+    internal enum TransformIcon
+    {
+        Never,
+        Always,
+        OnUniqueOrigin,
+        OnlyRectTransform
+    }
     
     internal class HierarchyPreferences : ScriptableObject
     {
         public bool enableSmartHierarchy = true;
-        public StickIcon stickComponentIcon = StickIcon.OnAnyObject;
+        public StickyIcon stickyComponentIcon = StickyIcon.OnAnyObject;
+        public TransformIcon transformIcon = TransformIcon.OnUniqueOrigin;
     }
     
     internal class HierarchySettingsProvider : SettingsProvider
     {
-        private class Contents
-        {
-            public static GUIContent enableSmartHierarchy = new GUIContent("Enable Smart Hierarchy");
-            public static GUIContent stickComponentIcon = new GUIContent("Stick Component Icon");
-        }
-        
         private const string Path = "Preferences/Workflow/Smart Hierarchy";
         
         private static HierarchySettingsProvider provider;
@@ -59,8 +61,10 @@ namespace AV.Hierarchy
             }
             
             visualTree.CloneTree(root);
-            
-            root.Bind(new SerializedObject(preferences));
+
+            var serializedObject = new SerializedObject(preferences);
+            root.Bind(serializedObject);
+            keywords = GetSearchKeywordsFromSerializedObject(serializedObject);
             
             // this is stupid
             root.RegisterCallback<ChangeEvent<bool>>(evt => SaveToJson());
@@ -86,10 +90,7 @@ namespace AV.Hierarchy
         {
             if (provider == null)
             {
-                provider = new HierarchySettingsProvider(Path, SettingsScope.User)
-                {
-                    keywords = GetSearchKeywordsFromGUIContentProperties<Contents>()
-                };
+                provider = new HierarchySettingsProvider(Path, SettingsScope.User);
             }
 
             if (provider.preferences == null)

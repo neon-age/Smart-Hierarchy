@@ -3,7 +3,8 @@
         <ui:Label text="Smart Hierarchy" style="font-size: 19px; -unity-font-style: bold; margin-left: 2px; margin-bottom: 12px;" />
         <ui:Toggle label="Enable Smart Hierarchy" binding-path="enableSmartHierarchy" />
         <ui:Foldout text="Icons">
-            <uie:EnumField label="Sticky Component Icon" binding-path="stickComponentIcon" />
+            <uie:EnumField label="Sticky Component Icon" binding-path="stickyComponentIcon" tooltip="Main component icon that is shown instead of GameObject or Prefab icon." />
+            <uie:EnumField label="Transform Icon" binding-path="transformIcon" />
         </ui:Foldout>
     </ui:VisualElement>
 </ui:UXML>

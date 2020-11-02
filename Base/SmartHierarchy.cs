@@ -2,11 +2,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace AV.Hierarchy
@@ -22,14 +24,14 @@ namespace AV.Hierarchy
         private class ItemData
         {
             internal GameObject instance;
+            
             internal TreeViewItem view;
-            
-            internal bool isFolder;
             internal Texture2D icon;
-            internal bool hasIcon;
-            
-            internal Texture2D initialIcon;
             internal int initialDepth;
+            
+            internal bool isPrefab;
+            internal bool isRootPrefab;
+            internal bool isFolder;
         }
         private class FolderData
         {
@@ -91,28 +93,18 @@ namespace AV.Hierarchy
                 if (instance == null)
                     return;
                 
-                //Debug.Log("item " + instanceId);
                 item = new ItemData
                 {
                     instance = instance,
+                    isPrefab = PrefabUtility.GetPrefabAssetType(instance) == PrefabAssetType.Regular,
+                    isRootPrefab = PrefabUtility.IsAnyPrefabInstanceRoot(instance),
                     isFolder = instance.TryGetComponent<Folder>(out _)
                 };
                 var components = instance.GetComponents<Component>();
-                
-                if (components.Length > 1)
-                {
-                    var firstComponent = components[1];
-                    if (firstComponent)
-                    {
-                        // Usually, main component is at the top, but for UI it's the opposite
-                        var isUI = components.Length > 1 && components[1] is CanvasRenderer;
-                        var component = components[isUI ? components.Length - 1 : components.Length > 1 ? 1 : 0];
-                        
-                        if(component)
-                            item.icon = EditorGUIUtility.ObjectContent(component, component.GetType()).image as Texture2D;
-                        item.hasIcon = item.icon != null;
-                    }
-                }
+
+                var mainComponent = DecideMainComponent(components);
+                if (mainComponent != null)
+                    item.icon = EditorGUIUtility.ObjectContent(mainComponent, mainComponent.GetType()).image as Texture2D;
                 
                 ItemsData.Add(instanceId, item);
             }
@@ -122,6 +114,9 @@ namespace AV.Hierarchy
 
             var fullWidthRect = GetFullWidthRect(rect);
             instance = item.instance;
+            
+            if (!instance)
+                return;
 
             if (item.view == null || item.view.id != instanceId)
             {
@@ -155,16 +150,16 @@ namespace AV.Hierarchy
             }
             else
             {
-                if (item.hasIcon)
+                if (item.icon != null)
                 {
-                    switch (preferences.stickComponentIcon)
+                    switch (preferences.stickyComponentIcon)
                     {
-                        case StickIcon.Never: break;
-                        case StickIcon.OnAnyObject:
+                        case StickyIcon.Never: break;
+                        case StickyIcon.OnAnyObject:
                             item.view.icon = item.icon;
                             break;
-                        case StickIcon.NotOnPrefabs:
-                            if (PrefabUtility.GetPrefabAssetType(instance) == PrefabAssetType.NotAPrefab)
+                        case StickyIcon.NotOnPrefabs:
+                            if (!item.isRootPrefab)
                                 item.view.icon = item.icon;
                             break;
                     }
@@ -180,9 +175,6 @@ namespace AV.Hierarchy
                 //    GUI.Label(iconRect, mainItem.icon, iconStyle);
                 //}
             }
-
-            if (!instance)
-                return;
             
             if (IsHoveringItem(fullWidthRect))
             {
@@ -192,6 +184,73 @@ namespace AV.Hierarchy
                     instance.SetActive(isActive);
                 }
             }
+        }
+
+        private static Component DecideMainComponent(params Component[] components)
+        {
+            var count = components.Length;
+            if (count == 0) 
+                return null;
+            
+            var zeroComponent = components[0];
+            
+            if (count == 1)
+            {
+                switch (preferences.transformIcon)
+                {
+                    case TransformIcon.Always: 
+                        return zeroComponent;
+                    
+                    case TransformIcon.OnUniqueOrigin:
+                        if (zeroComponent is Transform transform)
+                        {
+                            if (transform.localPosition != Vector3.zero || 
+                                transform.localRotation != Quaternion.identity)
+                                return zeroComponent;
+                        }
+                        break;
+                    
+                    case TransformIcon.OnlyRectTransform:
+                        return zeroComponent is RectTransform ? zeroComponent : null;
+                }
+
+                return null;
+            }
+            
+            if (HasCanvasRenderer(components))
+            {
+                return GetMainUGUIComponent(components);
+            }
+            
+            return components[1];
+        }
+
+        private static bool HasCanvasRenderer(params Component[] components)
+        {
+            return components.OfType<CanvasRenderer>().Any();
+        }
+
+        private static Component GetMainUGUIComponent(params Component[] components)
+        {
+            Graphic lastGraphic = null;
+            Selectable lastSelectable = null;
+
+            foreach (var component in components)
+            {
+                if (component is Graphic graphic)
+                    lastGraphic = graphic;
+
+                if (component is Selectable selectable)
+                    lastSelectable = selectable;
+            }
+
+            if (lastSelectable != null)
+                return lastSelectable;
+
+            if (lastGraphic != null)
+                return lastGraphic;
+
+            return null;
         }
 
         private static Rect GetFullWidthRect(Rect rect)
