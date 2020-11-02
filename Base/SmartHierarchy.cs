@@ -50,7 +50,11 @@ namespace AV.Hierarchy
             var settingsProvider = HierarchySettingsProvider.GetProvider();
             preferences = settingsProvider.preferences;
             
-            settingsProvider.onChange += ReloadView;
+            settingsProvider.onChange += () =>
+            {
+                ReloadView();
+                EditorApplication.DirtyHierarchyWindowSorting();
+            };
             Selection.selectionChanged += ReloadView;
             Reflected.onVisibleRowsChanged += ReloadView;
             EditorApplication.hierarchyChanged += ReloadView;
@@ -60,7 +64,7 @@ namespace AV.Hierarchy
             folderIcon = EditorGUIUtility.IconContent("Folder Icon").image as Texture2D;
             folderEmptyIcon = EditorGUIUtility.IconContent("FolderEmpty Icon").image as Texture2D;
         }
-
+        
         private static void ReloadView()
         {
             ItemsData.Clear();

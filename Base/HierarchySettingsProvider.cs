@@ -81,6 +81,7 @@ namespace AV.Hierarchy
         {
             var json = EditorJsonUtility.ToJson(preferences);
             EditorPrefs.SetString(Path, json);
+            onChange?.Invoke();
         }
 
         public static HierarchySettingsProvider GetProvider() => (HierarchySettingsProvider)GetSettingsProvider();
