@@ -211,8 +211,8 @@ namespace AV.Hierarchy
                                 transform.localRotation != Quaternion.identity)
                                 return zeroComponent;
                         }
-                        break;
-                    
+                        return zeroComponent is RectTransform ? zeroComponent : null;
+                        
                     case TransformIcon.OnlyRectTransform:
                         return zeroComponent is RectTransform ? zeroComponent : null;
                 }
