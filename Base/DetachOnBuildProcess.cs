@@ -23,6 +23,11 @@ namespace AV.Hierarchy
                 {
                     DetachRootChildren(folder.transform);
                 }
+
+                foreach (var folder in folders)
+                {
+                    Object.DestroyImmediate(folder.gameObject);
+                }
             }
         }
 
