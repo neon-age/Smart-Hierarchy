@@ -120,8 +120,14 @@ namespace AV.Hierarchy
             if (item.view == null)
             {
                 item.view = Reflected.GetViewItem(instanceId);
-                if(item.view == null)
+                if(item.view != null)
+                {
+                    item.initialDepth = item.view.depth;
+                }
+                else
+                {
                     return;
+                }
             }
 
             HandleItemView(item);
@@ -185,7 +191,7 @@ namespace AV.Hierarchy
                 }
 
                 if (Application.isPlaying)
-                    item.view.depth = item.initialDepth + 1;
+                    item.view.depth = item.initialDepth;
             }
         }
 

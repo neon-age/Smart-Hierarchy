@@ -14,8 +14,8 @@ namespace AV.Hierarchy
         public void OnProcessScene(Scene scene, BuildReport report)
         {
             var isEditor = Application.isEditor;
-            var roots = scene.GetRootGameObjects();
-            foreach (var root in roots)
+            var sceneRoots = scene.GetRootGameObjects();
+            foreach (var root in sceneRoots)
             {
                 foreach (var folder in root.GetComponentsInChildren<Folder>(true))
                 {
@@ -28,22 +28,22 @@ namespace AV.Hierarchy
                         continue;
                     }
 
-                    var children = new Transform[transform.childCount];
-                    var siblings = new int[children.Length];
+                    var roots = new Transform[transform.childCount];
+                    var siblings = new int[roots.Length];
                     var folderSibling = transform.GetSiblingIndex();
 
-                    for (int i = 0; i < children.Length; i++)
+                    for (int i = 0; i < roots.Length; i++)
                     {
-                        children[i] = transform.GetChild(i);
+                        roots[i] = transform.GetChild(i);
                         siblings[i] = transform.GetSiblingIndex();
                     }
 
                     //transform.DetachChildren();
                     
-                    for (int i = siblings.Length - 1; i >= 0; i--)
+                    for (int i = roots.Length - 1; i >= 0; i--)
                     {
-                        children[i].parent = null;
-                        children[i].SetSiblingIndex(siblings[i]);
+                        roots[i].SetParent(null);
+                        roots[i].SetSiblingIndex(siblings[i]);
                     }
                     
                     transform.SetSiblingIndex(folderSibling);
