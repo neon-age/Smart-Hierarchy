@@ -139,13 +139,6 @@ namespace AV.Hierarchy
                 {
                     item.instance.SetActive(isActive);
                 }
-                
-                // TODO: Show GO components on hover
-                //if (rect.Contains(Event.current.mousePosition))
-                //{
-                //    var iconRect = new Rect(rect) {x = rect.xMax - 16};
-                //    GUI.Label(iconRect, mainItem.icon, iconStyle);
-                //}
             }
         }
 
@@ -195,7 +188,7 @@ namespace AV.Hierarchy
             }
         }
 
-        private static Component DecideMainComponent(params Component[] components)
+        internal static Component DecideMainComponent(params Component[] components)
         {
             var count = components.Length;
             if (count == 0) 
@@ -347,7 +340,7 @@ namespace AV.Hierarchy
             }
         }
         
-        private static class Reflected
+        internal static class Reflected
         {
             public static TreeViewController CurrentTreeView;
             public static Action onExpandedStateChange;
@@ -358,6 +351,8 @@ namespace AV.Hierarchy
             private static readonly PropertyInfo getLastInteractedHierarchyWindow;
             private static readonly PropertyInfo getSceneHierarchy;
             private static readonly FieldInfo getTreeViewController;
+            
+            private static readonly MethodInfo frameObject;
             
             private static readonly Func<object> GetLastHierarchyWindow;
 
@@ -376,7 +371,16 @@ namespace AV.Hierarchy
                 getSceneHierarchy = sceneHierarchyWindowType.GetProperty("sceneHierarchy");
                 getTreeViewController = sceneHierarchyType.GetField("m_TreeView", BindingFlags.NonPublic | BindingFlags.Instance);
 
+                frameObject = sceneHierarchyWindowType.GetMethod("FrameObject");
+
                 GetLastHierarchyWindow = Lambda<Func<object>>(Property(null, getLastInteractedHierarchyWindow)).Compile();
+            }
+
+            public static void FrameObject(int instanceId)
+            {
+                var hierarchyWindow = GetLastHierarchyWindow();
+
+                frameObject.Invoke(hierarchyWindow, new object[] { instanceId, false });
             }
  
             public static TreeViewItem GetViewItem(int id)
