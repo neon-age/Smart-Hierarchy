@@ -38,24 +38,38 @@ namespace AV.Hierarchy
                 return "Environment";
             
             var components = firstSelection.GetComponents<Component>();
-
+            
             if (components.Length > 1)
             {
                 var mainComponent = SmartHierarchy.DecideMainComponent(components);
 
-                var type = mainComponent.GetType();
-                var declaringType = type.DeclaringType;
-                
-                if (typeNamings.TryGetValue(type.FullName, out var name))
-                    return folder.name = name; 
-                
-                if (declaringType != null && 
-                    typeNamings.TryGetValue(declaringType.FullName, out name))
-                    return folder.name = name;
+                if (TryGetNamingByComponent(mainComponent, out var naming))
+                    return naming;
+
+                for (int i = components.Length - 1; i >= 0; i--)
+                {
+                    if (TryGetNamingByComponent(components[i], out naming))
+                        return naming;
+                }
             }
             
             return firstSelection.name
                 .Replace("-", "");
+        }
+
+        private static bool TryGetNamingByComponent(Component component, out string naming)
+        {
+            var type = component.GetType();
+            var baseType = type.BaseType;
+                
+            if (typeNamings.TryGetValue(type.FullName, out naming))
+                return true; 
+                
+            if (baseType != null && 
+                typeNamings.TryGetValue(baseType.FullName, out naming))
+                return true;
+
+            return false;
         }
     }
 }
