@@ -46,8 +46,6 @@ namespace AV.Hierarchy
                 var type = mainComponent.GetType();
                 var declaringType = type.DeclaringType;
                 
-                Debug.Log(type.FullName);
-                
                 if (typeNamings.TryGetValue(type.FullName, out var name))
                     return folder.name = name; 
                 

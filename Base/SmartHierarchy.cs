@@ -38,8 +38,6 @@ namespace AV.Hierarchy
         }
         private class FolderData
         {
-            internal bool isEmpty;
-            internal GameObject mainGameObject;
         }
 
         private static readonly Dictionary<int, ItemData> ItemsData = new Dictionary<int, ItemData>();
@@ -151,20 +149,10 @@ namespace AV.Hierarchy
             {
                 if (!FoldersData.TryGetValue(id, out var folder))
                 {
-                    folder = new FolderData
-                    {
-                        isEmpty = instance.transform.childCount == 0
-                    };
-                    
-                    if (!folder.isEmpty)
-                    {
-                        folder.mainGameObject = instance.transform.GetChild(0).gameObject;
-                    }
-                    
                     FoldersData.Add(id, folder);
                 }
                 
-                item.view.icon = folder.isEmpty ? folderEmptyIcon : folderIcon;
+                item.view.icon = instance.transform.childCount == 0 ? folderEmptyIcon : folderIcon;
             }
             else
             {
