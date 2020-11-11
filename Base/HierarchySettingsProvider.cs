@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿#if UNITY_EDITOR
+using System;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
-using static UnityEditor.EditorGUI;
 
 namespace AV.Hierarchy
 {
@@ -104,3 +102,4 @@ namespace AV.Hierarchy
         }
     }
 }
+#endif
