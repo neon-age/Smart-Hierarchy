@@ -135,6 +135,7 @@ namespace AV.Hierarchy
                 var toggleRect = new Rect(fullWidthRect) { x = 32 };
                 if (OnLeftToggle(toggleRect, item.instance.activeSelf, out var isActive))
                 {
+                    Undo.RecordObject(item.instance, "GameObject Set Active");
                     item.instance.SetActive(isActive);
                 }
             }
