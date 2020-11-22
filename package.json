@@ -1,8 +1,8 @@
 {
   "name": "com.av.smart-hierarchy",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "displayName": "Smart Hierarchy",
-  "description": "Human readable hierarchy with icons and folders support.\nHelps you to organize your scene properly, without getting lost in objects mess.",
+  "description": "Human readable hierarchy with icons and folders support.\nOrganize your scene properly, without getting lost in objects mess.",
   "keywords": [
     "editor",
     "smart",
@@ -14,7 +14,7 @@
   "author": {
     "name": "Alternative Visual",
     "email": "alternativevisualgames@gmail.com",
-    "url": "alternativevisual.dev"
+    "url": "https://github.com/neon-age/Smart-Hierarchy"
   },
   "unity": "2019.3"
 }
