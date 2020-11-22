@@ -7,6 +7,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using static System.Linq.Expressions.Expression;
 using Object = UnityEngine.Object;
@@ -223,25 +224,25 @@ namespace AV.Hierarchy
 
         private static Component GetMainUGUIComponent(params Component[] components)
         {
-            Graphic lastGraphic = null;
-            Selectable lastSelectable = null;
+            Component lastComponent = null;
+            UIBehaviour firstUIBehaviour = null;
 
             foreach (var component in components)
             {
                 if (component is Graphic graphic)
-                    lastGraphic = graphic;
+                    lastComponent = graphic;
+
+                if (!firstUIBehaviour && component is UIBehaviour uiBehaviour)
+                {
+                    firstUIBehaviour = uiBehaviour;
+                    lastComponent = uiBehaviour;
+                }
 
                 if (component is Selectable selectable)
-                    lastSelectable = selectable;
+                    lastComponent = selectable;
             }
 
-            if (lastSelectable != null)
-                return lastSelectable;
-
-            if (lastGraphic != null)
-                return lastGraphic;
-
-            return null;
+            return lastComponent;
         }
 
         private static Rect GetFullWidthRect(Rect rect)
