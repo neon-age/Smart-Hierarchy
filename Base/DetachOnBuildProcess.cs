@@ -14,6 +14,11 @@ namespace AV.Hierarchy
         
         public void OnProcessScene(Scene scene, BuildReport report)
         {
+            var preferences = HierarchySettingsProvider.GetProvider().preferences;
+
+            if (Application.isEditor && preferences.keepFoldersInPlaymode)
+                return;
+            
             var sceneRoots = scene.GetRootGameObjects();
             foreach (var root in sceneRoots)
             {

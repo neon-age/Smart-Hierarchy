@@ -6,5 +6,8 @@
             <uie:EnumField label="Sticky Component Icon" binding-path="stickyComponentIcon" tooltip="Main component icon that is shown instead of GameObject or Prefab icon." />
             <uie:EnumField label="Transform Icon" binding-path="transformIcon" />
         </ui:Foldout>
+        <ui:Foldout text="Folders">
+            <ui:Toggle label="Keep In Playmode" binding-path="keepFoldersInPlaymode" />
+        </ui:Foldout>
     </ui:VisualElement>
 </ui:UXML>
