@@ -1,42 +1,44 @@
-# Smart-Hierarchy
-Human readable hierarchy with icons and folders for Unity.\
-Helps you to organize your scene properly, without getting lost in objects mess.
+# Smart Hierarchy
+Better hierarchy for Unity, made by community.\
+Organize your scene properly, without getting lost in objects mess.
 
-![Smart Hierarchy](https://i.imgur.com/oebJPv9.png)
+### Icons
+![Icons](https://i.imgur.com/V12LjiY.png)
+
+They help you to navigate visually around hierarchy by always showing the most important information.
+
+Note: Icons are not attached to Prefabs root. This behaviour can be changed in Preferences.
+
+### Folders
+![Folders](https://i.imgur.com/SRm9pdB.png)
+
+Folder is a special Editor-only object that has no components and no transform.\
+It detaches it's children on scene process, so there is no overhead at runtime.\
+[Best Practices: Optimizing the Hierarchy](https://blogs.unity3d.com/ru/2017/06/29/best-practices-from-the-spotlight-team-optimizing-the-hierarchy/)
+
+**Issue:** Currently there is no folders displayed in Playmode.
+
+### Activation Toggle
+![Activation Toggle](https://i.imgur.com/nv7aPE5.png)
+
+No more need to select game object in order to (de)activate it.
+
+## In progress:
+* Components bar
+* Double-click expanding
+* Folder inspector
+
+## Under investigation:
+* Nesting branches
+* Depth context
+* Decorator/Fake folders
+* Object preview
+* Scene highlight
+* Filtering
 
 ## Test status:
 * Made in Unity 2019.4
 * Tested with Unity 2020.1
 * Not tested with sub-scenes
+* Not tested with multiple hierarchy windows
 * Not tested with other workflow extensions like Peek
-
-
-## How folder works?
-Folder disables transform and detaches it's children on scene process. That's it
-
-## How did you set icons in hierarchy?
-Directly into hierarchy tree view items.\
-It doesn't affect objects actual icon (setted in inspector).
-
-### And what it shows me instead of cube?
-It smartly decides which component is main and shows you it's icon to help you navigate easily.\
-You'll always see where's all you lights, enemies, particles and cameras.
-
-
-## Known issues:
-* Folder inspector is ugly
-* First folder icon jittering on collapse
-* First folder getting expanded after exiting playmode
-* Playmode hierarchy depth does not account sub-folders
-* Playmode reordering doesn't update view depth
-
-## Todo:
-* Preferences
-* "Create Folder" menu
-* One-click expanding
-* Decorator folders
-* Folding in playmode
-* Components-bar
-* Child-objects filter
-* Object preview
-* Alternating Lines
