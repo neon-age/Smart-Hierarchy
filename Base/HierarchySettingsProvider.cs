@@ -30,7 +30,7 @@ namespace AV.Hierarchy
     
     internal class HierarchySettingsProvider : SettingsProvider
     {
-        private const string Path = "Preferences/Workflow/Smart Hierarchy";
+        private const string PreferencePath = "Preferences/Workflow/Smart Hierarchy";
         
         private static HierarchySettingsProvider provider;
         
@@ -45,18 +45,18 @@ namespace AV.Hierarchy
         {
             LoadFromJson();
             
-            const string UiPath = "Packages/com.av.smart-hierarchy/UI/";
-            
-            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(UiPath + "nice-foldout-header.uss");
-            var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(UiPath + "smart_hierarchy_settings.uxml");
+            var uiPath = AssetDatabase.GUIDToAssetPath("f0d92e1f03926664991b2f7fbfbd6268") + "/";
 
+            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(uiPath + "nice-foldout-header.uss");
             root.styleSheets.Add(styleSheet);
 
             if (EditorGUIUtility.isProSkin)
             {
-                var darkStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>(UiPath + "nice-foldout-header_dark.uss");
+                var darkStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>(uiPath + "nice-foldout-header_dark.uss");
                 root.styleSheets.Add(darkStyle);
             }
+            
+            var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(uiPath + "smart_hierarchy_settings.uxml");
             
             visualTree.CloneTree(root);
 
@@ -71,14 +71,14 @@ namespace AV.Hierarchy
 
         private void LoadFromJson()
         {
-            var json = EditorPrefs.GetString(Path);
+            var json = EditorPrefs.GetString(PreferencePath);
             EditorJsonUtility.FromJsonOverwrite(json, preferences);
         }
 
         private void SaveToJson()
         {
             var json = EditorJsonUtility.ToJson(preferences);
-            EditorPrefs.SetString(Path, json);
+            EditorPrefs.SetString(PreferencePath, json);
             onChange?.Invoke();
         }
 
@@ -89,7 +89,7 @@ namespace AV.Hierarchy
         {
             if (provider == null)
             {
-                provider = new HierarchySettingsProvider(Path, SettingsScope.User);
+                provider = new HierarchySettingsProvider(PreferencePath, SettingsScope.User);
             }
 
             if (provider.preferences == null)
