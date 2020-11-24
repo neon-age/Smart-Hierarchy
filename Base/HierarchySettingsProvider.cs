@@ -1,5 +1,4 @@
-﻿#if UNITY_EDITOR
-using System;
+﻿using System;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -105,4 +104,3 @@ namespace AV.Hierarchy
         }
     }
 }
-#endif

@@ -1,7 +1,10 @@
 {
     "name": "AV.Hierarchy",
     "references": [],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor",
+        "WindowsStandalone32"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
