@@ -3,7 +3,7 @@
     "references": [],
     "includePlatforms": [
         "Editor",
-        "WindowsStandalone32"
+        "Stadia"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
