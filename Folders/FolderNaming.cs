@@ -32,7 +32,7 @@ namespace AV.Hierarchy
         };
         
         // TODO: Smarter naming
-        internal static string DecideFolderName(GameObject folder, GameObject firstSelection)
+        internal static string ChooseFolderName(GameObject folder, GameObject firstSelection)
         {
             if (PrefabUtility.GetPrefabAssetType(firstSelection) == PrefabAssetType.Model)
                 return "Environment";
@@ -41,7 +41,7 @@ namespace AV.Hierarchy
             
             if (components.Length > 1)
             {
-                var mainComponent = SmartHierarchy.DecideMainComponent(components);
+                var mainComponent = Components.ChooseMainComponent(components);
 
                 if (TryGetNamingByComponent(mainComponent, out var naming))
                     return naming;

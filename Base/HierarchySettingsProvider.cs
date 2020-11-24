@@ -28,15 +28,28 @@ namespace AV.Hierarchy
         public TransformIcon transformIcon = TransformIcon.OnUniqueOrigin;
         public bool keepFoldersInPlaymode;
     }
-    
+
     internal class HierarchySettingsProvider : SettingsProvider
     {
         private const string PreferencePath = "Preferences/Workflow/Smart Hierarchy";
-        
+
         private static HierarchySettingsProvider provider;
-        
-        public HierarchyPreferences preferences { get; private set; }
-        public event Action onChange;
+        public static HierarchyPreferences Preferences 
+        {
+            get
+            {
+                if (preferences == null)
+                {
+                    preferences = ScriptableObject.CreateInstance<HierarchyPreferences>();
+                    LoadFromJson();
+                }
+
+                return preferences;
+            }
+        }
+
+        private static HierarchyPreferences preferences;
+        public static event Action onChange;
 
 
         private HierarchySettingsProvider(string path, SettingsScope scope)
@@ -70,13 +83,13 @@ namespace AV.Hierarchy
             root.RegisterCallback<ChangeEvent<Enum>>(evt => SaveToJson());
         }
 
-        private void LoadFromJson()
+        private static void LoadFromJson()
         {
             var json = EditorPrefs.GetString(PreferencePath);
             EditorJsonUtility.FromJsonOverwrite(json, preferences);
         }
 
-        private void SaveToJson()
+        private static void SaveToJson()
         {
             var json = EditorJsonUtility.ToJson(preferences);
             EditorPrefs.SetString(PreferencePath, json);
@@ -88,18 +101,7 @@ namespace AV.Hierarchy
         [SettingsProvider]
         private static SettingsProvider GetSettingsProvider()
         {
-            if (provider == null)
-            {
-                provider = new HierarchySettingsProvider(PreferencePath, SettingsScope.User);
-            }
-
-            if (provider.preferences == null)
-            {
-                provider.preferences = ScriptableObject.CreateInstance<HierarchyPreferences>();
-                provider.LoadFromJson();
-            }
-
-            return provider;
+            return provider ?? (provider = new HierarchySettingsProvider(PreferencePath, SettingsScope.User));
         }
     }
 }

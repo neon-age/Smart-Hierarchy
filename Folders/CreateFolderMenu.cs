@@ -46,10 +46,10 @@ namespace AV.Hierarchy
                     selections[i].transform.SetSiblingIndex(siblings[i]);
                 }
 
-                folder.name = FolderNaming.DecideFolderName(folder, firstSelection);
+                folder.name = FolderNaming.ChooseFolderName(folder, firstSelection);
                 folder.transform.SetSiblingIndex(folderSibling);
 
-                SmartHierarchy.Reflected.FrameObject(firstSelection.GetInstanceID());
+                SmartHierarchy.lastHierarchy.window.FrameObject(firstSelection.GetInstanceID());
                 Selection.activeGameObject = folder;
             }
             hasCreatedFolder = true;
