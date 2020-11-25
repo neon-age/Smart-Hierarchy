@@ -11,6 +11,7 @@ namespace AV.Hierarchy
         private object data; // GameObjectTreeViewDataSource
         public object controller; // TreeViewController
 
+        public static Func<object, TreeViewItem> hoveredItemFunc;
         public static Func<object, int, int> getRowFunc;
 
         public static Func<object, int, TreeViewItem> getItemFunc;
@@ -28,32 +29,36 @@ namespace AV.Hierarchy
         [InitializeOnLoadMethod]
         private static void OnInitialize()
         {
-            var treeViewControllerType =
+            var controllerType =
                 typeof(TreeViewState).Assembly.GetType("UnityEditor.IMGUI.Controls.TreeViewController");
 
-            dataProperty = treeViewControllerType.GetProperty("data");
+            dataProperty = controllerType.GetProperty("data");
 
-            var treeViewDataType = typeof(Editor).Assembly.GetType("UnityEditor.GameObjectTreeViewDataSource");
+            var goTreeViewType = typeof(Editor).Assembly.GetType("UnityEditor.GameObjectTreeViewDataSource");
 
             onVisibleRowsChangedField =
-                treeViewDataType.GetField("onVisibleRowsChanged");
+                goTreeViewType.GetField("onVisibleRowsChanged");
 
-            var getRowMethod = treeViewDataType.GetMethod("GetRow");
-            var getItemMethod = treeViewDataType.GetMethod("GetItem");
-            var isExpandedMethod = treeViewDataType.GetMethod("IsExpanded", new[] {typeof(int)});
+            var hoveredItem = controllerType.GetProperty("hoveredItem");
+            var getRowMethod = goTreeViewType.GetMethod("GetRow");
+            var getItemMethod = goTreeViewType.GetMethod("GetItem");
+            var isExpandedMethod = goTreeViewType.GetMethod("IsExpanded", new[] {typeof(int)});
 
             var objParam = Parameter(typeof(object));
             var intParam = Parameter(typeof(int));
-            var dataTypeConvert = Convert(objParam, treeViewDataType);
+            var controllerConvert = Convert(objParam, controllerType);
+            var goTreeViewConvert = Convert(objParam, goTreeViewType);
 
+            hoveredItemFunc = Lambda<Func<object, TreeViewItem>>(Property(controllerConvert, hoveredItem), objParam).Compile();
+            
             getRowFunc = Lambda<Func<object, int, int>>(
-                Call(dataTypeConvert, getRowMethod, intParam), objParam, intParam).Compile();
+                Call(goTreeViewConvert, getRowMethod, intParam), objParam, intParam).Compile();
 
             getItemFunc = Lambda<Func<object, int, TreeViewItem>>(
-                Call(dataTypeConvert, getItemMethod, intParam), objParam, intParam).Compile();
+                Call(goTreeViewConvert, getItemMethod, intParam), objParam, intParam).Compile();
 
             isExpandedFunc = Lambda<Func<object, int, bool>>(
-                Call(dataTypeConvert, isExpandedMethod, intParam), objParam, intParam).Compile();
+                Call(goTreeViewConvert, isExpandedMethod, intParam), objParam, intParam).Compile();
         }
 
         public int GetRow(int id)

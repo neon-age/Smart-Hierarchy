@@ -9,5 +9,8 @@
         <ui:Foldout text="Folders">
             <ui:Toggle label="Keep In Playmode" binding-path="keepFoldersInPlaymode" />
         </ui:Foldout>
+        <ui:Foldout text="Objects Preview">
+            <ui:Toggle label="Show Hover Preview" binding-path="showHoverPreview" />
+        </ui:Foldout>
     </ui:VisualElement>
 </ui:UXML>

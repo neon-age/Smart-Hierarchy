@@ -10,18 +10,22 @@ namespace AV.Hierarchy
     internal class SceneHierarchy
     {
         private object hierarchy;
+        internal TreeViewState state;
         internal TreeViewController controller;
         
         public Action onExpandedStateChange;
         public Action onVisibleRowsChanged;
         public Action onTreeViewReload;
 
-        private static FieldInfo treeViewControllerField;
+        public TreeViewItem hoveredItem => TreeViewController.hoveredItemFunc(controller.controller);
+
+        private static FieldInfo controllerField;
+        private static FieldInfo stateField;
 
         public SceneHierarchy(object hierarchy)
         {
             this.hierarchy = hierarchy;
-            controller = new TreeViewController(treeViewControllerField.GetValue(hierarchy));
+            controller = new TreeViewController(controllerField.GetValue(hierarchy));
         }
 
         public void ReassignCallbacks()
@@ -34,14 +38,13 @@ namespace AV.Hierarchy
         {
             var sceneHierarchyType = typeof(Editor).Assembly.GetType("UnityEditor.SceneHierarchy");
 
-            treeViewControllerField =
-                sceneHierarchyType.GetField("m_TreeView", BindingFlags.NonPublic | BindingFlags.Instance);
+            controllerField = sceneHierarchyType.GetField("m_TreeView", BindingFlags.NonPublic | BindingFlags.Instance);
+            
+            stateField = sceneHierarchyType.GetField("m_TreeViewState", BindingFlags.NonPublic | BindingFlags.Instance);
         }
 
         public TreeViewItem GetViewItem(int id)
         {
-            var controller = GetTreeViewController();
-
             // GetRow checks every rows for required id.
             // It's much faster then recursive FindItem, but still needs to be called only when TreeView is changed.
             var row = controller.GetRow(id);
@@ -51,21 +54,20 @@ namespace AV.Hierarchy
             return controller.GetItem(row);
         }
 
-        public TreeViewController GetTreeViewController()
+        public void EnsureValidData()
         {
-            // Reflection performance is not so bad comparing to FindItem.. 
-            var treeViewController = treeViewControllerField.GetValue(hierarchy);
+            var actualController = controllerField.GetValue(hierarchy);
 
-            // Has controller been re-initialized? (for ex. during entering/exiting Prefab Mode)
-            if (treeViewController != controller.controller)
+            // Was controller been re-initialized?
+            if (actualController != controller.controller)
             {
-                controller = new TreeViewController(treeViewController);
+                controller = new TreeViewController(actualController);
                 
                 controller.SetOnVisibleRowsChanged(onVisibleRowsChanged);
                 onTreeViewReload?.Invoke();
             }
-
-            return controller;
+            
+            state = stateField.GetValue(hierarchy) as TreeViewState;
         }
     }
 }

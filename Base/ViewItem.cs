@@ -7,7 +7,8 @@ namespace AV.Hierarchy
 {
     internal class ViewItem
     {
-        private TreeViewItem view;
+        internal Rect rect;
+        internal TreeViewItem view;
         
         internal readonly int id;
         internal readonly GameObject instance;
@@ -21,14 +22,17 @@ namespace AV.Hierarchy
         internal readonly bool isRootPrefab;
         internal readonly bool isFolder;
         internal readonly bool isEmpty;
+
+        private ObjectPreviewEditor previewEditor;
         
         private static Texture2D folderIcon = IconContent("Folder Icon").image as Texture2D;
         private static Texture2D folderEmptyIcon = IconContent("FolderEmpty Icon").image as Texture2D;
 
         public ViewItem(GameObject instance)
         {
-            id = instance.GetInstanceID();
             this.instance = instance;
+            
+            id = instance.GetInstanceID();
             
             transform = instance.transform;
             components = new Components(instance);
@@ -42,6 +46,13 @@ namespace AV.Hierarchy
 
             if (!isEmpty)
                 child = new ViewItem(transform.GetChild(0).gameObject);
+        }
+
+        public ObjectPreviewEditor GetPreviewEditor()
+        {
+            if (previewEditor == null)
+                previewEditor = new ObjectPreviewEditor(instance);
+            return previewEditor;
         }
         
         public bool EnsureViewExist(SceneHierarchy hierarchy)

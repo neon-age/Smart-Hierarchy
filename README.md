@@ -1,6 +1,9 @@
-# Smart Hierarchy
+# Smart Hierarchy v0.2.6
 Better hierarchy for Unity, made by community.\
 Organize your scene properly, without getting lost in objects mess.
+
+**Note:** Extension is in early development stage, so feel free to bug-hunt, provide feedback and ideas!\
+Every contribution is highly appreciated!
 
 ### Icons
 ![Icons](https://i.imgur.com/V12LjiY.png)
@@ -25,16 +28,21 @@ There is an option (in Preferences) to keep them in Editor, but beware of the ov
 
 No more need to select game object in order to (de)activate it.
 
+### Hover Preview
+![Hover Preview](https://i.imgur.com/ywnc4Yx.png) 
+
+**Very Experimental!** Can be enabled in Preferences.
+
+
 ## In progress:
 * Components bar
+* Nesting branches
 * Double-click expanding
 * Folder inspector
 
 ## Under investigation:
-* Nesting branches
 * Depth context
 * Decorator/Fake folders
-* Object preview
 * Scene highlight
 * Filtering
 

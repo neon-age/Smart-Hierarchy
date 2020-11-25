@@ -26,6 +26,7 @@ namespace AV.Hierarchy
         public StickyIcon stickyComponentIcon = StickyIcon.NotOnPrefabs;
         public TransformIcon transformIcon = TransformIcon.OnUniqueOrigin;
         public bool keepFoldersInPlaymode;
+        public bool showHoverPreview;
     }
 
     internal class HierarchySettingsProvider : SettingsProvider

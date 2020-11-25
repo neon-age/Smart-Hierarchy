@@ -38,7 +38,7 @@ namespace AV.Hierarchy
 
             if (!Hierarchies.TryGetValue(lastHierarchyWindow, out var hierarchy))
             {
-                hierarchy = new SmartHierarchy(lastHierarchyWindow);
+                hierarchy = new SmartHierarchy(lastHierarchyWindow as EditorWindow);
                 Hierarchies.Add(lastHierarchyWindow, hierarchy);
             }
             return hierarchy;

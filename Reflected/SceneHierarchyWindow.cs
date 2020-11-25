@@ -13,7 +13,7 @@ namespace AV.Hierarchy
         private static MethodInfo frameObject;
 
         private object instance;
-        internal EditorWindow window;
+        internal EditorWindow actualWindow;
         internal SceneHierarchy hierarchy;
 
         private static void DoReflection()
@@ -31,11 +31,11 @@ namespace AV.Hierarchy
             DoReflection();
         }
 
-        public SceneHierarchyWindow(object instance)
+        public SceneHierarchyWindow(EditorWindow instance)
         {
             this.instance = instance;
-            window = instance as EditorWindow;
-            hierarchy = new SceneHierarchy(sceneHierarchyProperty.GetValue(window));
+            actualWindow = instance;
+            hierarchy = new SceneHierarchy(sceneHierarchyProperty.GetValue(actualWindow));
         }
         
         public void FrameObject(int instanceId)
