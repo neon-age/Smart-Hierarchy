@@ -1,4 +1,6 @@
 # Smart Hierarchy v0.2.6
+[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L4L02M51R)
+
 Better hierarchy for Unity, made by community.\
 Organize your scene properly, without getting lost in objects mess.
 
