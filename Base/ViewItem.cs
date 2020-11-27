@@ -23,8 +23,6 @@ namespace AV.Hierarchy
         internal readonly bool isFolder;
         internal readonly bool isEmpty;
 
-        private ObjectPreviewEditor previewEditor;
-        
         private static Texture2D folderIcon = IconContent("Folder Icon").image as Texture2D;
         private static Texture2D folderEmptyIcon = IconContent("FolderEmpty Icon").image as Texture2D;
 
@@ -46,13 +44,6 @@ namespace AV.Hierarchy
 
             if (!isEmpty)
                 child = new ViewItem(transform.GetChild(0).gameObject);
-        }
-
-        public ObjectPreviewEditor GetPreviewEditor()
-        {
-            if (previewEditor == null)
-                previewEditor = new ObjectPreviewEditor(instance);
-            return previewEditor;
         }
         
         public bool EnsureViewExist(SceneHierarchy hierarchy)

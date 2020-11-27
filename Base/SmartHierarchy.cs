@@ -5,7 +5,9 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.AnimatedValues;
 using UnityEditor.IMGUI.Controls;
+using UnityEditor.ShortcutManagement;
 using UnityEditor.UIElements;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -18,17 +20,18 @@ namespace AV.Hierarchy
     internal class SmartHierarchy
     {
         internal static HierarchyPreferences preferences => HierarchySettingsProvider.Preferences;
+        internal static Event evt => Event.current;
         internal static SmartHierarchy lastHierarchy;
         
         internal SceneHierarchyWindow window { get; }
         internal SceneHierarchy hierarchy => window.hierarchy;
         internal TreeViewState state => hierarchy.state;
+        internal float time => Time.realtimeSinceStartup;
         
         private EditorWindow actualWindow => window.actualWindow;
-        private bool isMouseOverWindow;
         
         private readonly VisualElement root;
-        private readonly ObjectPreviewPopup hoverPreview = new ObjectPreviewPopup();
+        private readonly HoverPreview hoverPreview;
         private readonly Dictionary<int, ViewItem> ItemsData = new Dictionary<int, ViewItem>();
        
         
@@ -37,14 +40,15 @@ namespace AV.Hierarchy
             root = window.rootVisualElement;
             this.window = new SceneHierarchyWindow(window);
             
+            hoverPreview = new HoverPreview { hierarchy = this };
+            
             RegisterCallbacks();
             hierarchy.ReassignCallbacks();
             
             var rootGuiContainer = root.parent.Query<IMGUIContainer>().First();
-            rootGuiContainer.onGUIHandler += OnGUI;
+            rootGuiContainer.onGUIHandler  += OnGUI;
             
             root.Add(hoverPreview);
-            hoverPreview.visible = false;
 
             window.SetAntiAliasing(8);
         }
@@ -64,13 +68,13 @@ namespace AV.Hierarchy
             hierarchy.onVisibleRowsChanged += ReloadView;
             EditorApplication.hierarchyChanged += ReloadView;
         }
-
+        
         private void ReloadView()
         {
             ItemsData.Clear();
         }
         
-        private void ImmediateRepaint()
+        private static void ImmediateRepaint()
         {
             EditorApplication.DirtyHierarchyWindowSorting();
         }
@@ -81,24 +85,32 @@ namespace AV.Hierarchy
                 return;
 
             hierarchy.EnsureValidData();
-            
-            isMouseOverWindow = EditorWindow.mouseOverWindow == actualWindow;
 
-            hoverPreview.visible = false;
-            
-            if (preferences.showHoverPreview)
+            if (preferences.enableHoverPreview)
             {
-                if (hierarchy.hoveredItem != null)
+                var isMagnifyHold = false;
+                switch (preferences.magnifyHoldKey)
+                {
+                    case ModificationKey.Alt: isMagnifyHold = evt.alt; break;
+                    case ModificationKey.Shift: isMagnifyHold = evt.shift; break;
+                    case ModificationKey.Control: isMagnifyHold = evt.control; break;
+                }
+                var showPreview = isMagnifyHold || preferences.alwaysShowPreview;
+                
+                if (showPreview && hierarchy.hoveredItem != null)
                 {
                     var isHovering = ItemsData.TryGetValue(hierarchy.hoveredItem.id, out var item);
                     var hasPreview = true;
 
-                    if (hasPreview && isHovering && isMouseOverWindow)
-                    {
-                        OnHoverPreview(item.rect, item);
-                        hoverPreview.visible = true;
-                    }
+                    if (isHovering)
+                        hoverPreview.OnItemPreview(item);
                 }
+                else
+                {
+                    hoverPreview.Hide();
+                }
+                
+                hoverPreview.UpdatePosition();
             }
         }
 
@@ -154,30 +166,6 @@ namespace AV.Hierarchy
                 Undo.RecordObject(instance, "GameObject Set Active");
                 instance.SetActive(isActive);
             }
-        }
-
-        private void OnHoverPreview(Rect rect, ViewItem item)
-        {
-            if (Event.current.type != EventType.Repaint)
-                return;
-            
-            var hoverRect = new Rect(rect);
-
-            var style = hoverPreview.resolvedStyle;
-            
-            var size = new Vector2(style.width, style.height);
-            
-            hoverRect.size = size;
-            hoverRect.position = Event.current.mousePosition;
-            
-            hoverRect.x = Mathf.Clamp(hoverRect.x, 0, rect.xMax - size.x);
-            
-            hoverPreview.editor = item.GetPreviewEditor();
-
-            hoverPreview.style.left = hoverRect.x;
-            hoverPreview.style.top = hoverRect.y;
-            
-            hoverPreview.MarkDirtyRepaint();
         }
 
         private static Rect GetFullWidthRect(Rect rect)

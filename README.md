@@ -31,10 +31,11 @@ There is an option (in Preferences) to keep them in Editor, but beware of the ov
 No more need to select game object in order to (de)activate it.
 
 ### Hover Preview
-![Hover Preview](https://i.imgur.com/ywnc4Yx.png) 
+![Hover Preview](https://i.imgur.com/CAN5uKL.png) 
 
+Hold "magnify" key to preview hovered object.\
+Bindable keys: Alt / Shift / Ctrl.\
 **Very Experimental!** Can be enabled in Preferences.
-
 
 ## In progress:
 * Components bar

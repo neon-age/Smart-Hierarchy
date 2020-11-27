@@ -10,7 +10,9 @@
             <ui:Toggle label="Keep In Playmode" binding-path="keepFoldersInPlaymode" />
         </ui:Foldout>
         <ui:Foldout text="Objects Preview">
-            <ui:Toggle label="Show Hover Preview" binding-path="showHoverPreview" />
+            <ui:Toggle label="Enable Preview" />
+            <uie:EnumField label="Preview Hotkey" binding-path="magnifyHoldKey" />
+            <ui:Toggle label="Always Show Preview" binding-path="enableHoverPreview" />
         </ui:Foldout>
     </ui:VisualElement>
 </ui:UXML>

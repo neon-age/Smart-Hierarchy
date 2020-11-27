@@ -19,6 +19,13 @@ namespace AV.Hierarchy
         OnUniqueOrigin,
         OnlyRectTransform
     }
+
+    internal enum ModificationKey
+    {
+        Alt,
+        Shift,
+        Control,
+    }
     
     internal class HierarchyPreferences : ScriptableObject
     {
@@ -26,7 +33,9 @@ namespace AV.Hierarchy
         public StickyIcon stickyComponentIcon = StickyIcon.NotOnPrefabs;
         public TransformIcon transformIcon = TransformIcon.OnUniqueOrigin;
         public bool keepFoldersInPlaymode;
-        public bool showHoverPreview;
+        public bool enableHoverPreview;
+        public bool alwaysShowPreview;
+        public ModificationKey magnifyHoldKey;
     }
 
     internal class HierarchySettingsProvider : SettingsProvider

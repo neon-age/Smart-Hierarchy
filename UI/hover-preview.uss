@@ -1,20 +1,17 @@
 ﻿
-ObjectPreviewPopup {
+ObjectPreviewContainer {
     width: 64;
     height: 64;
-    padding-top: 0;
-    border-width: 1;
-    border-color: #aaaaaa;
-    border-radius: 2;
-    background-color: #c4c4c4;
-}
-
-.unity-popup-window__content-container {
+    
     flex-grow: 1;
+    
     padding: 0;
-    margin: 3;
+    border-radius: 12;
+    background-color: rgba(255, 255, 255, 0.5);
+
     overflow: hidden;
 }
 
 IMGUIContainer {
+    opacity: 1;
 }
