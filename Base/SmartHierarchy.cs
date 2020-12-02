@@ -137,7 +137,8 @@ namespace AV.Hierarchy
             HandleKeyboard(); 
             
             // Mouse is relative to window during onGUIHandler
-            hoverPreview.SetPosition(evt.mousePosition, actualWindow.position);
+            if (evt.type != EventType.Used)
+                hoverPreview.SetPosition(evt.mousePosition, actualWindow.position);
             
             HandleObjectPreview();
 
