@@ -1,25 +1,15 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using UnityEditor.AnimatedValues;
 using UnityEditor.IMGUI.Controls;
-using UnityEditor.ShortcutManagement;
 using UnityEditor.UIElements;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 using UnityEngine.UIElements;
-using static System.Linq.Expressions.Expression;
-using Object = UnityEngine.Object;
 
 namespace AV.Hierarchy
 {
     internal class SmartHierarchy
     {
-        internal static HierarchyPreferences preferences => HierarchySettingsProvider.Preferences;
+        internal static HierarchyPreferences prefs => HierarchySettingsProvider.Preferences;
         internal static Event evt => Event.current;
         internal static SmartHierarchy lastHierarchy;
         
@@ -29,9 +19,17 @@ namespace AV.Hierarchy
         internal float time => Time.realtimeSinceStartup;
         
         private EditorWindow actualWindow => window.actualWindow;
+        private ViewItem hoveredItem;
+        private bool isHovering => hoveredItem != null;
+        private int hoveredItemId => hierarchy.hoveredItem?.id ?? -1;
+        private bool isShowingPreview;
+        private bool requiresUpdateBeforeGUI;
+        private bool requiresGUISetup = true;
+        private Vector2 localMousePosition;
         
         private readonly VisualElement root;
         private readonly HoverPreview hoverPreview;
+        private IMGUIContainer guiContainer;
         private readonly Dictionary<int, ViewItem> ItemsData = new Dictionary<int, ViewItem>();
        
         
@@ -40,19 +38,26 @@ namespace AV.Hierarchy
             root = window.rootVisualElement;
             this.window = new SceneHierarchyWindow(window);
             
-            hoverPreview = new HoverPreview { hierarchy = this };
-            
+            hoverPreview = new HoverPreview();
+
+            Initialize();
             RegisterCallbacks();
             hierarchy.ReassignCallbacks();
             
-            var rootGuiContainer = root.parent.Query<IMGUIContainer>().First();
-            rootGuiContainer.onGUIHandler  += OnGUI;
+            guiContainer = root.parent.Query<IMGUIContainer>().First();
+            
+            // onGUIHandler is called after hierarchy GUI, thus has a slight delay
+            guiContainer.onGUIHandler += OnAfterGUI;
             
             root.Add(hoverPreview);
-
-            window.SetAntiAliasing(8);
         }
-        
+
+        private void Initialize()
+        {
+            isShowingPreview = prefs.enableHoverPreview && prefs.alwaysShowPreview;
+            requiresGUISetup = true;
+        }
+
         [InitializeOnLoadMethod]
         private static void OnInitialize()
         {
@@ -61,12 +66,18 @@ namespace AV.Hierarchy
 
         private void RegisterCallbacks()
         {
-            HierarchySettingsProvider.onChange += ReloadView;
-            HierarchySettingsProvider.onChange += ImmediateRepaint;
+            HierarchySettingsProvider.onChange += OnSettingsChange;
             
             Selection.selectionChanged += ReloadView;
             hierarchy.onVisibleRowsChanged += ReloadView;
             EditorApplication.hierarchyChanged += ReloadView;
+        }
+
+        private void OnSettingsChange()
+        {
+            Initialize();
+            ReloadView();
+            ImmediateRepaint();
         }
         
         private void ReloadView()
@@ -79,57 +90,92 @@ namespace AV.Hierarchy
             EditorApplication.DirtyHierarchyWindowSorting();
         }
         
-        private void OnGUI()
+        private static void OnHierarchyItemGUI(int id, Rect rect)
         {
-            if (!preferences.enableSmartHierarchy)
-                return;
-
-            hierarchy.EnsureValidData();
-
-            if (preferences.enableHoverPreview)
-            {
-                var isMagnifyHold = false;
-                switch (preferences.magnifyHoldKey)
-                {
-                    case ModificationKey.Alt: isMagnifyHold = evt.alt; break;
-                    case ModificationKey.Shift: isMagnifyHold = evt.shift; break;
-                    case ModificationKey.Control: isMagnifyHold = evt.control; break;
-                }
-                var showPreview = isMagnifyHold || preferences.alwaysShowPreview;
-                
-                if (showPreview && hierarchy.hoveredItem != null)
-                {
-                    var isHovering = ItemsData.TryGetValue(hierarchy.hoveredItem.id, out var item);
-                    var hasPreview = true;
-
-                    if (isHovering)
-                        hoverPreview.OnItemPreview(item);
-                }
-                else
-                {
-                    hoverPreview.Hide();
-                }
-                
-                hoverPreview.UpdatePosition();
-            }
-        }
-
-        private static void OnHierarchyItemGUI(int instanceId, Rect rect)
-        {
-            if (!preferences.enableSmartHierarchy)
+            if (!prefs.enableSmartHierarchy)
                 return;
             
             lastHierarchy = HierarchyInitialization.GetLastHierarchy();
-            lastHierarchy.OnItemGUI(instanceId, rect);
+
+            lastHierarchy.OnItemCallback(id, rect);
+        }
+
+        private void OnItemCallback(int id, Rect rect)
+        {
+            if (requiresGUISetup)
+            {
+                requiresGUISetup = false;
+                OnGUISetup();
+            }
+
+            if (requiresUpdateBeforeGUI)
+            {
+                requiresUpdateBeforeGUI = false;
+                OnBeforeGUI();
+            }
+            
+            OnItemGUI(id, rect);
+        }
+
+        private void OnGUISetup()
+        {
+            actualWindow.SetAntiAliasing(8);
         }
         
+        private void OnBeforeGUI()
+        {
+            hierarchy.EnsureValidData();
+            
+            ItemsData.TryGetValue(hoveredItemId, out hoveredItem);
+        }
+        
+        private void OnAfterGUI()
+        {
+            if (!prefs.enableSmartHierarchy)
+                return;
+            
+            HandleKeyboard(); 
+            
+            // Mouse is relative to window during onGUIHandler
+            hoverPreview.SetPosition(evt.mousePosition, actualWindow.position);
+            
+            HandleObjectPreview();
+
+            requiresUpdateBeforeGUI = true;
+        }
+
+        private void HandleKeyboard()
+        {
+            if (!prefs.alwaysShowPreview)
+            {
+                switch (prefs.magnifyHoldKey)
+                {
+                    case ModificationKey.Alt: isShowingPreview = evt.alt; break;
+                    case ModificationKey.Shift: isShowingPreview = evt.shift; break;
+                    case ModificationKey.Control: isShowingPreview = evt.control; break;
+                }
+            }
+        }
+
+        private void HandleObjectPreview()
+        {
+            if (isShowingPreview && isHovering)
+            {
+                hoverPreview.OnItemPreview(hoveredItem);
+            }
+            else
+            {
+                hoverPreview.Hide();
+            }
+        }
+
         private void OnItemGUI(int id, Rect rect)
         {
             var instance = EditorUtility.InstanceIDToObject(id) as GameObject;
 
             if (!instance)
                 return;
-            
+
             GetInstanceViewItem(id, instance, rect, out var item);
             
             // Happens to be null when entering prefab mode
