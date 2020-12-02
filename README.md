@@ -14,15 +14,17 @@ They help you to navigate visually around hierarchy by always showing the most i
 
 Note: Icons are not attached to Prefabs root. This behaviour can be changed in Preferences.
 
-### Folders
-![Folders](https://i.imgur.com/SRm9pdB.png)
+### Collections
+![Collections](https://i.imgur.com/SRm9pdB.png)
 
-Folder is a special Editor-only object that has no components and no transform.\
+Use 
+
+Collection is a special Editor-only object that has no components and no transform.\
 It detaches it's children on scene process, so there is no overhead at runtime.\
 [Best Practices: Transforms Optimization](https://unity.com/ru/how-to/best-practices-performance-optimization-unity#transforms) \
 [Best Practices: Optimizing the Hierarchy](https://blogs.unity3d.com/ru/2017/06/29/best-practices-from-the-spotlight-team-optimizing-the-hierarchy/)
 
-**Issue:** Currently folders are not displayed in Playmode.\
+**Issue:** Currently they are not displayed in Playmode.\
 There is an option (in Preferences) to keep them in Editor, but beware of the overhead.
 
 ### Activation Toggle

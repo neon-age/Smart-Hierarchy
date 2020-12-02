@@ -26,8 +26,7 @@ namespace AV.Hierarchy
         internal readonly bool isFolder;
         internal readonly bool isEmpty;
 
-        private static Texture2D folderIcon = IconContent("Folder Icon").image as Texture2D;
-        private static Texture2D folderEmptyIcon = IconContent("FolderEmpty Icon").image as Texture2D;
+        private static Texture2D collectionIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath("6ee527fd28545e04593219b473dc26da"));
 
         public ViewItem(GameObject instance)
         {
@@ -42,7 +41,7 @@ namespace AV.Hierarchy
 
             isPrefab = PrefabUtility.GetPrefabAssetType(instance) == PrefabAssetType.Regular;
             isRootPrefab = PrefabUtility.IsAnyPrefabInstanceRoot(instance);
-            isFolder = instance.TryGetComponent<Folder>(out _);
+            isFolder = instance.TryGetComponent<Collection>(out _);
             isEmpty = instance.transform.childCount == 0;
             
             mainType = components.main?.GetType() ?? typeof(GameObject);
@@ -72,7 +71,7 @@ namespace AV.Hierarchy
             
             if (isFolder)
             {
-                view.icon = instance.transform.childCount == 0 ? folderEmptyIcon : folderIcon;
+                view.icon = collectionIcon;
             }
             else
             {

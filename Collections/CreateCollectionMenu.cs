@@ -7,20 +7,20 @@ using UnityEngine;
 
 namespace AV.Hierarchy
 {
-    internal static class CreateFolderMenu
+    internal static class CreateCollectionMenu
     {
-        private static bool hasCreatedFolder;
+        private static bool isExecuted;
 
-        [MenuItem("GameObject/Create Folder", priority = 0)]
-        public static void CreateFolder()
+        [MenuItem("GameObject/Create Collection", priority = 0)]
+        public static void CreateCollection()
         {
-            if (hasCreatedFolder)
+            if (isExecuted)
                 return;
         
-            EditorApplication.delayCall += () => hasCreatedFolder = false;
+            EditorApplication.delayCall += () => isExecuted = false;
         
-            var folder = new GameObject("New Folder", typeof(Folder));
-            Undo.RegisterCreatedObjectUndo(folder, "Create Folder");
+            var folder = new GameObject("New Collection", typeof(Collection));
+            Undo.RegisterCreatedObjectUndo(folder, "Create Collection");
 
             var selections = Selection.gameObjects;
 
@@ -37,21 +37,21 @@ namespace AV.Hierarchy
                 var siblings = new int[selections.Length];
                 var folderSibling = firstSelection.transform.GetSiblingIndex();
 
-                Undo.SetTransformParent(folder.transform, firstSelection.transform.parent, "Create Folder");
+                Undo.SetTransformParent(folder.transform, firstSelection.transform.parent, "Create Collection");
             
                 for (int i = 0; i < selections.Length; i++)
                 {
-                    Undo.SetTransformParent(selections[i].transform, folder.transform, "Create Folder");
+                    Undo.SetTransformParent(selections[i].transform, folder.transform, "Create Collection");
                     selections[i].transform.SetSiblingIndex(siblings[i]);
                 }
 
-                folder.name = FolderNaming.ChooseFolderName(folder, firstSelection);
+                folder.name = CollectionNaming.ChooseCollectionName(firstSelection);
                 folder.transform.SetSiblingIndex(folderSibling);
 
                 SmartHierarchy.lastHierarchy.window.FrameObject(firstSelection.GetInstanceID());
                 Selection.activeGameObject = folder;
             }
-            hasCreatedFolder = true;
+            isExecuted = true;
         }
     }
 }

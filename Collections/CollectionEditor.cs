@@ -10,8 +10,8 @@ using static UnityEditor.EditorGUIUtility;
 
 namespace AV.Hierarchy
 {
-    [CustomEditor(typeof(Folder))]
-    internal class FolderEditor : Editor
+    [CustomEditor(typeof(Collection))]
+    internal class CollectionEditor : Editor
     {
         private static class Reflected
         {
@@ -24,8 +24,8 @@ namespace AV.Hierarchy
 
             static Reflected()
             {
-                gameObjectInspectorType = typeof(UnityEditor.Editor).Assembly.GetType("UnityEditor.GameObjectInspector");
-                var inspectorWindowType = typeof(UnityEditor.Editor).Assembly.GetType("UnityEditor.InspectorWindow");
+                gameObjectInspectorType = typeof(Editor).Assembly.GetType("UnityEditor.GameObjectInspector");
+                var inspectorWindowType = typeof(Editor).Assembly.GetType("UnityEditor.InspectorWindow");
 
                 var getAllInspectorsMethod = inspectorWindowType.GetMethod("GetAllInspectorWindows",
                     BindingFlags.NonPublic | BindingFlags.Static);
@@ -34,7 +34,7 @@ namespace AV.Hierarchy
                 getInspectorTracker = inspectorWindowType.GetProperty("tracker", 
                     BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
                 hideInspector =
-                    typeof(UnityEditor.Editor).GetField("hideInspector",
+                    typeof(Editor).GetField("hideInspector",
                         BindingFlags.NonPublic | BindingFlags.Instance);
             }
         }
@@ -55,12 +55,12 @@ namespace AV.Hierarchy
         
         private void OnEnable()
         {
-            folderIsEmpty = new GUIContent(" Folder is empty.", IconContent("console.infoicon.sml").image);
+            folderIsEmpty = new GUIContent(" Collection is empty.", IconContent("console.infoicon.sml").image);
             
-            target = (base.target as Folder).transform;
+            target = (base.target as Collection).transform;
             targets = new Transform[base.targets.Length];
             for (int i = 0; i < targets.Length; i++)
-                targets[i] = (base.targets[i] as Folder).transform;
+                targets[i] = (base.targets[i] as Collection).transform;
 
             children = new GameObject[target.transform.childCount];
             for (int i = 0; i < target.childCount; i++)
@@ -84,7 +84,7 @@ namespace AV.Hierarchy
                 if (target == null)
                     return;
                 // Show transform when folder component is removed
-                if (!target.TryGetComponent<Folder>(out _))
+                if (!target.TryGetComponent<Collection>(out _))
                     target.hideFlags ^= HideFlags.HideInInspector;
             }
         }
@@ -102,7 +102,7 @@ namespace AV.Hierarchy
                     if (editor == null)
                         continue;
                     
-                    if (!(editor.target is Folder folder))
+                    if (!(editor.target is Collection folder))
                         continue;
                     
                     foreach (var gameObjectInspector in Resources.FindObjectsOfTypeAll(Reflected.gameObjectInspectorType))

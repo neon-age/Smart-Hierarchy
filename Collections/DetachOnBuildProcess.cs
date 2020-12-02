@@ -21,7 +21,7 @@ namespace AV.Hierarchy
             var sceneRoots = scene.GetRootGameObjects();
             foreach (var root in sceneRoots)
             {
-                var folders = root.GetComponentsInChildren<Folder>(true);
+                var folders = root.GetComponentsInChildren<Collection>(true);
                 
                 foreach (var folder in folders)
                 {

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace AV.Hierarchy
 {
-    internal static class FolderNaming
+    internal static class CollectionNaming
     {
         // TODO: Expose namings in preferences
         private static Dictionary<string, string> typeNamings = new Dictionary<string, string>()
@@ -31,7 +31,7 @@ namespace AV.Hierarchy
         };
         
         // TODO: Smarter naming
-        internal static string ChooseFolderName(GameObject folder, GameObject firstSelection)
+        internal static string ChooseCollectionName(GameObject firstSelection)
         {
             if (PrefabUtility.GetPrefabAssetType(firstSelection) == PrefabAssetType.Model)
                 return "Environment";
