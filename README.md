@@ -15,9 +15,9 @@ They help you to navigate visually around hierarchy by always showing the most i
 Note: Icons are not attached to Prefabs root. This behaviour can be changed in Preferences.
 
 ### Collections
-![Collections](https://i.imgur.com/SRm9pdB.png)
+![Collections](https://i.imgur.com/9anU7QQ.png)
 
-Use 
+*"GameObject / Create Collection".*
 
 Collection is a special Editor-only object that has no components and no transform.\
 It detaches it's children on scene process, so there is no overhead at runtime.\
