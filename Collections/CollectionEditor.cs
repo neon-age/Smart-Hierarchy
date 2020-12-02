@@ -40,6 +40,8 @@ namespace AV.Hierarchy
         }
 
         private static GUIContent folderIsEmpty;
+
+        private SerializedProperty colorTag;
         
         private new Transform target;
         private new Transform[] targets;
@@ -56,6 +58,8 @@ namespace AV.Hierarchy
         private void OnEnable()
         {
             folderIsEmpty = new GUIContent(" Collection is empty.", IconContent("console.infoicon.sml").image);
+
+            colorTag = serializedObject.FindProperty("colorTag");
             
             target = (base.target as Collection).transform;
             targets = new Transform[base.targets.Length];
@@ -122,6 +126,12 @@ namespace AV.Hierarchy
 
         public override void OnInspectorGUI()
         {
+            serializedObject.Update();
+            
+            GUILayout.Space(5);
+
+            EditorGUILayout.PropertyField(colorTag);
+            
             GUILayout.Space(5);
             
             foreach (var child in children)
@@ -143,6 +153,8 @@ namespace AV.Hierarchy
                 GUILayout.Label(folderIsEmpty);
                 EditorStyles.label.fontSize -= 2;
             }
+
+            serializedObject.ApplyModifiedProperties();
         }
     }
 }

@@ -183,14 +183,20 @@ namespace AV.Hierarchy
             if (!item.EnsureViewExist(hierarchy))
                 return;
 
-            var fullWidthRect = GetFullWidthRect(rect);
-            
             item.UpdateViewIcon();
-
+            if (item.isCollection)
+                item.DrawFolderIcon(rect, IsSelected(id));
+            
             if (hierarchy.hoveredItem == item.view)
             {
+                var fullWidthRect = GetFullWidthRect(rect);
                 OnHoverGUI(fullWidthRect, item);
             }
+        }
+
+        private bool IsSelected(int id)
+        {
+            return state?.selectedIDs?.Contains(id) ?? false;
         }
         
         private void GetInstanceViewItem(int id, GameObject instance, Rect rect, out ViewItem item)

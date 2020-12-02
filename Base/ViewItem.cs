@@ -14,6 +14,7 @@ namespace AV.Hierarchy
         
         internal readonly int id;
         internal readonly GameObject instance;
+        internal readonly Collection collection;
         internal readonly Transform transform;
         internal readonly Components components;
         internal readonly Type mainType; 
@@ -23,10 +24,13 @@ namespace AV.Hierarchy
         
         internal readonly bool isPrefab;
         internal readonly bool isRootPrefab;
-        internal readonly bool isFolder;
+        internal readonly bool isCollection;
         internal readonly bool isEmpty;
 
-        private static Texture2D collectionIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath("6ee527fd28545e04593219b473dc26da"));
+        private static Texture2D transparent;
+        private static Texture2D folderIcon = IconContent("Folder On Icon").image as Texture2D;
+        private static Texture2D folderEmptyIcon = IconContent("FolderEmpty On Icon").image as Texture2D;
+        private static Texture2D collectionsIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath("6ee527fd28545e04593219b473dc26da"));
 
         public ViewItem(GameObject instance)
         {
@@ -41,7 +45,7 @@ namespace AV.Hierarchy
 
             isPrefab = PrefabUtility.GetPrefabAssetType(instance) == PrefabAssetType.Regular;
             isRootPrefab = PrefabUtility.IsAnyPrefabInstanceRoot(instance);
-            isFolder = instance.TryGetComponent<Collection>(out _);
+            isCollection = instance.TryGetComponent(out collection);
             isEmpty = instance.transform.childCount == 0;
             
             mainType = components.main?.GetType() ?? typeof(GameObject);
@@ -65,13 +69,41 @@ namespace AV.Hierarchy
             return true;
         }
         
+        public void DrawFolderIcon(Rect rect, bool isSelected)
+        {
+            var iconRect = new Rect(rect) { width = 16, height = 16 };
+
+            var guiColor = GUI.color;
+            var tintColor =  ColorTags.GetColor(collection.colorTag);
+
+            var icon = instance.transform.childCount == 0 ? folderEmptyIcon : folderIcon;
+            
+            if (!isSelected)
+                GUI.color *= tintColor;
+            
+            if (!instance.activeInHierarchy)
+                GUI.color *= new Color(1, 1, 1, 0.5f);
+            
+            GUI.DrawTexture(iconRect, collectionsIcon);
+            
+            GUI.color = guiColor;
+        }
+        
         public void UpdateViewIcon()
         {
             var preferences = HierarchySettingsProvider.Preferences;
             
-            if (isFolder)
+            if (isCollection)
             {
-                view.icon = collectionIcon;
+                if (transparent == null)
+                {
+                    transparent = new Texture2D(1, 1);
+                    transparent.SetPixel(0, 0, new Color(1, 1, 1, 0));
+                    transparent.Apply();
+                }
+                
+                // Draw icon manually, as there is no way to tint it without touching text or background
+                view.icon = transparent;
             }
             else
             {
