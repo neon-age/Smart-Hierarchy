@@ -1,8 +1,10 @@
 ﻿
+HoverPreview {
+    width: 48;
+    height: 48;
+}
+
 ObjectPreviewContainer {
-    width: 64;
-    height: 64;
-    
     flex-grow: 1;
     
     padding: 0;

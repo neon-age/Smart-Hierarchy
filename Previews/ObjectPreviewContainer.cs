@@ -10,15 +10,11 @@ namespace AV.Hierarchy
 {
     internal class ObjectPreviewContainer : VisualElement
     {
-        private static StyleSheet styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(AssetDatabase.GUIDToAssetPath("5ef573d491c5ec949a5679507e4be2a4"));
-       
         public readonly GameObjectPreview editor = new GameObjectPreview();
         private IMGUIContainer guiContainer;
 
         public ObjectPreviewContainer()
         {
-            styleSheets.Add(styleSheet);
-            
             guiContainer = new IMGUIContainer(() =>
             {
                 var style = resolvedStyle;
