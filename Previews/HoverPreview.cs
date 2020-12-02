@@ -1,10 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.AnimatedValues;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Object = UnityEngine.Object;
 
 namespace AV.Hierarchy
 {
@@ -12,24 +14,45 @@ namespace AV.Hierarchy
     {
         private static StyleSheet styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(AssetDatabase.GUIDToAssetPath("5ef573d491c5ec949a5679507e4be2a4"));
 
-        internal ObjectPreviewContainer container = new ObjectPreviewContainer();
+        private Rect rect;
+        private ObjectPreviewBase preview;
+        private ObjectPreviewContainer container = new ObjectPreviewContainer();
 
+        
         public HoverPreview()
         {
             Add(container);
             styleSheets.Add(styleSheet);
 
-            container.style.position = Position.Relative;
             visible = false;
         }
 
         public void OnItemPreview(ViewItem item)
         {
             visible = true;
+            
+            if (preview == null || preview.GetTargetType() != item.mainType)
+            {
+                // Target type has changed, switch preview
+                if (!ObjectPreviewBase.TryGetAvailablePreview(item.mainType, out preview))
+                {
+                    // No preview available for such type...
+                    Hide();
+                    return;
+                }
+            }
+
+            preview.Target = item.instance;
+
+            if (!preview.HasPreview())
+                return;
+
+            container.preview = preview;
 
             EditorGUIUtility.AddCursorRect(new Rect(0, 0, Screen.width, 1000000), MouseCursor.Zoom);
 
-            container.editor.CreateCachedEditor(new Vector2(80, 80), item.instance);
+            preview.RenderArea = new Rect(Vector2.zero, rect.size);
+            preview.RenderPreview();
         }
 
         public void Hide()
@@ -39,7 +62,7 @@ namespace AV.Hierarchy
 
         public void SetPosition(Vector2 localMousePosition, Rect area)
         {
-            var rect = new Rect
+            rect = new Rect
             {
                 position = localMousePosition,
                 size = new Vector2(resolvedStyle.width, resolvedStyle.height)

@@ -22,7 +22,7 @@ namespace AV.Hierarchy
         private ViewItem hoveredItem;
         private bool isHovering => hoveredItem != null;
         private int hoveredItemId => hierarchy.hoveredItem?.id ?? -1;
-        private bool isShowingPreview;
+        private bool wantsToShowPreview;
         private bool requiresUpdateBeforeGUI;
         private bool requiresGUISetup = true;
         private Vector2 localMousePosition;
@@ -54,7 +54,7 @@ namespace AV.Hierarchy
 
         private void Initialize()
         {
-            isShowingPreview = prefs.enableHoverPreview && prefs.alwaysShowPreview;
+            wantsToShowPreview = prefs.enableHoverPreview && prefs.alwaysShowPreview;
             requiresGUISetup = true;
         }
 
@@ -150,16 +150,16 @@ namespace AV.Hierarchy
             {
                 switch (prefs.magnifyHoldKey)
                 {
-                    case ModificationKey.Alt: isShowingPreview = evt.alt; break;
-                    case ModificationKey.Shift: isShowingPreview = evt.shift; break;
-                    case ModificationKey.Control: isShowingPreview = evt.control; break;
+                    case ModificationKey.Alt: wantsToShowPreview = evt.alt; break;
+                    case ModificationKey.Shift: wantsToShowPreview = evt.shift; break;
+                    case ModificationKey.Control: wantsToShowPreview = evt.control; break;
                 }
             }
         }
 
         private void HandleObjectPreview()
         {
-            if (isShowingPreview && isHovering)
+            if (isHovering && wantsToShowPreview)
             {
                 hoverPreview.OnItemPreview(hoveredItem);
             }

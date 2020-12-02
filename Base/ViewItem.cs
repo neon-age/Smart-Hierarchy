@@ -1,7 +1,9 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using static UnityEditor.EditorGUIUtility;
+using Object = UnityEngine.Object;
 
 namespace AV.Hierarchy
 {
@@ -14,6 +16,7 @@ namespace AV.Hierarchy
         internal readonly GameObject instance;
         internal readonly Transform transform;
         internal readonly Components components;
+        internal readonly Type mainType; 
         internal readonly Texture2D icon;
         
         internal readonly ViewItem child;
@@ -34,13 +37,18 @@ namespace AV.Hierarchy
             
             transform = instance.transform;
             components = new Components(instance);
-            
+
             icon = components.icon;
 
             isPrefab = PrefabUtility.GetPrefabAssetType(instance) == PrefabAssetType.Regular;
             isRootPrefab = PrefabUtility.IsAnyPrefabInstanceRoot(instance);
             isFolder = instance.TryGetComponent<Folder>(out _);
             isEmpty = instance.transform.childCount == 0;
+            
+            mainType = components.main?.GetType() ?? typeof(GameObject);
+
+            if (isRootPrefab)
+                mainType = typeof(GameObject);
 
             if (!isEmpty)
                 child = new ViewItem(transform.GetChild(0).gameObject);

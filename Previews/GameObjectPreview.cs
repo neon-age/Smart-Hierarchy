@@ -7,20 +7,19 @@ using UnityEngine;
 
 namespace AV.Hierarchy
 {
-    internal class GameObjectPreview
+    internal class GameObjectPreview : ObjectPreviewBase<GameObject>
     {
         private static Type gameObjectInspectorType;
         private static MethodInfo getPreviewDataMethod;
         private static FieldInfo renderUtilityField;
 
-        private Rect renderSize;
         private Color light0Color;
         private Color light1Color;
         private Color backgroundColor;
         private PreviewRenderUtility renderUtility;
         private Editor editor;
 
-        public RenderTexture outputTexture;
+        private static HashSet<GameObject> renderableObjects = new HashSet<GameObject>();
 
         [InitializeOnLoadMethod]
         private static void OnInitialize()
@@ -30,18 +29,21 @@ namespace AV.Hierarchy
             
             getPreviewDataMethod = gameObjectInspectorType.GetMethod("GetPreviewData", BindingFlags.NonPublic | BindingFlags.Instance);
             renderUtilityField = previewDataType.GetField("renderUtility", BindingFlags.Public | BindingFlags.Instance);
+
+            EditorApplication.hierarchyChanged += renderableObjects.Clear;
         }
 
-        public void CreateCachedEditor(Vector2 renderSize, GameObject target)
+        public override void OnTargetChange()
         {
-            if (!editor || editor.target != target)
-            {
-                this.renderSize = new Rect(0, 0, renderSize.x, renderSize.y);
-                Editor.CreateCachedEditor(target, gameObjectInspectorType, ref editor);
-            }
+            Editor.CreateCachedEditor(Target, gameObjectInspectorType, ref editor);
         }
 
-        public void OnPreviewGUI(Rect rect)
+        public override bool HasPreview()
+        {
+            return HasRenderableParts(Target);
+        }
+
+        public override void RenderPreview()
         {
             if (!editor)
                 return;
@@ -62,40 +64,54 @@ namespace AV.Hierarchy
             renderUtility.camera.clearFlags = CameraClearFlags.Depth;
             
             var color = GUI.color;
-            // Hide default preview texture, because it is being drawn without alpha blending
+            // Hide default preview texture, since we would draw it later with alpha blending
             GUI.color = new Color(1, 1, 1, 0);
             
-            editor.OnInteractivePreviewGUI(renderSize, null);
+            editor.OnPreviewGUI(RenderArea, null);
             
             GUI.color = color;
 
             var targetTexture = renderUtility.camera.targetTexture;
-
-            if (targetTexture)
-            {
-                GUI.DrawTexture(rect, targetTexture, ScaleMode.ScaleToFit, true, 0);
-                outputTexture = targetTexture;
-            }
-
-//
-            /*
-            var id = editor.target.GetInstanceID();
             
-            var assetPreview = AssetPreview.GetAssetPreview(editor.target);
-            var isLoading = AssetPreview.IsLoadingAssetPreview(id);
+            Output = targetTexture;
+        }
+        
+        public static bool HasRenderableParts(GameObject go)
+        {
+            if (renderableObjects.Contains(go))
+                return true;
+
+            var result = false;
+            var renderers = go.GetComponentsInChildren<Renderer>();
             
-            if (isLoading)
+            foreach (var renderer in renderers)
             {
-                if (cachedPreview != null)
-                    EditorGUI.DrawTextureTransparent(rect, cachedPreview);
+                switch (renderer)
+                {
+                    case MeshRenderer _:
+                        var filter = renderer.gameObject.GetComponent<MeshFilter>();
+                        if (filter && filter.sharedMesh)
+                            result = true;
+                        break;
+                    case SkinnedMeshRenderer skinnedMesh:
+                        if (skinnedMesh.sharedMesh)
+                            result = true;
+                        break;
+                    case SpriteRenderer sprite:
+                        if (sprite.sprite)
+                            result = true;
+                        break;
+                    case BillboardRenderer billboard:
+                        if (billboard.billboard && billboard.sharedMaterial)
+                            result = true;
+                        break;
+                }
             }
-            else if (assetPreview != null)
-            {
-                EditorGUI.DrawTextureTransparent(rect, assetPreview);
-                cachedPreview = assetPreview;
-            }
-*/
-            //EditorGUI.DrawTextureAlpha(rect, assetPreview, ScaleMode.ScaleToFit, 0, GetHashCode());
+
+            if (result)
+                renderableObjects.Add(go);
+
+            return result;
         }
     }
 }
