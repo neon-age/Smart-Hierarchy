@@ -8,6 +8,7 @@ namespace AV.Hierarchy
 {
     public abstract class ObjectPreviewBase
     {
+        private static Dictionary<int, RenderTexture> previewCache = new Dictionary<int, RenderTexture>();
         private static Dictionary<Type, ObjectPreviewBase> availablePreviews = new Dictionary<Type, ObjectPreviewBase>();
         
         private Object target;
@@ -19,24 +20,38 @@ namespace AV.Hierarchy
                 if (value.GetType() != GetTargetType())
                 {
                     target = null;
-                    return;
+                    OnTargetChange();
                 }
 
                 if (value != target)
+                {
+                    target = value;
                     OnTargetChange();
-                
-                target = value;
+                }
             }
         }
+        public int TargetID => target ? target.GetInstanceID() : 0;
+
+        public bool IsCached => previewCache.ContainsKey(TargetID);
+
+        public bool IgnoreCaching { get; set; } = false;
         
         public Rect RenderArea { get; set; } = new Rect(0, 0, 64, 64);
         
         public RenderTexture Output { get; set; }
         
+        public abstract void OnTargetChange();
+        public abstract bool HasPreview();
+        public abstract void RenderPreview();
+        public abstract Type GetTargetType();
+        
         
         [InitializeOnLoadMethod]
         private static void OnInitialize()
         {
+            Cleanup();
+            EditorApplication.hierarchyChanged += Cleanup;
+            
             foreach (var previewType in TypeCache.GetTypesDerivedFrom<ObjectPreviewBase>())
             {
                 if (previewType.ContainsGenericParameters)
@@ -46,17 +61,42 @@ namespace AV.Hierarchy
                 availablePreviews.Add(preview.GetTargetType(), preview);
             }
         }
+        
+        private static void Cleanup()
+        {
+            if (previewCache.Count < 100)
+                return;
+            
+            foreach (var texture in previewCache.Values)
+                Object.DestroyImmediate(texture);
+            
+            previewCache.Clear();
+        }
 
         public static bool TryGetAvailablePreview(Type targetType, out ObjectPreviewBase preview)
         {
             return availablePreviews.TryGetValue(targetType, out preview);
         }
         
-        public abstract void OnTargetChange();
-        public abstract bool HasPreview();
-        public abstract void RenderPreview();
+        protected void CachePreview(int instanceId)
+        {
+            if (!Output || instanceId == 0)
+                return;
 
-        public abstract Type GetTargetType();
+            var copy = new RenderTexture(Output);
+            var previous = RenderTexture.active;
+            
+            Graphics.Blit(Output, copy);
+            RenderTexture.active = previous;
+            
+            previewCache.Add(instanceId, copy);
+        }
+
+        public RenderTexture GetCachedPreview(int instanceId)
+        {
+            previewCache.TryGetValue(instanceId, out var preview);
+            return preview;
+        }
     }
     
     public abstract class ObjectPreviewBase<TTarget> : ObjectPreviewBase where TTarget : Object

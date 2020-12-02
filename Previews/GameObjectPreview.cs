@@ -4,6 +4,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEditor.VersionControl;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace AV.Hierarchy
 {
@@ -18,7 +19,7 @@ namespace AV.Hierarchy
         private Color backgroundColor;
         private PreviewRenderUtility renderUtility;
         private Editor editor;
-
+        
         private static HashSet<GameObject> renderableObjects = new HashSet<GameObject>();
 
         [InitializeOnLoadMethod]
@@ -30,7 +31,7 @@ namespace AV.Hierarchy
             getPreviewDataMethod = gameObjectInspectorType.GetMethod("GetPreviewData", BindingFlags.NonPublic | BindingFlags.Instance);
             renderUtilityField = previewDataType.GetField("renderUtility", BindingFlags.Public | BindingFlags.Instance);
 
-            EditorApplication.hierarchyChanged += renderableObjects.Clear;
+            EditorApplication.hierarchyChanged +=  renderableObjects.Clear;
         }
 
         public override void OnTargetChange()
@@ -47,6 +48,7 @@ namespace AV.Hierarchy
         {
             if (!editor)
                 return;
+            
             if (renderUtility == null || renderUtility.lights[0] == null)
             {
                 var previewData = getPreviewDataMethod.Invoke(editor, null);
@@ -66,14 +68,17 @@ namespace AV.Hierarchy
             var color = GUI.color;
             // Hide default preview texture, since we would draw it later with alpha blending
             GUI.color = new Color(1, 1, 1, 0);
-            
-            editor.OnPreviewGUI(RenderArea, null);
-            
-            GUI.color = color;
 
-            var targetTexture = renderUtility.camera.targetTexture;
-            
-            Output = targetTexture;
+            if (!IsCached)
+            {
+                editor.OnPreviewGUI(RenderArea, null);
+                
+                GUI.color = color;
+
+                Output = renderUtility.camera.targetTexture;
+
+                CachePreview(TargetID);
+            }
         }
         
         public static bool HasRenderableParts(GameObject go)

@@ -26,10 +26,14 @@ namespace AV.Hierarchy
                 
                 var color = GUI.color;
                 GUI.color = new Color(1, 1, 1, resolvedStyle.opacity * guiStyle.opacity);
-                
-                if (preview.Output)
-                    GUI.DrawTexture(preview.RenderArea, preview.Output, ScaleMode.ScaleAndCrop, true);
-                
+
+                if (preview.IsCached)
+                {
+                    var cachedPreview = preview.GetCachedPreview(preview.TargetID);
+
+                    GUI.DrawTexture(preview.RenderArea, cachedPreview, ScaleMode.ScaleAndCrop, true);
+                }
+
                 GUI.color = color;
             });
             Add(container);
