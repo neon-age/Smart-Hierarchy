@@ -1,0 +1,59 @@
+﻿
+.popup-window {
+    position: absolute;
+    flex-grow: 0;
+
+    background-color: rgba(35, 35, 35, 0.9);
+    
+    border-color: rgba(0, 0, 0, 0.05);
+    border-radius: 8;
+    padding: 8;
+}
+
+.context-arrow {
+    -unity-background-image-tint-color: rgba(35, 35, 35, 0.9);
+    
+    width: 16;
+    height: 9;
+    top: -8;
+    right: -4;
+
+    -unity-slice: 1;
+    -unity-slice-top: 10;
+}
+
+#Title {
+    opacity: 0.75;
+}
+
+.separator {
+    flex-grow: 1;
+    height: 1;
+    
+    background-color: rgba(255, 255, 255, 0.25);
+    border-radius: 2;
+    
+    margin-top: 4;
+    margin-bottom: 4;
+}
+
+.unity-toolbar {
+    padding: 1;
+    border-radius: 4;
+}
+
+.highlight-button {
+    width: 20;
+    height: 20;
+    
+    border-width: 0;
+    border-radius: 4;
+    margin: 0;
+    
+    background-color: rgba(100, 100, 100, 0);
+    align-items: center;
+}
+
+.highlight-button :hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}

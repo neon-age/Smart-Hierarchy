@@ -27,6 +27,8 @@ namespace AV.Hierarchy
         internal readonly bool isCollection;
         internal readonly bool isEmpty;
 
+        private string displayName;
+
         private static Texture2D transparent;
         private static Texture2D folderIcon = IconContent("Folder On Icon").image as Texture2D;
         private static Texture2D folderEmptyIcon = IconContent("FolderEmpty On Icon").image as Texture2D;
@@ -69,24 +71,26 @@ namespace AV.Hierarchy
             return true;
         }
         
-        public void DrawFolderIcon(Rect rect, bool isSelected)
+        public bool OnCollectionButton(Rect rect, bool isSelected)
         {
-            var iconRect = new Rect(rect) { width = 16, height = 16 };
+            var iconRect = new Rect(rect) { width = 18, height = 18 };
+            iconRect.y -= 1;
 
             var guiColor = GUI.color;
             var tintColor =  ColorTags.GetColor(collection.colorTag);
 
             var icon = instance.transform.childCount == 0 ? folderEmptyIcon : folderIcon;
-            
-            if (!isSelected)
-                GUI.color *= tintColor;
-            
+
             if (!instance.activeInHierarchy)
                 GUI.color *= new Color(1, 1, 1, 0.5f);
             
-            GUI.DrawTexture(iconRect, collectionsIcon);
+            GUI.color *= tintColor;
+
+            if (GUI.Button(iconRect, collectionsIcon, EditorStyles.label))
+                return true;
             
             GUI.color = guiColor;
+            return false;
         }
         
         public void UpdateViewIcon()

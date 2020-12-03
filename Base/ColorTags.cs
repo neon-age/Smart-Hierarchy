@@ -10,24 +10,10 @@ namespace AV.Hierarchy
         // https://chir.ag/projects/name-that-color/
         /// <summary>Silver, Emperor</summary>
         UI, 
-        /// <summary>Light Orchid, Cerise</summary> 
-        Constraints, 
-        /// <summary>
-        /// Malibu, Denim
-        /// </summary>
-        Rendering,
         /// <summary>
         /// Burning Orange, Milano Red
         /// </summary>
         Navigation,
-        /// <summary>
-        /// Portage, Royal Purple
-        /// </summary>
-        Sprites,
-        /// <summary>
-        /// Aquamarine, Surfie Green
-        /// </summary>
-        Animations,
         /// <summary>
         /// Amber, Buddha Gold
         /// </summary>
@@ -36,6 +22,20 @@ namespace AV.Hierarchy
         /// Green Yellow, Sea Green
         /// </summary>
         Environment,
+        /// <summary>
+        /// Aquamarine, Surfie Green
+        /// </summary>
+        Animations,
+        /// <summary>
+        /// Malibu, Denim
+        /// </summary>
+        Rendering,
+        /// <summary>
+        /// Portage, Royal Purple
+        /// </summary>
+        Sprites,
+        /// <summary>Light Orchid, Cerise</summary> 
+        Constraints, 
     }
     
     public static class ColorTags

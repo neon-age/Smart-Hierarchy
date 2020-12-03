@@ -45,6 +45,7 @@ namespace AV.Hierarchy
             hierarchy.ReassignCallbacks();
             
             guiContainer = root.parent.Query<IMGUIContainer>().First();
+            guiContainer.RegisterCallback<MouseDownEvent>(_ => ObjectPopupWindow.Close());
             
             // onGUIHandler is called after hierarchy GUI, thus has a slight delay
             guiContainer.onGUIHandler += OnAfterGUI;
@@ -134,12 +135,19 @@ namespace AV.Hierarchy
             if (!prefs.enableSmartHierarchy)
                 return;
             
+            if (EditorWindow.focusedWindow != actualWindow)
+                ObjectPopupWindow.Close();
+            
             HandleKeyboard(); 
             
             // Mouse is relative to window during onGUIHandler
             if (evt.type != EventType.Used)
-                hoverPreview.SetPosition(evt.mousePosition, actualWindow.position);
-            
+            {
+                localMousePosition = evt.mousePosition;
+                
+                hoverPreview.SetPosition(localMousePosition, actualWindow.position);
+            }
+
             HandleObjectPreview();
 
             requiresUpdateBeforeGUI = true;
@@ -185,8 +193,16 @@ namespace AV.Hierarchy
 
             item.UpdateViewIcon();
             if (item.isCollection)
-                item.DrawFolderIcon(rect, IsSelected(id));
-            
+            {
+                if (item.OnCollectionButton(rect, IsSelected(id)))
+                {
+                    var popup = new CollectionPopup(item.collection);
+
+                    var position = new Vector2(rect.x, rect.yMax - state.scrollPos.y + 32);
+                    popup.ShowInsideWindow(position, root);
+                }
+            }
+
             if (hierarchy.hoveredItem == item.view)
             {
                 var fullWidthRect = GetFullWidthRect(rect);
