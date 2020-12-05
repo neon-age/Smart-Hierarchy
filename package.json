@@ -1,8 +1,8 @@
 {
   "name": "com.av.smart-hierarchy",
-  "version": "0.2.6",
+  "version": "0.2.8",
   "displayName": "Smart Hierarchy",
-  "description": "Human readable hierarchy with icons and folders support.\nOrganize your scene properly, without getting lost in objects mess.",
+  "description": "Workflow improvements for Hierarchy.\nIcons, Collections, Color Tags, Previews and more..!\n\nDesigned with a native-feel and intuitiveness in mind.",
   "keywords": [
     "editor",
     "smart",
