@@ -1,21 +1,27 @@
-# Smart Hierarchy v0.2.6
+# Smart Hierarchy v0.2.8
 [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L4L02M51R)
 
-Better hierarchy for Unity, made by community.\
-Organize your scene properly, without getting lost in objects mess.
+Collection of QoL improvements for Unity Hierarchy.\
+Designed with a native-feel and intuitiveness in mind.
 
 **Note:** Extension is in early development stage, so feel free to bug-hunt, provide feedback and ideas!\
 Every contribution is highly appreciated!
 
+## Installation
+![Installation](https://i.imgur.com/2e4baUn.png)
+
+No additional setup required!\
+Customize plugin behaviour in "Preferences > Workflow > Smart Hierarchy".
+
+## Features
 ### Icons
-![Icons](https://i.imgur.com/V12LjiY.png)
+![Icons](https://i.imgur.com/aVIzuCy.png)
 
-They help you to navigate visually around hierarchy by always showing the most important information.
-
-Note: Icons are not attached to Prefabs root. This behaviour can be changed in Preferences.
+First object component is shown by default, and the last one for UI.\
+Default icon is shown only when object is "Empty", i.e. it has no components and transform is not changed.
 
 ### Collections
-![Collections](https://i.imgur.com/9anU7QQ.png)
+![Collections](https://i.imgur.com/F2Z8lVz.png)
 
 *"GameObject / Create Collection".*
 
@@ -35,17 +41,19 @@ No more need to select game object in order to (de)activate it.
 ### Hover Preview
 ![Hover Preview](https://i.imgur.com/CAN5uKL.png) 
 
-Hold "magnify" key to preview hovered object.\
+Hold modification key to preview hovered object.\
 Bindable keys: Alt / Shift / Ctrl.\
 **Very Experimental!** Can be enabled in Preferences.
 
 ## In progress:
 * Components bar
-* Nesting branches
-* Double-click expanding
+* Single-click expanding
 * Folder inspector
+* "Cut" shortcut
 
 ## Under investigation:
+* Types priority
+* Nesting branches
 * Depth context
 * Decorator/Fake folders
 * Scene highlight
