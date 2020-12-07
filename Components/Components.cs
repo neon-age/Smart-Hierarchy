@@ -1,5 +1,5 @@
-﻿using System.Linq;
-using AV.Hierarchy;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -11,18 +11,22 @@ namespace AV.Hierarchy
     {
         public readonly Component main;
         public readonly Texture2D icon;
-        private readonly ComponentData[] data;
+        private readonly List<ComponentData> data;
 
         public ComponentData this[int index] => data[index];
 
         public Components(GameObject instance)
         {
             var components = instance.GetComponents<Component>();
-            data = new ComponentData[components.Length];
-            
-            for (int i = 0; i < components.Length; i++)
-                data[i] = new ComponentData(components[i]);
-            
+            data = new List<ComponentData>(components.Length);
+
+            foreach (var component in components)
+            {
+                // TODO: Show null component in hierarchy
+                if (component)
+                    data.Add(new ComponentData(component));
+            }
+
             main = ChooseMainComponent(components);
 
             if (main)
