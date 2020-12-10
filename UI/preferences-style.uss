@@ -1,0 +1,21 @@
+
+.unity-foldout {
+    padding-top: 4;
+    padding-bottom: 4;
+}
+
+#title {
+    
+}
+
+.unity-label {
+    overflow: hidden;
+    flex-grow: 0.5;
+    flex-basis: 24;
+    min-width: 50;
+    max-width: 200;
+}
+
+.unity-enum-field {
+    margin-left: 1;
+}

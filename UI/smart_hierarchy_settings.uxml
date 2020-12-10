@@ -1,9 +1,9 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
     <ui:VisualElement style="margin-left: 7px; margin-top: 2px;">
-        <ui:Label text="Smart Hierarchy" style="font-size: 19px; -unity-font-style: bold; margin-left: 2px; margin-bottom: 12px;" />
-        <ui:Toggle label="Enable Smart Hierarchy" binding-path="enableSmartHierarchy" />
+        <ui:Label text="Smart Hierarchy" name="title" style="font-size: 19px; -unity-font-style: bold; margin-left: 2px; margin-bottom: 12px;" />
+        <ui:Toggle label="Enable Extension" binding-path="enableSmartHierarchy" style="margin-left: 16px;" />
         <ui:Foldout text="Icons">
-            <uie:EnumField label="Sticky Component Icon" binding-path="stickyComponentIcon" tooltip="Main component icon that is shown instead of GameObject or Prefab icon." />
+            <uie:EnumField label="Effective Icon" binding-path="stickyComponentIcon" tooltip="Main component icon that is shown instead of GameObject or Prefab icon." />
             <uie:EnumField label="Transform Icon" binding-path="transformIcon" />
         </ui:Foldout>
         <ui:Foldout text="Folders">
@@ -11,8 +11,8 @@
         </ui:Foldout>
         <ui:Foldout text="Objects Preview">
             <ui:Toggle label="Enable Preview" />
-            <uie:EnumField label="Preview Hotkey" binding-path="magnifyHoldKey" />
             <ui:Toggle label="Always Show Preview" binding-path="enableHoverPreview" />
+            <uie:EnumField label="Preview Key" binding-path="magnifyHoldKey" />
         </ui:Foldout>
     </ui:VisualElement>
 </ui:UXML>

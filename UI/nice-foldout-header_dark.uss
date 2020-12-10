@@ -1,8 +1,8 @@
 
-.unity-foldout .unity-toggle__input:hover {
+.unity-foldout > .unity-foldout__toggle :hover {
     background-color: #b6b6b6;
 }
-.unity-foldout .unity-toggle__input:hover {
+.unity-foldout > .unity-foldout__toggle :hover {
     background-color: #444444;
 }
 

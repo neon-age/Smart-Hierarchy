@@ -70,13 +70,15 @@ namespace AV.Hierarchy
             
             var uiPath = AssetDatabase.GUIDToAssetPath("f0d92e1f03926664991b2f7fbfbd6268") + "/";
 
-            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(uiPath + "nice-foldout-header.uss");
+            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(uiPath + "preferences-style.uss");
+            var foldoutStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>(uiPath + "nice-foldout-header.uss");
             root.styleSheets.Add(styleSheet);
+            root.styleSheets.Add(foldoutStyle);
 
             if (EditorGUIUtility.isProSkin)
             {
-                var darkStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>(uiPath + "nice-foldout-header_dark.uss");
-                root.styleSheets.Add(darkStyle);
+                var foldoutDarkStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>(uiPath + "nice-foldout-header_dark.uss");
+                root.styleSheets.Add(foldoutDarkStyle);
             }
             
             var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(uiPath + "smart_hierarchy_settings.uxml");
