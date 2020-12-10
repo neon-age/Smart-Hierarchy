@@ -47,12 +47,7 @@ namespace AV.Hierarchy
         {
             get
             {
-                if (preferences == null)
-                {
-                    preferences = ScriptableObject.CreateInstance<HierarchyPreferences>();
-                    LoadFromJson();
-                }
-
+                LoadIfNeeded();
                 return preferences;
             }
         }
@@ -66,7 +61,7 @@ namespace AV.Hierarchy
 
         public override void OnActivate(string searchContext, VisualElement root)
         {
-            LoadFromJson();
+            LoadIfNeeded();
             
             var uiPath = AssetDatabase.GUIDToAssetPath("f0d92e1f03926664991b2f7fbfbd6268") + "/";
 
@@ -106,9 +101,15 @@ namespace AV.Hierarchy
             EditorPrefs.SetString(PreferencePath, json);
             onChange?.Invoke();
         }
-
-        public static HierarchySettingsProvider GetProvider() => (HierarchySettingsProvider)GetSettingsProvider();
         
+        private static void LoadIfNeeded()
+        {
+            if (preferences != null)
+                return;
+            preferences = ScriptableObject.CreateInstance<HierarchyPreferences>();
+            LoadFromJson();
+        }
+
         [SettingsProvider]
         private static SettingsProvider GetSettingsProvider()
         {
