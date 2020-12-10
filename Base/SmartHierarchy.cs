@@ -204,7 +204,7 @@ namespace AV.Hierarchy
         {
             if (!prefs.alwaysShowPreview)
             {
-                switch (prefs.magnifyHoldKey)
+                switch (prefs.previewKey)
                 {
                     case ModificationKey.Alt: wantsToShowPreview = evt.alt; break;
                     case ModificationKey.Shift: wantsToShowPreview = evt.shift; break;

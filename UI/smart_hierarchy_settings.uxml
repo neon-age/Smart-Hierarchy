@@ -3,7 +3,7 @@
         <ui:Label text="Smart Hierarchy" name="title" style="font-size: 19px; -unity-font-style: bold; margin-left: 2px; margin-bottom: 12px;" />
         <ui:Toggle label="Enable Extension" binding-path="enableSmartHierarchy" style="margin-left: 16px;" />
         <ui:Foldout text="Icons">
-            <uie:EnumField label="Effective Icon" binding-path="stickyComponentIcon" tooltip="Main component icon that is shown instead of GameObject or Prefab icon." />
+            <uie:EnumField label="Effective Icon" binding-path="effectiveIcon" tooltip="Main component icon that is shown instead of GameObject or Prefab icon." />
             <uie:EnumField label="Transform Icon" binding-path="transformIcon" />
         </ui:Foldout>
         <ui:Foldout text="Folders">
@@ -12,7 +12,7 @@
         <ui:Foldout text="Objects Preview">
             <ui:Toggle label="Enable Preview" />
             <ui:Toggle label="Always Show Preview" binding-path="enableHoverPreview" />
-            <uie:EnumField label="Preview Key" binding-path="magnifyHoldKey" />
+            <uie:EnumField label="Preview Key" binding-path="previewKey" />
         </ui:Foldout>
     </ui:VisualElement>
 </ui:UXML>

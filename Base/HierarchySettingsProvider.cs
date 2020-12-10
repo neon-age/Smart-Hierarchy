@@ -30,12 +30,12 @@ namespace AV.Hierarchy
     internal class HierarchyPreferences : ScriptableObject
     {
         public bool enableSmartHierarchy = true;
-        public StickyIcon stickyComponentIcon = StickyIcon.NotOnPrefabs;
+        public StickyIcon effectiveIcon = StickyIcon.NotOnPrefabs;
         public TransformIcon transformIcon = TransformIcon.OnUniqueOrigin;
         public bool keepFoldersInPlaymode;
         public bool enableHoverPreview;
         public bool alwaysShowPreview;
-        public ModificationKey magnifyHoldKey;
+        public ModificationKey previewKey;
     }
 
     internal class HierarchySettingsProvider : SettingsProvider

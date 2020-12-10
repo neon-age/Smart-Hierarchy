@@ -81,7 +81,7 @@ namespace AV.Hierarchy
             if (isCollection)
                 return collectionIcon;
             
-            switch (preferences.stickyComponentIcon)
+            switch (preferences.effectiveIcon)
             {
                 case StickyIcon.Never: 
                     break;
