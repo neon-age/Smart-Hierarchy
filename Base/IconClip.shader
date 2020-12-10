@@ -64,10 +64,10 @@ Shader "Hidden/Internal-IconClip"
         if (_IsOn == 0)
             return col;
 
-        half left = tex2D(_MainTex, float2(0.3, 0.5));
-        half right = tex2D(_MainTex, float2(0.7, 0.5));
-        half top = tex2D(_MainTex, float2(0.5, 0.9));
-        half bottom = tex2D(_MainTex, float2(0.5, 0.1));
+        half left = tex2D(_MainTex, float2(0.3, 0.5)).a;
+        half right = tex2D(_MainTex, float2(0.7, 0.5)).a;
+        half top = tex2D(_MainTex, float2(0.5, 0.9)).a;
+        half bottom = tex2D(_MainTex, float2(0.5, 0.1)).a;
 
         // Special case for "file" icons, where background color is white and content is not in alpha channel
         if (left > 0.9 && right > 0.9 > top > 0.9 && bottom > 0.9)
