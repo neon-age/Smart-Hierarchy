@@ -2,6 +2,7 @@
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
+using static UnityEditor.AssetDatabase;
 using static UnityEditor.EditorGUIUtility;
 using Object = UnityEngine.Object;
 
@@ -9,31 +10,33 @@ namespace AV.Hierarchy
 {
     internal class ViewItem
     {
-        internal Rect rect;
-        internal TreeViewItem view;
+        private static HierarchyPreferences preferences = HierarchySettingsProvider.Preferences;
         
-        internal readonly int id;
-        internal readonly GameObject instance;
-        internal readonly Collection collection;
-        internal readonly Transform transform;
-        internal readonly Components components;
-        internal readonly Type mainType; 
-        internal readonly Texture2D icon;
+        public Rect rect;
+        public TreeViewItem view;
+        private GameObjectViewItem goView;
+
+        public int colorCode => goView.colorCode;
+        public Texture2D overlayIcon => goView.overlayIcon;
+        public Texture2D effectiveIcon => GetEffectiveIcon() ?? view.icon;
         
-        internal readonly ViewItem child;
+        public readonly int id;
+        public readonly GameObject instance;
+        public readonly Collection collection;
+        public readonly Transform transform;
+        public readonly Components components;
+        public readonly Type mainType; 
+        public readonly Texture2D icon;
         
-        internal readonly bool isPrefab;
-        internal readonly bool isRootPrefab;
-        internal readonly bool isCollection;
-        internal readonly bool isEmpty;
-
-        private string displayName;
-
-        private static Texture2D transparent;
-        private static Texture2D folderIcon = IconContent("Folder On Icon").image as Texture2D;
-        private static Texture2D folderEmptyIcon = IconContent("FolderEmpty On Icon").image as Texture2D;
-        private static Texture2D collectionsIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath("6ee527fd28545e04593219b473dc26da"));
-
+        public readonly ViewItem child;
+        
+        public readonly bool isPrefab;
+        public readonly bool isRootPrefab;
+        public readonly bool isCollection;
+        public readonly bool isEmpty;
+        
+        private static Texture2D collectionIcon = LoadAssetAtPath<Texture2D>(GUIDToAssetPath("6ee527fd28545e04593219b473dc26da"));
+        
         public ViewItem(GameObject instance)
         {
             this.instance = instance;
@@ -67,66 +70,30 @@ namespace AV.Hierarchy
                 if(view == null)
                     return false;
             }
-
+            
+            goView = new GameObjectViewItem(view);
+            
             return true;
         }
-        
-        public bool OnCollectionButton(Rect rect, bool isSelected)
+
+        private Texture2D GetEffectiveIcon()
         {
-            var iconRect = new Rect(rect) { width = 18, height = 18 };
-            iconRect.y -= 1;
-
-            var guiColor = GUI.color;
-            var tintColor =  ColorTags.GetColor(collection.colorTag);
-
-            var icon = instance.transform.childCount == 0 ? folderEmptyIcon : folderIcon;
-
-            if (!instance.activeInHierarchy)
-                GUI.color *= new Color(1, 1, 1, 0.5f);
-            
-            GUI.color *= tintColor;
-
-            if (GUI.Button(iconRect, collectionsIcon, EditorStyles.label))
-                return true;
-            
-            GUI.color = guiColor;
-            return false;
-        }
-        
-        public void UpdateViewIcon()
-        {
-            var preferences = HierarchySettingsProvider.Preferences;
-            
             if (isCollection)
+                return collectionIcon;
+            
+            switch (preferences.stickyComponentIcon)
             {
-                if (transparent == null)
-                {
-                    transparent = new Texture2D(1, 1);
-                    transparent.SetPixel(0, 0, new Color(1, 1, 1, 0));
-                    transparent.Apply();
-                }
-                
-                // Draw icon manually, as there is no way to tint it without touching text or background
-                view.icon = transparent;
+                case StickyIcon.Never: 
+                    break;
+                case StickyIcon.OnAnyObject:
+                    return icon;
+                case StickyIcon.NotOnPrefabs:
+                    if (!isRootPrefab)
+                        return icon;
+                    break;
             }
-            else
-            {
-                if (icon == null) 
-                    return;
-                
-                switch (preferences.stickyComponentIcon)
-                {
-                    case StickyIcon.Never: 
-                        break;
-                    case StickyIcon.OnAnyObject:
-                        view.icon = icon;
-                        break;
-                    case StickyIcon.NotOnPrefabs:
-                        if (!isRootPrefab)
-                            view.icon = icon;
-                        break;
-                }
-            }
+
+            return view.icon;
         }
     }
 }

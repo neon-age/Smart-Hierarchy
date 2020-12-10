@@ -16,6 +16,7 @@ namespace AV.Hierarchy
         internal SceneHierarchyWindow window { get; }
         internal SceneHierarchy hierarchy => window.hierarchy;
         internal TreeViewState state => hierarchy.state;
+        internal TreeViewController controller => hierarchy.controller;
         internal float time => Time.realtimeSinceStartup;
         
         private EditorWindow actualWindow => window.actualWindow;
@@ -130,6 +131,52 @@ namespace AV.Hierarchy
             ItemsData.TryGetValue(hoveredItemId, out hoveredItem);
         }
         
+        private void OnItemGUI(int id, Rect rect)
+        {
+            var instance = EditorUtility.InstanceIDToObject(id) as GameObject;
+
+            if (!instance)
+                return;
+
+            GetInstanceViewItem(id, instance, rect, out var item);
+            
+            // Happens to be null when entering prefab mode
+            if (!item.EnsureViewExist(hierarchy))
+                return;
+            
+            // Changing icon in TreeViewItem is not enough,
+            // When item is selected, it is hardcoded to use "On" icon (white version for blue background).
+            // https://github.com/Unity-Technologies/UnityCsReference/blob/2019.4/Editor/Mono/GUI/TreeView/TreeViewGUI.cs#L157
+            
+            // Setting width to zero will hide default icon, so we can draw our own on top,
+            // But this also removes item text indentation and "Pinging" icon..
+            controller.gui.SetIconWidth(0);
+            
+            controller.gui.SetSpaceBetweenIconAndText(18);
+            
+            var isSelected = controller.IsSelected(item.view);
+            var isOn = isSelected && controller.HasFocus();
+
+            item.DrawIcon(rect, isOn);
+            
+            if (item.isCollection)
+            {
+                if (ViewItemGUI.OnIconClick(rect))
+                {
+                    var popup = new CollectionPopup(item.collection);
+
+                    var position = new Vector2(rect.x, rect.yMax - state.scrollPos.y + 32);
+                    popup.ShowInsideWindow(position, root);
+                }
+            }
+
+            if (hierarchy.hoveredItem == item.view)
+            {
+                var fullWidthRect = GetFullWidthRect(rect);
+                OnHoverGUI(fullWidthRect, item);
+            }
+        }
+        
         private void OnAfterGUI()
         {
             if (!prefs.enableSmartHierarchy)
@@ -176,43 +223,6 @@ namespace AV.Hierarchy
             {
                 hoverPreview.Hide();
             }
-        }
-
-        private void OnItemGUI(int id, Rect rect)
-        {
-            var instance = EditorUtility.InstanceIDToObject(id) as GameObject;
-
-            if (!instance)
-                return;
-
-            GetInstanceViewItem(id, instance, rect, out var item);
-            
-            // Happens to be null when entering prefab mode
-            if (!item.EnsureViewExist(hierarchy))
-                return;
-
-            item.UpdateViewIcon();
-            if (item.isCollection)
-            {
-                if (item.OnCollectionButton(rect, IsSelected(id)))
-                {
-                    var popup = new CollectionPopup(item.collection);
-
-                    var position = new Vector2(rect.x, rect.yMax - state.scrollPos.y + 32);
-                    popup.ShowInsideWindow(position, root);
-                }
-            }
-
-            if (hierarchy.hoveredItem == item.view)
-            {
-                var fullWidthRect = GetFullWidthRect(rect);
-                OnHoverGUI(fullWidthRect, item);
-            }
-        }
-
-        private bool IsSelected(int id)
-        {
-            return state?.selectedIDs?.Contains(id) ?? false;
         }
         
         private void GetInstanceViewItem(int id, GameObject instance, Rect rect, out ViewItem item)
