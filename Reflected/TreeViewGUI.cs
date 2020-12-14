@@ -22,8 +22,8 @@ namespace AV.Hierarchy
         
         private static GUIStyle foldout;
 
-        private float defaultIconWidth = -1;
-        private float defaultSpaceBeforeIcon = -1;
+        private readonly float defaultIconWidth;
+        private readonly float defaultSpaceBeforeIcon;
 
         [InitializeOnLoadMethod]
         private static void OnInitialize()
@@ -42,6 +42,9 @@ namespace AV.Hierarchy
         public TreeViewGUI(object gui)
         {
             this.gui = gui;
+            
+            defaultIconWidth = (float)iconWidthField.GetValue(gui);
+            defaultSpaceBeforeIcon = (float)iconSpaceField.GetValue(gui);
         }
 
         public void SetLineHeight(float height)
@@ -57,15 +60,11 @@ namespace AV.Hierarchy
 
         public void SetIconWidth(float width)
         {
-            if (defaultIconWidth == -1)
-                defaultIconWidth = (float)iconWidthField.GetValue(gui);
             iconWidthField.SetValue(gui, width);
         }
 
         public void SetSpaceBetweenIconAndText(float space)
         {
-            if (defaultSpaceBeforeIcon == -1)
-                defaultSpaceBeforeIcon = (float)iconSpaceField.GetValue(gui);
             iconSpaceField.SetValue(gui, space);
         }
         
