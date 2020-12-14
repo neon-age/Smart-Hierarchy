@@ -22,7 +22,8 @@ namespace AV.Hierarchy
         
         private static GUIStyle foldout;
 
-        private float defaultBaseIndent = -1;
+        private float defaultIconWidth = -1;
+        private float defaultSpaceBeforeIcon = -1;
 
         [InitializeOnLoadMethod]
         private static void OnInitialize()
@@ -48,13 +49,23 @@ namespace AV.Hierarchy
             lineHeightProperty.SetValue(gui, height);
         }
 
+        public void ResetCustomStyling()
+        {
+            iconWidthField.SetValue(gui, defaultIconWidth);
+            iconSpaceField.SetValue(gui, defaultSpaceBeforeIcon);
+        }
+
         public void SetIconWidth(float width)
         {
+            if (defaultIconWidth == -1)
+                defaultIconWidth = (float)iconWidthField.GetValue(gui);
             iconWidthField.SetValue(gui, width);
         }
 
-        public void SetSpaceBetweenIconAndText(int space)
+        public void SetSpaceBetweenIconAndText(float space)
         {
+            if (defaultSpaceBeforeIcon == -1)
+                defaultSpaceBeforeIcon = (float)iconSpaceField.GetValue(gui);
             iconSpaceField.SetValue(gui, space);
         }
         

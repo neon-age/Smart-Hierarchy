@@ -131,6 +131,8 @@ namespace AV.Hierarchy
             hierarchy.EnsureValidData();
             
             ItemsData.TryGetValue(hoveredItemId, out hoveredItem);
+
+            HideDefaultIcon();
         }
         
         private void OnItemGUI(int id, Rect rect)
@@ -146,15 +148,7 @@ namespace AV.Hierarchy
             if (!item.EnsureViewExist(hierarchy))
                 return;
             
-            // Changing icon in TreeViewItem is not enough,
-            // When item is selected, it is hardcoded to use "On" icon (white version for blue background).
-            // https://github.com/Unity-Technologies/UnityCsReference/blob/2019.4/Editor/Mono/GUI/TreeView/TreeViewGUI.cs#L157
-            
-            // Setting width to zero will hide default icon, so we can draw our own on top,
-            // But this also removes item text indentation and "Pinging" icon..
-            controller.gui.SetIconWidth(0);
-            
-            controller.gui.SetSpaceBetweenIconAndText(18);
+            HideDefaultIcon();
             
             var isSelected = controller.IsSelected(item.view);
             var isOn = isSelected && controller.HasFocus();
@@ -184,6 +178,9 @@ namespace AV.Hierarchy
             if (!prefs.enableSmartHierarchy)
                 return;
             
+            // Makes sure other items like scene headers are not interrupted 
+            controller.gui.ResetCustomStyling();
+            
             if (EditorWindow.focusedWindow != actualWindow)
                 ObjectPopupWindow.Close();
             
@@ -200,6 +197,19 @@ namespace AV.Hierarchy
             HandleObjectPreview();
 
             requiresUpdateBeforeGUI = true;
+        }
+
+        private void HideDefaultIcon()
+        {
+            // Changing icon in TreeViewItem is not enough,
+            // When item is selected, it is hardcoded to use "On" icon (white version for blue background).
+            // https://github.com/Unity-Technologies/UnityCsReference/blob/2019.4/Editor/Mono/GUI/TreeView/TreeViewGUI.cs#L157
+            
+            // Setting width to zero will hide default icon, so we can draw our own on top,
+            // But this also removes item text indentation and "Pinging" icon..
+            controller.gui.SetIconWidth(0);
+            
+            controller.gui.SetSpaceBetweenIconAndText(18);
         }
 
         private void HandleKeyboard()
