@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 using static UnityEditor.EditorGUIUtility;
 
 namespace AV.Hierarchy
@@ -30,9 +28,7 @@ namespace AV.Hierarchy
             main = ChooseMainComponent(components);
 
             if (main)
-            {
                 icon = ObjectContent(main, main.GetType()).image as Texture2D;
-            }
         }
         
         public static Component ChooseMainComponent(params Component[] components)
@@ -41,67 +37,45 @@ namespace AV.Hierarchy
             if (length == 0) 
                 return null;
 
-            var preferences = HierarchySettingsProvider.Preferences;
+            var prefs = HierarchySettingsProvider.Preferences;
             
-            var first = components[0];
+            var zero = components[0];
             
             if (length == 1)
             {
-                switch (preferences.transformIcon)
+                switch (prefs.transformIcon)
                 {
                     case TransformIcon.Always: 
-                        return components[0];
+                        return zero;
                     
                     case TransformIcon.OnUniqueOrigin:
-                        if (first is Transform transform)
+                        if (zero is Transform transform)
                         {
                             if (transform.localPosition != Vector3.zero || 
                                 transform.localRotation != Quaternion.identity)
-                                return components[0];
+                                return zero;
                         }
-                        return first is RectTransform ? components[0] : null;
+                        return zero is RectTransform ? zero : null;
                         
                     case TransformIcon.OnlyRectTransform:
-                        return first is RectTransform ? components[0] : null;
+                        return zero is RectTransform ? zero : null;
                 }
 
                 return null;
             }
             
-            if (HasCanvasRenderer(components))
+            var first = components[1];
+            var last = components[length - 1];
+
+            var prioritized = prefs.componentsPriority.SelectPrioritizedComponents(components).ToArray();
+
+            if (prioritized.Any())
             {
-                return GetMainUGUIComponent(components);
+                first = prioritized.First();
+                last = prioritized.Last();
             }
             
-            return components[1];
-        }
-
-        private static bool HasCanvasRenderer(params Component[] components)
-        {
-            return components.OfType<CanvasRenderer>().Any();
-        }
-
-        private static Component GetMainUGUIComponent(params Component[] components)
-        {
-            Component lastComponent = null;
-            UIBehaviour firstUIBehaviour = null;
-
-            foreach (var component in components)
-            {
-                if (component is Graphic graphic)
-                    lastComponent = graphic;
-
-                if (!firstUIBehaviour && component is UIBehaviour uiBehaviour)
-                {
-                    firstUIBehaviour = uiBehaviour;
-                    lastComponent = uiBehaviour;
-                }
-
-                if (component is Selectable selectable)
-                    lastComponent = selectable;
-            }
-
-            return lastComponent;
+            return prefs.preferLastComponent ? last : first;
         }
     }
 }

@@ -1,3 +1,9 @@
+
+.unity-foldout {
+    margin-top: 4;
+    margin-bottom: 4;
+}
+
 .unity-foldout .unity-toggle {
     margin-left: 1;
     margin-bottom: 1;

@@ -1,4 +1,4 @@
-# Smart Hierarchy v0.2.8
+# Smart Hierarchy v0.2.9
 [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L4L02M51R)
 
 Collection of QoL improvements for Unity Hierarchy.\
@@ -17,7 +17,7 @@ Customize plugin behaviour in "Preferences > Workflow > Smart Hierarchy".
 ### Icons
 ![Icons](https://i.imgur.com/aVIzuCy.png)
 
-First object component is shown by default, and the last one for UI.\
+Last object component is shown by default. You can define "Types Priority" in Preferences.\
 Default icon is shown only when object is "Empty", i.e. it has no components and transform is not changed.
 
 ### Collections
@@ -52,7 +52,6 @@ Bindable keys: Alt / Shift / Ctrl.\
 * "Cut" shortcut
 
 ## Under investigation:
-* Types priority
 * Nesting branches
 * Depth context
 * Decorator/Fake folders

@@ -1,18 +1,21 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
-    <ui:VisualElement style="margin-left: 7px; margin-top: 2px;">
-        <ui:Label text="Smart Hierarchy" name="title" style="font-size: 19px; -unity-font-style: bold; margin-left: 2px; margin-bottom: 12px;" />
-        <ui:Toggle label="Enable Extension" binding-path="enableSmartHierarchy" style="margin-left: 16px;" />
-        <ui:Foldout text="Icons">
+    <ui:Label text="Smart Hierarchy" name="Title" style="font-size: 19px; -unity-font-style: bold;" />
+    <ui:ScrollView>
+        <ui:Toggle label="Enable Extension" binding-path="enableSmartHierarchy" />
+        <ui:Foldout text="Icons" name="Icons">
             <uie:EnumField label="Effective Icon" binding-path="effectiveIcon" tooltip="Main component icon that is shown instead of GameObject or Prefab icon." />
             <uie:EnumField label="Transform Icon" binding-path="transformIcon" />
         </ui:Foldout>
-        <ui:Foldout text="Folders">
+        <ui:Foldout text="Folders" name="Folders">
             <ui:Toggle label="Keep In Playmode" binding-path="keepFoldersInPlaymode" />
         </ui:Foldout>
-        <ui:Foldout text="Objects Preview">
+        <ui:Foldout text="Objects Preview" name="ObjectsPreview">
             <ui:Toggle label="Enable Preview" />
             <ui:Toggle label="Always Show Preview" binding-path="enableHoverPreview" />
             <uie:EnumField label="Preview Key" binding-path="previewKey" />
         </ui:Foldout>
-    </ui:VisualElement>
+        <ui:Foldout text="Components" name="Components">
+            <ui:Toggle label="Prefer Last Component" binding-path="preferLastComponent" style="padding-bottom: 4px;" />
+        </ui:Foldout>
+    </ui:ScrollView>
 </ui:UXML>

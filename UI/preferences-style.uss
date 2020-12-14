@@ -1,19 +1,24 @@
 
-.unity-foldout {
-    padding-top: 4;
-    padding-bottom: 4;
+#unity-content-container {
+    padding-left: 6;
+    padding-top: 2;
 }
 
-#title {
-    
+#Title {
+    padding-left: 9;
+    padding-top: 2;
+    margin-bottom: 9;
+    flex-grow: 0;
+}
+
+.unity-toggle {
+    margin-top: 2;
+    margin-bottom: 2;
 }
 
 .unity-label {
     overflow: hidden;
-    flex-grow: 0.5;
-    flex-basis: 24;
-    min-width: 50;
-    max-width: 200;
+    flex-grow: 0.1;
 }
 
 .unity-enum-field {

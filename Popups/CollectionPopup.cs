@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 
 namespace AV.Hierarchy
 {
-    public class CollectionPopup : ObjectPopupWindow
+    internal class CollectionPopup : ObjectPopupWindow
     {
         private static Texture2D collectionsIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath("6ee527fd28545e04593219b473dc26da"));
 

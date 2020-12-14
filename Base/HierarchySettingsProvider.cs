@@ -30,24 +30,32 @@ namespace AV.Hierarchy
     internal class HierarchyPreferences : ScriptableObject
     {
         public bool enableSmartHierarchy = true;
+        
         public StickyIcon effectiveIcon = StickyIcon.NotOnPrefabs;
         public TransformIcon transformIcon = TransformIcon.OnUniqueOrigin;
+        
         public bool keepFoldersInPlaymode;
+        
         public bool enableHoverPreview;
         public bool alwaysShowPreview;
         public ModificationKey previewKey;
+
+        public bool preferLastComponent = true;
+        public TypesPriority componentsPriority = new TypesPriority();
     }
 
     internal class HierarchySettingsProvider : SettingsProvider
     {
         private const string PreferencePath = "Preferences/Workflow/Smart Hierarchy";
+        private static string UIPath = AssetDatabase.GUIDToAssetPath("f0d92e1f03926664991b2f7fbfbd6268") + "/";
 
         private static HierarchySettingsProvider provider;
         public static HierarchyPreferences Preferences 
         {
             get
             {
-                LoadIfNeeded();
+                if (!preferences)
+                    LoadFromJson();
                 return preferences;
             }
         }
@@ -55,59 +63,78 @@ namespace AV.Hierarchy
         private static HierarchyPreferences preferences;
         public static event Action onChange;
 
+        private SerializedObject serializedObject;
 
         private HierarchySettingsProvider(string path, SettingsScope scope)
             : base(path, scope){}
 
         public override void OnActivate(string searchContext, VisualElement root)
         {
-            LoadIfNeeded();
+            LoadFromJson();
+            serializedObject = new SerializedObject(preferences);
+            keywords = GetSearchKeywordsFromSerializedObject(serializedObject);
             
-            var uiPath = AssetDatabase.GUIDToAssetPath("f0d92e1f03926664991b2f7fbfbd6268") + "/";
+            var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(UIPath + "smart_hierarchy_settings.uxml");
+            visualTree.CloneTree(root);
+            
+            var scrollView = root.Query<ScrollView>().First();
+            var container = scrollView.contentContainer;
+            
+            ApplyStyling(root);
+            root.Bind(serializedObject);
 
-            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(uiPath + "preferences-style.uss");
-            var foldoutStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>(uiPath + "nice-foldout-header.uss");
+            var componentsFoldout = root.Query("Components").First();
+
+            provider.CreateTypesPriorityGUI("Prioritized Types", componentsFoldout, "componentsPriority");
+            
+            // this is stupid
+            container.RegisterCallback<ChangeEvent<bool>>(evt => SaveToJson());
+            container.RegisterCallback<ChangeEvent<Enum>>(evt => SaveToJson());
+        }
+
+        public override void OnDeactivate()
+        {
+            if (preferences)
+                SaveToJson();
+        }
+
+        private void CreateTypesPriorityGUI(string header, VisualElement parent, string propertyName)
+        {
+            var gui = new TypesPriorityGUI(header, serializedObject.FindProperty(propertyName));
+            gui.onChange += SaveToJson;
+            
+            var container = new IMGUIContainer(() => gui.List.DoLayoutList());
+
+            parent.Add(container);
+        }
+
+        private static void ApplyStyling(VisualElement root)
+        {
+            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(UIPath + "preferences-style.uss");
+            var foldoutStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>(UIPath + "nice-foldout-header.uss");
             root.styleSheets.Add(styleSheet);
             root.styleSheets.Add(foldoutStyle);
 
             if (EditorGUIUtility.isProSkin)
             {
-                var foldoutDarkStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>(uiPath + "nice-foldout-header_dark.uss");
+                var foldoutDarkStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>(UIPath + "nice-foldout-header_dark.uss");
                 root.styleSheets.Add(foldoutDarkStyle);
             }
-            
-            var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(uiPath + "smart_hierarchy_settings.uxml");
-            
-            visualTree.CloneTree(root);
-
-            var serializedObject = new SerializedObject(preferences);
-            root.Bind(serializedObject);
-            keywords = GetSearchKeywordsFromSerializedObject(serializedObject);
-            
-            // this is stupid
-            root.RegisterCallback<ChangeEvent<bool>>(evt => SaveToJson());
-            root.RegisterCallback<ChangeEvent<Enum>>(evt => SaveToJson());
         }
 
         private static void LoadFromJson()
         {
+            preferences = ScriptableObject.CreateInstance<HierarchyPreferences>();
             var json = EditorPrefs.GetString(PreferencePath);
             EditorJsonUtility.FromJsonOverwrite(json, preferences);
         }
 
         private static void SaveToJson()
         {
-            var json = EditorJsonUtility.ToJson(preferences);
+            var json = EditorJsonUtility.ToJson(preferences, true);
             EditorPrefs.SetString(PreferencePath, json);
+            
             onChange?.Invoke();
-        }
-        
-        private static void LoadIfNeeded()
-        {
-            if (preferences != null)
-                return;
-            preferences = ScriptableObject.CreateInstance<HierarchyPreferences>();
-            LoadFromJson();
         }
 
         [SettingsProvider]
