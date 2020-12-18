@@ -63,6 +63,8 @@ namespace AV.Hierarchy
             
             foreach (var component in components)
             {
+                if (component == null)
+                    continue;
                 if (component.hideFlags == HideFlags.HideInInspector)
                     continue;
 
