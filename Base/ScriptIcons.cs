@@ -119,7 +119,7 @@ namespace AV.Hierarchy
 				var script = AssetDatabase.LoadAssetAtPath<MonoScript>(path);
 				var type = script.GetClass();
 
-				if (type == null)
+				if (type == null || monoScripts.ContainsKey(type))
 					continue;
 
 				monoScripts.Add(type, script);
