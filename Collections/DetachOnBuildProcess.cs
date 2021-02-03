@@ -17,7 +17,7 @@ namespace AV.Hierarchy
 
             if (Application.isEditor && preferences.keepFoldersInPlaymode)
                 return;
-            
+                
             var sceneRoots = scene.GetRootGameObjects();
             foreach (var root in sceneRoots)
             {
@@ -25,11 +25,15 @@ namespace AV.Hierarchy
                 
                 foreach (var folder in folders)
                 {
+                    if (folder.keepTransformHierarchy)
+                        continue;
                     DetachRootChildren(folder.transform);
                 }
 
                 foreach (var folder in folders)
                 {
+                    if (folder.keepTransformHierarchy)
+                        continue;
                     Object.DestroyImmediate(folder.gameObject);
                 }
             }

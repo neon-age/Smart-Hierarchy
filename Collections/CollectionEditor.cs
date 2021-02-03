@@ -1,18 +1,23 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using UnityEditor;
 using UnityEditor.Callbacks;
+using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.UIElements;
 using static UnityEditor.EditorGUIUtility;
 
 namespace AV.Hierarchy
 {
     [CustomEditor(typeof(Collection))]
+    [CanEditMultipleObjects]
     internal class CollectionEditor : Editor
     {
+        // TODO: Remove all this reflection junk and use UI Elements instead.
         private static class Reflected
         {
             public static Type gameObjectInspectorType;
@@ -39,13 +44,15 @@ namespace AV.Hierarchy
             }
         }
 
-        private static GUIContent folderIsEmpty;
-
-        private SerializedProperty colorTag;
+        private SerializedProperty keepHierarchy;
         
         private new Transform target;
         private new Transform[] targets;
+        // TODO: Local-Hierarchy
         private GameObject[] children;
+
+        private VisualElement root;
+        private VisualElement componentsWarning;
 
         [DidReloadScripts]
         private static void DidReloadScripts()
@@ -57,9 +64,7 @@ namespace AV.Hierarchy
         
         private void OnEnable()
         {
-            folderIsEmpty = new GUIContent(" Collection is empty.", IconContent("console.infoicon.sml").image);
-
-            colorTag = serializedObject.FindProperty("colorTag");
+            keepHierarchy = serializedObject.FindProperty("keepTransformHierarchy");
             
             target = (base.target as Collection).transform;
             targets = new Transform[base.targets.Length];
@@ -124,37 +129,104 @@ namespace AV.Hierarchy
             }
         }
 
-        public override void OnInspectorGUI()
+        public override VisualElement CreateInspectorGUI()
         {
-            serializedObject.Update();
-            
-            GUILayout.Space(5);
+            root = new VisualElement { style = { paddingTop = 12, paddingBottom = 5 } };
 
-            EditorGUILayout.PropertyField(colorTag);
+            // TODO: Tooltip doesn't work?!
+            var keepHierarchyField = new PropertyField(keepHierarchy) { tooltip = keepHierarchy.tooltip };
+            root.Add(keepHierarchyField);
             
-            GUILayout.Space(5);
+            root.RegisterCallback<ChangeEvent<bool>>(_ => SetComponentsReadOnly(!keepHierarchy.boolValue));
+
+            // TODO: Find any better callback for initialization
+            EditorApplication.delayCall += () => SetComponentsReadOnly(!keepHierarchy.boolValue);
             
-            foreach (var child in children)
+            return root;
+        }
+
+        private void SetComponentsReadOnly(bool readOnly)
+        {
+            var inspectorEditorsList = root.parent.parent.parent;
+            
+            var componentsByName = target.GetComponents<Component>().ToDictionary(ObjectNames.GetInspectorTitle);
+            var componentsCount = 0;
+
+            foreach (var editor in inspectorEditorsList.Children())
             {
-                EditorGUILayout.BeginHorizontal();
-                
-                EditorGUI.BeginChangeCheck();
-                GUILayout.Toggle(child.activeSelf, GUIContent.none);
-                if (EditorGUI.EndChangeCheck())
-                    child.SetActive(!child.activeSelf);
-                
-                EditorGUILayout.ObjectField(child, typeof(GameObject), true);
-                EditorGUILayout.EndHorizontal();
+                var header = editor[0];
+                var componentName = header.name.TrimEnd("Header".ToCharArray());
+
+                if (componentsByName.TryGetValue(componentName, out var component))
+                {
+                    if (component.GetType() == typeof(Collection))
+                        continue;
+
+                    componentsCount++;
+                    SetDisabledGroup(editor, readOnly);
+                }
             }
 
-            if (children.Length == 0)
+            if (componentsCount == 0)
+                readOnly = false;
+
+            var componentButton = inspectorEditorsList.parent.Query(className: "unity-inspector-add-component-button").First();
+            
+            componentButton.SetEnabled(!readOnly);
+
+
+            if (componentsWarning == null)
             {
-                EditorStyles.label.fontSize += 2;
-                GUILayout.Label(folderIsEmpty);
-                EditorStyles.label.fontSize -= 2;
+                componentsWarning = new HelpBox(
+                "Collection and components are stripped during build process.\n" +
+                "Use \"Keep Transform Hierarchy\" to keep this object in build.\n", HelpBoxMessageType.Error)
+                {
+                    name = "ComponentsWarning", style = { flexDirection = FlexDirection.Row }
+                };
+
+                componentsWarning.Query<Label>().First().style.fontSize = 11;
+                
+                componentsWarning.style.borderTopLeftRadius = 6;
+                componentsWarning.style.borderTopRightRadius = 6;
+                componentsWarning.style.borderBottomLeftRadius = 6;
+                componentsWarning.style.borderBottomRightRadius = 6;
+                
+                //componentsWarning.Add(new Image { image = IconContent("console.erroricon.sml").image, style = { alignSelf = Align.FlexStart }});
+                //componentsWarning.Add(new TextElement
+                //{
+                //    text = "Attached components will be stripped during build process.\n" +
+                //           "Enable \"Keep Transform Hierarchy\" so it works like regular GameObject.\n" +
+                //           "Use only when you know that transform overhead is doable."
+                //});
             }
 
-            serializedObject.ApplyModifiedProperties();
+            if (readOnly)
+                root.Add(componentsWarning);
+            else
+                componentsWarning.RemoveFromHierarchy();
+        }
+        
+        private VisualElement SetDisabledGroup(VisualElement target, bool disabled)
+        {
+            var disabledGroup = target.Query(className: "disabled-group").First();
+            
+            if (disabledGroup == null && disabled)
+            {
+                disabledGroup = new VisualElement { style = {
+                    position = Position.Absolute,
+                    top = 0, left = 0, right = 0, bottom = 0,
+                    backgroundColor = new Color(0.23f, 0.23f, 0.23f, 0.5f)
+                }};
+                disabledGroup.pickingMode = PickingMode.Ignore;
+                disabledGroup.AddToClassList("disabled-group");
+                target.Add(disabledGroup);
+            }
+            else if (disabledGroup != null && !disabled)
+            {
+                disabledGroup.RemoveFromHierarchy();
+            }
+
+            return disabledGroup;
         }
     }
 }
