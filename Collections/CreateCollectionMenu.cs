@@ -18,14 +18,28 @@ namespace AV.Hierarchy
                 return;
         
             EditorApplication.delayCall += () => isExecuted = false;
-        
-            var folder = new GameObject("New Collection", typeof(Collection));
-            Undo.RegisterCreatedObjectUndo(folder, "Create Collection");
-
+            
             var selections = Selection.gameObjects;
 
             if (selections.Length > 0)
             {
+                if (selections.Length == 1)
+                {
+                    var components = selections[0].GetComponents<Component>();
+                    var mainComponent = Components.ChooseMainComponent(components);
+
+                    if (!mainComponent || mainComponent is Transform)
+                    {
+                        Undo.AddComponent<Collection>(selections[0]);
+                        isExecuted = true;
+                        return;
+                    }
+                }
+            
+                var folder = new GameObject("New Collection", typeof(Collection));
+                Undo.RegisterCreatedObjectUndo(folder, "Create Collection");
+
+            
                 selections = selections
                     .OrderBy(x => x.transform.GetSiblingIndex()).Reverse().ToArray();
                 
@@ -51,6 +65,7 @@ namespace AV.Hierarchy
                 SmartHierarchy.lastHierarchy.window.FrameObject(firstSelection.GetInstanceID());
                 Selection.activeGameObject = folder;
             }
+            
             isExecuted = true;
         }
     }
