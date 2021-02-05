@@ -58,6 +58,12 @@ namespace AV.Hierarchy
 
         private static bool TryGetNamingByComponent(Component component, out string naming)
         {
+            if (component == null)
+            {
+                naming = "";
+                return false;
+            }
+
             var type = component.GetType();
             var baseType = type.BaseType;
                 
