@@ -21,6 +21,7 @@ namespace AV.Hierarchy
         private static class Reflected
         {
             public static Type gameObjectInspectorType;
+            public static Type inspectorWindowType;
             // Need this to hide GameObject editor in inspector
             public static FieldInfo hideInspector;
             
@@ -30,7 +31,7 @@ namespace AV.Hierarchy
             static Reflected()
             {
                 gameObjectInspectorType = typeof(Editor).Assembly.GetType("UnityEditor.GameObjectInspector");
-                var inspectorWindowType = typeof(Editor).Assembly.GetType("UnityEditor.InspectorWindow");
+                inspectorWindowType = typeof(Editor).Assembly.GetType("UnityEditor.InspectorWindow");
 
                 var getAllInspectorsMethod = inspectorWindowType.GetMethod("GetAllInspectorWindows",
                     BindingFlags.NonPublic | BindingFlags.Static);
@@ -43,6 +44,9 @@ namespace AV.Hierarchy
                         BindingFlags.NonPublic | BindingFlags.Instance);
             }
         }
+        
+        private static StyleSheet helpBoxStyle;
+
 
         private SerializedProperty keepHierarchy;
         
@@ -52,7 +56,11 @@ namespace AV.Hierarchy
         private GameObject[] children;
 
         private VisualElement root;
+        private VisualElement editorsList;
         private VisualElement componentsWarning;
+
+        private int editorsCount;
+        
 
         [DidReloadScripts]
         private static void DidReloadScripts()
@@ -64,8 +72,6 @@ namespace AV.Hierarchy
         
         private void OnEnable()
         {
-            keepHierarchy = serializedObject.FindProperty("keepTransformHierarchy");
-            
             target = (base.target as Collection).transform;
             targets = new Transform[base.targets.Length];
             for (int i = 0; i < targets.Length; i++)
@@ -92,6 +98,7 @@ namespace AV.Hierarchy
             {
                 if (target == null)
                     return;
+                    
                 // Show transform when folder component is removed
                 if (!target.TryGetComponent<Collection>(out _))
                     target.hideFlags ^= HideFlags.HideInInspector;
@@ -116,7 +123,7 @@ namespace AV.Hierarchy
                     
                     foreach (var gameObjectInspector in Resources.FindObjectsOfTypeAll(Reflected.gameObjectInspectorType))
                     {
-                        var goEditor = gameObjectInspector as UnityEditor.Editor;
+                        var goEditor = gameObjectInspector as Editor;
                         var gameObject = goEditor.target as GameObject;
 
                         // Hide GameObject inspector only for folders
@@ -131,76 +138,100 @@ namespace AV.Hierarchy
 
         public override VisualElement CreateInspectorGUI()
         {
+            if (helpBoxStyle == null)
+                helpBoxStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>(AssetDatabase.GUIDToAssetPath("d23f3b0d4e030dc43a7d023bc53a5508"));
+        
+            keepHierarchy = serializedObject.FindProperty("keepTransformHierarchy");
+        
             root = new VisualElement { style = { paddingTop = 12, paddingBottom = 5 } };
 
             // TODO: Tooltip doesn't work?!
             var keepHierarchyField = new PropertyField(keepHierarchy) { tooltip = keepHierarchy.tooltip };
             root.Add(keepHierarchyField);
             
-            root.RegisterCallback<ChangeEvent<bool>>(_ => SetComponentsReadOnly(!keepHierarchy.boolValue));
-
-            // TODO: Find any better callback for initialization
-            EditorApplication.delayCall += () => SetComponentsReadOnly(!keepHierarchy.boolValue);
+            root.RegisterCallback<ChangeEvent<bool>>(_ => SetComponentsDisabled(!keepHierarchy.boolValue));
+            root.RegisterCallback<AttachToPanelEvent>(_ => OnInspectorInitialize());
             
             return root;
         }
 
-        private void SetComponentsReadOnly(bool readOnly)
+        private void OnInspectorInitialize()
         {
-            var inspectorEditorsList = root.parent.parent.parent;
-            
-            var componentsByName = target.GetComponents<Component>().ToDictionary(ObjectNames.GetInspectorTitle);
+        #if UNITY_2019_3 || UNITY_2019_4
+            var inspectors = Resources.FindObjectsOfTypeAll(Reflected.inspectorWindowType);
+            foreach (EditorWindow inspector in inspectors)
+                inspector.SetAntiAliasing(8);
+        #endif
+        
+            editorsList = root.parent.parent.parent;
+            editorsList.RegisterCallback<GeometryChangedEvent>(OnEditorsListChange);
+        }
+
+        private void OnDisable()
+        {
+            editorsList?.UnregisterCallback<GeometryChangedEvent>(OnEditorsListChange);
+        }
+
+        private void OnEditorsListChange(GeometryChangedEvent evt)
+        {
+            if (editorsCount == editorsList.childCount)
+                return;
+                    
+            editorsCount = editorsList.childCount;
+            SetComponentsDisabled(!keepHierarchy.boolValue);
+        }
+
+        private void SetComponentsDisabled(bool disabled)
+        {
+            var componentsByName = target.GetComponents<Component>().Where(c => c != null).ToDictionary(ObjectNames.GetInspectorTitle);
             var componentsCount = 0;
 
-            foreach (var editor in inspectorEditorsList.Children())
+            foreach (var editor in editorsList.Children())
             {
                 var header = editor[0];
-                var componentName = header.name.TrimEnd("Header".ToCharArray());
-
+                var componentName = header.name;
+                
+                if (componentName.EndsWith("Header"))
+                    componentName = componentName.Remove(componentName.Length - 6, 6);
+                
                 if (componentsByName.TryGetValue(componentName, out var component))
                 {
                     if (component.GetType() == typeof(Collection))
                         continue;
 
                     componentsCount++;
-                    SetDisabledGroup(editor, readOnly);
+                    SetDisabledGroup(editor, disabled);
                 }
             }
 
             if (componentsCount == 0)
-                readOnly = false;
+                disabled = false;
 
-            var componentButton = inspectorEditorsList.parent.Query(className: "unity-inspector-add-component-button").First();
+            var componentButton = editorsList.parent.Query(className: "unity-inspector-add-component-button").First();
             
-            componentButton.SetEnabled(!readOnly);
+            componentButton.SetEnabled(!disabled);
 
 
             if (componentsWarning == null)
             {
-                componentsWarning = new HelpBox(
-                "Collection and components are stripped during build process.\n" +
-                "Use \"Keep Transform Hierarchy\" to keep this object in build.\n", HelpBoxMessageType.Error)
+                componentsWarning = new VisualElement { name = "ComponentsWarning" };
+                
+                componentsWarning.style.SetBorderColor(isProSkin ? new Color(0, 0, 0, 0.5f) : new Color(0.33f, 0.33f, 0.33f, 0.5f));
+                componentsWarning.styleSheets.Add(helpBoxStyle);
+                
+                componentsWarning.Add(new Image { name = "Icon", image = IconContent("console.erroricon").image });
+                componentsWarning.Add(new TextElement
                 {
-                    name = "ComponentsWarning", style = { flexDirection = FlexDirection.Row }
-                };
-
-                componentsWarning.Query<Label>().First().style.fontSize = 11;
-                
-                componentsWarning.style.borderTopLeftRadius = 6;
-                componentsWarning.style.borderTopRightRadius = 6;
-                componentsWarning.style.borderBottomLeftRadius = 6;
-                componentsWarning.style.borderBottomRightRadius = 6;
-                
-                //componentsWarning.Add(new Image { image = IconContent("console.erroricon.sml").image, style = { alignSelf = Align.FlexStart }});
-                //componentsWarning.Add(new TextElement
-                //{
-                //    text = "Attached components will be stripped during build process.\n" +
-                //           "Enable \"Keep Transform Hierarchy\" so it works like regular GameObject.\n" +
-                //           "Use only when you know that transform overhead is doable."
-                //});
+                    name = "Warning",
+                    text = "Collection and components are stripped during build process.\n" +
+                           "Use \"Keep Transform Hierarchy\" to keep this object in build.\n",
+                    #if UNITY_2019_3 || UNITY_2019_4
+                    style = { marginBottom = -10 }
+                    #endif
+                });
             }
 
-            if (readOnly)
+            if (disabled)
                 root.Add(componentsWarning);
             else
                 componentsWarning.RemoveFromHierarchy();
@@ -215,8 +246,9 @@ namespace AV.Hierarchy
                 disabledGroup = new VisualElement { style = {
                     position = Position.Absolute,
                     top = 0, left = 0, right = 0, bottom = 0,
-                    backgroundColor = new Color(0.23f, 0.23f, 0.23f, 0.5f)
+                    backgroundColor = isProSkin ? new Color(0.23f, 0.23f, 0.23f, 0.5f) : new Color(0.77f, 0.77f, 0.77f, 0.5f)
                 }};
+                
                 disabledGroup.pickingMode = PickingMode.Ignore;
                 disabledGroup.AddToClassList("disabled-group");
                 target.Add(disabledGroup);

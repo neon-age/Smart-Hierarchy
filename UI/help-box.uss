@@ -1,0 +1,21 @@
+﻿
+#ComponentsWarning {
+    border-radius: 6;
+    border-width: 1;
+    border-color: rgba(0, 0, 0, 0.45);
+    background-color: rgba(125, 125, 125, 0.075);
+    padding: 4;
+    font-size: 11;
+    flex-direction: row;
+}
+
+#Icon {
+    align-self: flex-start;
+    margin-right: 2;
+    margin-bottom: -2;
+}
+
+#Warning {
+    align-self: center;
+    opacity: 0.9;
+}
