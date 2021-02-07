@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
+using UnityEditorInternal;
 using UnityEngine;
 
 namespace AV.Hierarchy
@@ -20,26 +21,25 @@ namespace AV.Hierarchy
             EditorApplication.delayCall += () => isExecuted = false;
             
             var selections = Selection.gameObjects;
+            
+            if (selections.Length == 1)
+            {
+                var components = selections[0].GetComponents<Component>();
+                var mainComponent = Components.ChooseMainComponent(components);
+            
+                if (!mainComponent || mainComponent is Transform)
+                {
+                    Undo.AddComponent<Collection>(selections[0]);
+                    isExecuted = true;
+                    return;
+                }
+            }
+            
+            var folder = new GameObject("New Collection", typeof(Collection));
+            Undo.RegisterCreatedObjectUndo(folder, "Create Collection");
 
             if (selections.Length > 0)
             {
-                if (selections.Length == 1)
-                {
-                    var components = selections[0].GetComponents<Component>();
-                    var mainComponent = Components.ChooseMainComponent(components);
-
-                    if (!mainComponent || mainComponent is Transform)
-                    {
-                        Undo.AddComponent<Collection>(selections[0]);
-                        isExecuted = true;
-                        return;
-                    }
-                }
-            
-                var folder = new GameObject("New Collection", typeof(Collection));
-                Undo.RegisterCreatedObjectUndo(folder, "Create Collection");
-
-            
                 selections = selections
                     .OrderBy(x => x.transform.GetSiblingIndex()).Reverse().ToArray();
                 
