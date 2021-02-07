@@ -79,8 +79,6 @@ namespace AV.Hierarchy
             
             container.style.left = rect.x;
             container.style.top = rect.y;
-
-            container.MarkDirtyRepaint();
         }
     }
 }
