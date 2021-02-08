@@ -48,11 +48,20 @@ namespace AV.Hierarchy
             EditorGUI.DrawPreviewTexture(position, texture, iconMaterial);
         }
         
-        public static bool OnIconClick(Rect rect)
+        public static bool OnClick(Rect rect)
         {
             var iconRect = new Rect(rect) { width = rect.height, height = rect.height };
 
-            return GUI.Button(iconRect, GUIContent.none, GUIStyle.none);
+            var clicked = iconRect.Contains(Event.current.mousePosition) &&
+                        Event.current.type == EventType.MouseDown &&
+                        Event.current.button == 0;
+            
+            if (clicked)
+            {
+                Event.current.Use();
+                return true;
+            }
+            return false;
         }
     }
 }

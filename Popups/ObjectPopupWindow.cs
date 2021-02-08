@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -12,8 +13,9 @@ namespace AV.Hierarchy
         private static StyleSheet styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(AssetDatabase.GUIDToAssetPath("d7461833a510d124191fbed727ac19f0"));
         private static Texture2D arrowIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath("70cf301939ec64147b3b646ec72c2cf2"));
 
-        private static ObjectPopupWindow current;
-        
+        private static ObjectPopupWindow active;
+        private static Dictionary<Type, ObjectPopupWindow> activePopups = new Dictionary<Type, ObjectPopupWindow>();
+
         public string title
         {
             get => titleText.text;
@@ -22,6 +24,8 @@ namespace AV.Hierarchy
         public VisualElement titleContainer { get; }
         public override VisualElement contentContainer { get; }
 
+        public override bool canGrabFocus => true;
+
         private TextElement titleText;
         private VisualElement contextArrow;
 
@@ -29,6 +33,7 @@ namespace AV.Hierarchy
         private VisualElement root;
 
         private Color backgroundColor => isProSkin ? new Color32(35, 35, 35, 230) : new Color32(165, 165, 165, 230);
+        
         
         protected ObjectPopupWindow()
         {
@@ -50,6 +55,14 @@ namespace AV.Hierarchy
             hierarchy.Add(titleContainer);
             hierarchy.Add(CreateSeparator());
             hierarchy.Add(contentContainer);
+
+            activePopups.Add(GetType(), this);
+        }
+
+        public static T GetPopup<T>() where T : ObjectPopupWindow
+        {
+            activePopups.TryGetValue(typeof(T), out var popup);
+            return (T)popup;
         }
 
         public VisualElement CreateSeparator()
@@ -59,17 +72,17 @@ namespace AV.Hierarchy
             return separator;
         }
 
-        public static void Close()
+        public void Close()
         {
-            current?.RemoveFromHierarchy();
+            RemoveFromHierarchy();
+            activePopups.Remove(GetType());
         }
-
+        
         public void ShowInsideWindow(Vector2 position, VisualElement root)
         {
-            if (current != null)
-                current.RemoveFromHierarchy();
+            active?.RemoveFromHierarchy();
 
-            current = this;
+            active = this;
             
             position.x -= 7;
             position.y -= 5;
@@ -79,13 +92,13 @@ namespace AV.Hierarchy
             
             root.Add(this);
             
-            RegisterCallback<MouseDownEvent>(evt => evt.StopImmediatePropagation());
-            RegisterCallback<ContextClickEvent>(evt => evt.StopImmediatePropagation());
-            
+            GUI.SetNextControlName("PopupElement");
+            GUI.FocusControl("PopupElement");
             Focus();
             
             root.RegisterCallback<GeometryChangedEvent>(OnRootGeometryChange);
             RegisterCallback<GeometryChangedEvent>(OnGeometryChange);
+            RegisterCallback<FocusOutEvent>(evt => Close());
             
             style.top = position.y;
             

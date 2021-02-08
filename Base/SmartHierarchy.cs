@@ -46,7 +46,6 @@ namespace AV.Hierarchy
             hierarchy.ReassignCallbacks();
             
             guiContainer = root.parent.Query<IMGUIContainer>().First();
-            guiContainer.RegisterCallback<MouseDownEvent>(_ => ObjectPopupWindow.Close());
             
             // onGUIHandler is called after hierarchy GUI, thus has a slight delay
             guiContainer.onGUIHandler += OnAfterGUI;
@@ -157,12 +156,18 @@ namespace AV.Hierarchy
             
             if (item.isCollection)
             {
-                if (ViewItemGUI.OnIconClick(rect))
+                if (ViewItemGUI.OnClick(rect))
                 {
-                    var popup = new CollectionPopup(item.collection);
+                    var collectionPopup = ObjectPopupWindow.GetPopup<CollectionPopup>();
+                    if (collectionPopup == null)
+                    {
+                        var popup = new CollectionPopup(item.collection);
 
-                    var position = new Vector2(rect.x, rect.yMax - state.scrollPos.y + 32);
-                    popup.ShowInsideWindow(position, root);
+                        var position = new Vector2(rect.x, rect.yMax - state.scrollPos.y + 32);
+                        popup.ShowInsideWindow(position, root);
+                    }
+                    else
+                        collectionPopup.Close();
                 }
             }
 
@@ -180,9 +185,6 @@ namespace AV.Hierarchy
             
             // Makes sure other items like scene headers are not interrupted 
             controller.gui.ResetCustomStyling();
-            
-            if (EditorWindow.focusedWindow != actualWindow)
-                ObjectPopupWindow.Close();
             
             HandleKeyboard(); 
             
