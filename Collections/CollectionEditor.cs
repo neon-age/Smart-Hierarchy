@@ -49,6 +49,7 @@ namespace AV.Hierarchy
 
 
         private SerializedProperty keepHierarchy;
+        private SerializedProperty colorTag;
         
         private new Transform target;
         private new Transform[] targets;
@@ -142,8 +143,15 @@ namespace AV.Hierarchy
                 helpBoxStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>(AssetDatabase.GUIDToAssetPath("d23f3b0d4e030dc43a7d023bc53a5508"));
         
             keepHierarchy = serializedObject.FindProperty("keepTransformHierarchy");
+            colorTag = serializedObject.FindProperty("colorTag");
         
             root = new VisualElement { style = { paddingTop = 12, paddingBottom = 5 } };
+
+            var colorTagField = new PropertyField(colorTag);
+            colorTagField.RegisterValueChangeCallback(evt => EditorApplication.RepaintHierarchyWindow());
+            root.Add(colorTagField);
+            
+            root.Add(new VisualElement { style = { height = 2 } });
 
             // TODO: Tooltip doesn't work?!
             var keepHierarchyField = new PropertyField(keepHierarchy) { tooltip = keepHierarchy.tooltip };
@@ -162,6 +170,8 @@ namespace AV.Hierarchy
             foreach (EditorWindow inspector in inspectors)
                 inspector.SetAntiAliasing(8);
         #endif
+
+            root.Query<Label>().ForEach(label => label.style.width = 160);
         
             editorsList = root.parent.parent.parent;
             editorsList.RegisterCallback<GeometryChangedEvent>(OnEditorsListChange);
@@ -225,9 +235,9 @@ namespace AV.Hierarchy
                     name = "Warning",
                     text = "Collection and components are stripped during build process.\n" +
                            "Use \"Keep Transform Hierarchy\" to keep this object in build.\n",
-                    #if UNITY_2019_3 || UNITY_2019_4
+                    //#if UNITY_2019_3 || UNITY_2019_4
                     style = { marginBottom = -10 }
-                    #endif
+                    //#endif
                 });
             }
 

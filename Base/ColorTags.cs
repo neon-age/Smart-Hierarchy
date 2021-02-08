@@ -8,34 +8,34 @@ namespace AV.Hierarchy
     public enum ColorTag
     {
         // https://chir.ag/projects/name-that-color/
-        /// <summary>Silver, Emperor</summary>
-        UI, 
+        /// <summary>Silver / Emperor. UI</summary>
+        Gray, 
         /// <summary>
-        /// Burning Orange, Milano Red
+        /// Burning Orange / Milano Red. Navigation
         /// </summary>
-        Navigation,
+        Red,
         /// <summary>
-        /// Amber, Buddha Gold
+        /// Amber / Buddha Gold. Audio
         /// </summary>
-        Audio,
+        Orange,
         /// <summary>
-        /// Green Yellow, Sea Green
+        /// Green Yellow / Sea Green. Environment
         /// </summary>
-        Environment,
+        Green,
         /// <summary>
-        /// Aquamarine, Surfie Green
+        /// Aquamarine / Surfie Green. Animation
         /// </summary>
-        Animations,
+        Aquamarine,
         /// <summary>
-        /// Malibu, Denim
+        /// Malibu / Denim. Rendering
         /// </summary>
-        Rendering,
+        Blue,
         /// <summary>
-        /// Portage, Royal Purple
+        /// Portage / Royal Purple. Sprites
         /// </summary>
-        Sprites,
-        /// <summary>Light Orchid, Cerise</summary> 
-        Constraints, 
+        Purple,
+        /// <summary>Light Orchid / Cerise. Constraints</summary> 
+        Pink, 
     }
     
     public static class ColorTags
@@ -49,14 +49,14 @@ namespace AV.Hierarchy
                 colorTable = new Dictionary<ColorTag, (Color, Color)>
                 {
                     // Hex is taken from built-in icons
-                    {ColorTag.UI,          (Hex("#c3c3c3"), Hex("#555555"))}, 
-                    {ColorTag.Constraints, (Hex("#e58cda"), Hex("#cb247e"))}, 
-                    {ColorTag.Rendering,   (Hex("#80D6FD"), Hex("#0d6cca"))}, 
-                    {ColorTag.Navigation,  (Hex("#fc6d40"), Hex("#b00d0d"))},
-                    {ColorTag.Sprites,     (Hex("#ae90f2"), Hex("#673ab6"))},
-                    {ColorTag.Animations,  (Hex("#7ffde4"), Hex("#107685"))},
-                    {ColorTag.Audio,       (Hex("#FDC008"), Hex("#c89601"))},
-                    {ColorTag.Environment, (Hex("#b1fd59"), Hex("#2f7d33"))},
+                    {ColorTag.Gray,       (Hex("#c3c3c3"), Hex("#555555"))}, 
+                    {ColorTag.Pink,       (Hex("#e58cda"), Hex("#cb247e"))}, 
+                    {ColorTag.Blue,       (Hex("#80D6FD"), Hex("#0d6cca"))}, 
+                    {ColorTag.Red,        (Hex("#fc6d40"), Hex("#b00d0d"))},
+                    {ColorTag.Purple,     (Hex("#ae90f2"), Hex("#673ab6"))},
+                    {ColorTag.Aquamarine, (Hex("#7ffde4"), Hex("#107685"))},
+                    {ColorTag.Orange,     (Hex("#FDC008"), Hex("#c89601"))},
+                    {ColorTag.Green,      (Hex("#b1fd59"), Hex("#2f7d33"))},
                 };
             }
 
