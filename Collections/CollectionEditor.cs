@@ -147,8 +147,8 @@ namespace AV.Hierarchy
         
             root = new VisualElement { style = { paddingTop = 12, paddingBottom = 5 } };
 
-            var colorTagField = new PropertyField(colorTag);
-            colorTagField.RegisterValueChangeCallback(evt => EditorApplication.RepaintHierarchyWindow());
+            var colorTagField = new EnumField("Color Tag") { bindingPath = colorTag.propertyPath };
+            colorTagField.RegisterValueChangedCallback(evt => EditorApplication.RepaintHierarchyWindow());
             root.Add(colorTagField);
             
             root.Add(new VisualElement { style = { height = 2 } });
