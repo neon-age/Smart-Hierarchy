@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
@@ -128,10 +129,72 @@ namespace AV.Hierarchy
         private void OnBeforeGUI()
         {
             hierarchy.EnsureValidData();
-            
+
             ItemsData.TryGetValue(hoveredItemId, out hoveredItem);
 
+            ExecuteCommands();
             HideDefaultIcon();
+        }
+
+        private void ExecuteCommands()
+        {
+            if (evt.type != EventType.ExecuteCommand && evt.type != EventType.ValidateCommand)
+                return;
+            
+            var execute = evt.type == EventType.ExecuteCommand;
+            var selections = Selection.transforms;
+            var lastSiblingIndex = 0;
+            
+            if (evt.commandName == "Paste")
+            {
+                if (execute)
+                {
+                    SortSelection();
+                    hierarchy.PasteGO();
+                    SetSiblingsInPlaceAndFrame(lastSiblingIndex, Selection.transforms);
+                }
+                Use();
+            }
+            else if (evt.commandName == "Duplicate")
+            {
+                if (execute)
+                {
+                    SortSelection();
+                    hierarchy.DuplicateGO();
+                    SetSiblingsInPlaceAndFrame(lastSiblingIndex, Selection.transforms);
+                }
+                Use();
+            }
+
+            void SetSiblingsInPlaceAndFrame(int index, IEnumerable<Transform> transforms)
+            {
+                transforms = OrderSiblingsAndSetInPlace(index, transforms);
+                
+                window.FrameObject(transforms.Reverse().Last().gameObject.GetInstanceID());
+                ImmediateRepaint();
+            }
+            
+            void SortSelection()
+            {
+                selections = selections.OrderBy(x => x.transform.GetSiblingIndex()).ToArray();
+                lastSiblingIndex = selections.Last().GetSiblingIndex() + 1;
+            }
+
+            IEnumerable<Transform> OrderSiblingsAndSetInPlace(int index, IEnumerable<Transform> transforms)
+            {
+                transforms = transforms.OrderBy(x => x.transform.GetSiblingIndex()).Reverse();
+                foreach (var transform in transforms)
+                {
+                    transform.SetSiblingIndex(index);
+                    yield return transform;
+                }
+            }
+
+            void Use()
+            {
+                evt.Use();
+                GUIUtility.ExitGUI();
+            }
         }
         
         private void OnItemGUI(int id, Rect rect)
@@ -140,7 +203,7 @@ namespace AV.Hierarchy
 
             if (!instance)
                 return;
-
+                
             GetInstanceViewItem(id, instance, rect, out var item);
             
             // Happens to be null when entering prefab mode
@@ -182,7 +245,7 @@ namespace AV.Hierarchy
         {
             if (!prefs.enableSmartHierarchy)
                 return;
-            
+
             // Makes sure other items like scene headers are not interrupted 
             controller.gui.ResetCustomStyling();
             
