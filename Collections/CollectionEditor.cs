@@ -206,7 +206,7 @@ namespace AV.Hierarchy
                 
                 if (componentsByName.TryGetValue(componentName, out var component))
                 {
-                    if (component.GetType() == typeof(Collection))
+                    if (component is Collection || component is Transform)
                         continue;
 
                     componentsCount++;
