@@ -8,7 +8,7 @@ using UnityEngine;
 namespace AV.Hierarchy
 {
     [Serializable]
-    internal class TypesPriority
+    internal class TypesPriority : ISerializationCallbackReceiver
     {
         [Serializable]
         public class TypeItem
@@ -46,6 +46,12 @@ namespace AV.Hierarchy
         };
         
         private Dictionary<Type, TypeItem> lookup = new Dictionary<Type, TypeItem>();
+
+        public void OnBeforeSerialize() {}
+        public void OnAfterDeserialize()
+        {
+            Initialize();
+        }
 
         public void Initialize()
         {

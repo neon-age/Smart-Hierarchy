@@ -58,8 +58,6 @@ namespace AV.Hierarchy
 
         private void Initialize()
         {
-            prefs.componentsPriority.Initialize();
-            
             wantsToShowPreview = prefs.enableHoverPreview;
             requiresGUISetup = true;
         }
