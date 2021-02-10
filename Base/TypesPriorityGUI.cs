@@ -46,35 +46,34 @@ namespace AV.Hierarchy
 
             List.drawElementCallback = (rect, index, active, focused) =>
             {
-                rect.y += 2;
-                
-                var item = typesProperty.GetArrayElementAtIndex(index);
-                var assemblyName = item.FindPropertyRelative("assemblyQualifiedName");
-                var name = item.FindPropertyRelative("fullName");
-                var displayName = name.stringValue;
-                var hasName = !string.IsNullOrEmpty(displayName);
-
                 if (miniPullDown == null)
                 {
-                    miniPullDown = new GUIStyle("MiniPullDown")
-                    {
-                        fontSize = 11
-                    };
+                    miniPullDown = new GUIStyle("MiniPullDown") { fontSize = 11 };
                     var textColor = miniPullDown.normal.textColor;
                     textColor.a = 0.9f;
                     miniPullDown.normal.textColor = textColor;
                 }
+            
+                var item = typesProperty.GetArrayElementAtIndex(index);
+                
+                var assemblyName = item.FindPropertyRelative("assemblyQualifiedName");
+                var fullName = item.FindPropertyRelative("fullName");
+                
+                var displayName = fullName.stringValue;
+                var hasName = !string.IsNullOrEmpty(displayName);
 
                 if (hasName && !displayNames.TryGetValue(item, out displayName))
                 {
-                    displayName = name.stringValue.Replace("UnityEngine.", " ");
+                    displayName = fullName.stringValue.Replace("UnityEngine.", " ");
                     displayNames[item] = displayName;
                 }
 
                 tempContent.text = hasName ? displayName : "None";
-                tempContent.image = ScriptIcons.GetIcon(name.stringValue);
+                tempContent.image = ScriptIcons.GetIcon(fullName.stringValue);
 
                 EditorGUIUtility.SetIconSize(new Vector2(16, 16));
+                
+                rect.y += 2;
 
                 if (GUI.Button(rect, tempContent, miniPullDown))
                 {
@@ -87,20 +86,28 @@ namespace AV.Hierarchy
                     var popup = ScriptableObject.CreateInstance<TypeSearchPopup>();
                     popup.Initialize(componentTypes, type =>
                     {
-                        name.stringValue = type.FullName;
+                        fullName.stringValue = type.FullName;
                         assemblyName.stringValue = type.AssemblyQualifiedName;
-                        property.serializedObject.ApplyModifiedProperties();
+                        SaveChanges();
                     });
                     SearchWindow.Open(context, popup);
                 }
             };
 
             List.onChangedCallback += _ => SaveChanges();
-            List.onReorderCallback += _ => SaveChanges();
-
+            
             void SaveChanges()
             {
-                property.serializedObject.ApplyModifiedProperties();
+                // I've spent hours trying to figure why reordering/value change didn't trigger saving.
+                
+                // ApplyModifiedProperties on this array doesn't work unless you insert new element into it.
+                // And this stupid fix makes it work! God save me.
+                
+                typesProperty.InsertArrayElementAtIndex(typesProperty.arraySize - 1);
+                typesProperty.serializedObject.ApplyModifiedProperties();
+                typesProperty.DeleteArrayElementAtIndex(typesProperty.arraySize - 1);
+                typesProperty.serializedObject.ApplyModifiedProperties();
+                
                 onChange?.Invoke();
             }
         }

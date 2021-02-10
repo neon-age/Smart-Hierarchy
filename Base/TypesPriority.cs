@@ -28,6 +28,11 @@ namespace AV.Hierarchy
                 if (Type != null)
                     fullName = Type.FullName;
             }
+
+            public override string ToString()
+            {
+                return Type.AssemblyQualifiedName;
+            }
         }
         
         [SerializeField] private List<TypeItem> types = new List<TypeItem>
@@ -35,7 +40,9 @@ namespace AV.Hierarchy
             "UnityEngine.Canvas, UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
             "UnityEngine.Camera, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
             "UnityEngine.Light, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
-            "UnityEngine.ParticleSystem, UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+            "UnityEngine.ParticleSystem, UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+            "UnityEngine.Collider, UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+            "UnityEngine.MeshFilter, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
         };
         
         private Dictionary<Type, TypeItem> lookup = new Dictionary<Type, TypeItem>();

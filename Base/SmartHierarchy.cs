@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
+using UnityEditor.SceneManagement;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
@@ -13,7 +15,7 @@ namespace AV.Hierarchy
         internal static HierarchyPreferences prefs => HierarchySettingsProvider.Preferences;
         internal static Event evt => Event.current;
         internal static SmartHierarchy lastHierarchy;
-        
+
         internal SceneHierarchyWindow window { get; }
         internal SceneHierarchy hierarchy => window.hierarchy;
         internal TreeViewState state => hierarchy.state;
@@ -71,10 +73,11 @@ namespace AV.Hierarchy
         private void RegisterCallbacks()
         {
             HierarchySettingsProvider.onChange += OnSettingsChange;
-            
+
             Selection.selectionChanged += ReloadView;
             hierarchy.onVisibleRowsChanged += ReloadView;
             EditorApplication.hierarchyChanged += ReloadView;
+            EditorApplication.playModeStateChanged += change => Initialize();
         }
 
         private void OnSettingsChange()
