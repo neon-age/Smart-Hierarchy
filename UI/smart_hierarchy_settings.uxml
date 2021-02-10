@@ -1,4 +1,4 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <ui:Label text="Smart Hierarchy" name="Title" style="font-size: 19px; -unity-font-style: bold;" />
     <ui:ScrollView>
         <ui:Toggle label="Enable Extension" binding-path="enableSmartHierarchy" />
@@ -6,12 +6,14 @@
             <uie:EnumField label="Effective Icon" binding-path="effectiveIcon" tooltip="Main component icon that is shown instead of GameObject or Prefab icon." />
             <uie:EnumField label="Transform Icon" binding-path="transformIcon" />
         </ui:Foldout>
-        <ui:Foldout text="Folders" name="Folders">
+        <ui:Foldout text="Commands" name="Commands">
+            <uie:EnumField label="Paste Object Place" binding-path="copyPastePlace" />
+        </ui:Foldout>
+        <ui:Foldout text="Collections" name="Collections">
             <ui:Toggle label="Keep In Playmode" binding-path="keepFoldersInPlaymode" />
         </ui:Foldout>
         <ui:Foldout text="Objects Preview" name="ObjectsPreview">
             <ui:Toggle label="Enable Preview" />
-            <ui:Toggle label="Always Show Preview" binding-path="enableHoverPreview" />
             <uie:EnumField label="Preview Key" binding-path="previewKey" />
         </ui:Foldout>
         <ui:Foldout text="Components" name="Components">

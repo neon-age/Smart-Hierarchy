@@ -2,6 +2,7 @@
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UIElements;
 
 namespace AV.Hierarchy
@@ -11,6 +12,14 @@ namespace AV.Hierarchy
         Never,
         OnAnyObject,
         NotOnPrefabs
+    }
+    internal enum CopyPastePlace
+    {
+        [InspectorName("After Selection (Recommended)")]
+        AfterSelection,
+        BeforeSelection,
+        [InspectorName("Last Sibling (Unity Default)")]
+        LastSibling
     }
     internal enum TransformIcon
     {
@@ -33,11 +42,13 @@ namespace AV.Hierarchy
         
         public StickyIcon effectiveIcon = StickyIcon.NotOnPrefabs;
         public TransformIcon transformIcon = TransformIcon.OnUniqueOrigin;
+
+        public CopyPastePlace copyPastePlace;
         
-        public bool keepFoldersInPlaymode;
+        [FormerlySerializedAs("keepFoldersInPlaymode")] 
+        public bool keepCollectionsInPlaymode;
         
         public bool enableHoverPreview;
-        public bool alwaysShowPreview;
         public ModificationKey previewKey;
 
         public bool preferLastComponent = true;
