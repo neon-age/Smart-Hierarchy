@@ -62,7 +62,7 @@ namespace AV.Hierarchy
                 collection.name = CollectionNaming.ChooseCollectionName(firstSelection);
                 collection.transform.SetSiblingIndex(folderSibling);
                 
-                SmartHierarchy.lastHierarchy.window.FrameObject(firstSelection.GetInstanceID());
+                SmartHierarchy.active.window.FrameObject(firstSelection.GetInstanceID());
             }
             
             Selection.activeGameObject = collection;

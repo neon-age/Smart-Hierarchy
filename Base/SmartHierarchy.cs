@@ -14,7 +14,7 @@ namespace AV.Hierarchy
     {
         internal static HierarchyPreferences prefs => HierarchySettingsProvider.Preferences;
         internal static Event evt => Event.current;
-        internal static SmartHierarchy lastHierarchy;
+        internal static SmartHierarchy active { get; private set; }
 
         internal SceneHierarchyWindow window { get; }
         internal SceneHierarchy hierarchy => window.hierarchy;
@@ -100,9 +100,9 @@ namespace AV.Hierarchy
             if (!prefs.enableSmartHierarchy)
                 return;
             
-            lastHierarchy = HierarchyInitialization.GetLastHierarchy();
+            active = HierarchyInitialization.GetLastHierarchy();
 
-            lastHierarchy.OnItemCallback(id, rect);
+            active.OnItemCallback(id, rect);
         }
 
         private void OnItemCallback(int id, Rect rect)
@@ -133,80 +133,10 @@ namespace AV.Hierarchy
 
             ItemsData.TryGetValue(hoveredItemId, out hoveredItem);
 
-            ExecuteCommands();
+            CopyPasteCommands.ExecuteCommands();
             HideDefaultIcon();
         }
-
-        private void ExecuteCommands()
-        {
-            if (evt.type != EventType.ExecuteCommand && evt.type != EventType.ValidateCommand)
-                return;
-
-            if (prefs.copyPastePlace == CopyPastePlace.LastSibling)
-                return;
-            
-            var execute = evt.type == EventType.ExecuteCommand;
-            var selections = Selection.transforms;
-            var lastSiblingIndex = 0;
-            
-            if (evt.commandName == "Paste")
-            {
-                if (execute)
-                {
-                    SortSelection();
-                    hierarchy.PasteGO();
-                    SetSiblingsInPlaceAndFrame(lastSiblingIndex, Selection.transforms);
-                }
-                Use();
-            }
-            else if (evt.commandName == "Duplicate")
-            {
-                if (execute)
-                {
-                    SortSelection();
-                    hierarchy.DuplicateGO();
-                    SetSiblingsInPlaceAndFrame(lastSiblingIndex, Selection.transforms);
-                }
-                Use();
-            }
-
-            void SetSiblingsInPlaceAndFrame(int index, IEnumerable<Transform> transforms)
-            {
-                transforms = OrderSiblingsAndSetInPlace(index, transforms);
-                var objectToFrame = prefs.copyPastePlace == CopyPastePlace.AfterSelection ? 
-                                    transforms.Reverse().Last() :
-                                    transforms.Last();
-                
-                window.FrameObject(objectToFrame.GetInstanceID());
-                ImmediateRepaint();
-            }
-            
-            void SortSelection()
-            {
-                selections = selections.OrderBy(x => x.transform.GetSiblingIndex()).ToArray();
-                
-                lastSiblingIndex = prefs.copyPastePlace == CopyPastePlace.AfterSelection ? 
-                                   selections.Last().GetSiblingIndex() + 1 : 
-                                   selections.First().GetSiblingIndex();
-            }
-
-            IEnumerable<Transform> OrderSiblingsAndSetInPlace(int index, IEnumerable<Transform> transforms)
-            {
-                transforms = transforms.OrderBy(x => x.transform.GetSiblingIndex()).Reverse();
-                
-                foreach (var transform in transforms)
-                {
-                    transform.SetSiblingIndex(index);
-                    yield return transform;
-                }
-            }
-
-            void Use()
-            {
-                evt.Use();
-                GUIUtility.ExitGUI();
-            }
-        }
+        
         
         private void OnItemGUI(int id, Rect rect)
         {
