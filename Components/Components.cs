@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 using static UnityEditor.EditorGUIUtility;
 
@@ -7,6 +8,8 @@ namespace AV.Hierarchy
 {
     internal class Components
     {
+        private static readonly Texture2D nullComponentIcon = IconContent("DefaultAsset Icon").image as Texture2D;
+    
         public readonly Component main;
         public readonly Texture2D icon;
         private readonly List<ComponentData> data;
@@ -20,14 +23,18 @@ namespace AV.Hierarchy
 
             foreach (var component in components)
             {
-                // TODO: Show null component in hierarchy
-                if (component)
-                    data.Add(new ComponentData(component));
+                if (component == null)
+                {
+                    icon = nullComponentIcon;
+                    continue;
+                }
+
+                data.Add(new ComponentData(component));
             }
 
             main = ChooseMainComponent(components);
 
-            if (main)
+            if (main && !icon)
                 icon = ObjectContent(main, main.GetType()).image as Texture2D;
         }
         
@@ -63,7 +70,7 @@ namespace AV.Hierarchy
 
                 return null;
             }
-            
+
             var first = components[1];
             var last = components[length - 1];
 
