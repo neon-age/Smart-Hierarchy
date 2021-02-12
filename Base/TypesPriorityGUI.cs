@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEditorInternal;
 using UnityEngine;
+using static UnityEditor.EditorGUIUtility;
 
 namespace AV.Hierarchy
 {
@@ -12,7 +13,9 @@ namespace AV.Hierarchy
         private static TypeCache.TypeCollection componentTypes;
         
         private static GUIStyle miniPullDown;
-        private static Texture defaultAssetIcon = EditorGUIUtility.IconContent("DefaultAsset Icon").image;
+        private static Texture defaultAssetIcon = IconContent("DefaultAsset Icon").image;
+        private static GUIContent visibilityOn = new GUIContent(IconContent("animationvisibilitytoggleon")) { tooltip = "Type is prefered." };
+        private static GUIContent visibilityOff = new GUIContent(IconContent("animationvisibilitytoggleoff")) { tooltip = "Type is ignored." };
 
         private GUIContent tempContent = new GUIContent();
         
@@ -44,6 +47,12 @@ namespace AV.Hierarchy
                 GUI.Label(rect, header);
             };
 
+            List.drawElementBackgroundCallback += (rect, index, active, focused) =>
+            {
+                if (active || focused)
+                    EditorGUI.DrawRect(rect, isProSkin ? new Color32(77, 77, 77, 255) : new Color32(174, 174, 174, 255));
+            };
+
             List.drawElementCallback = (rect, index, active, focused) =>
             {
                 if (miniPullDown == null)
@@ -58,6 +67,7 @@ namespace AV.Hierarchy
                 
                 var assemblyName = item.FindPropertyRelative("assemblyQualifiedName");
                 var fullName = item.FindPropertyRelative("fullName");
+                var isIgnored = item.FindPropertyRelative("isIgnored");
                 
                 var displayName = fullName.stringValue;
                 var hasName = !string.IsNullOrEmpty(displayName);
@@ -71,9 +81,21 @@ namespace AV.Hierarchy
                 tempContent.text = hasName ? displayName : "None";
                 tempContent.image = ScriptIcons.GetIcon(fullName.stringValue);
 
-                EditorGUIUtility.SetIconSize(new Vector2(16, 16));
+                SetIconSize(new Vector2(16, 16));
                 
                 rect.y += 2;
+                
+                EditorGUI.BeginChangeCheck();
+                
+                var visibilityRect = new Rect(rect) { width = 20 };
+                var visibilityIcon = isIgnored.boolValue ? visibilityOff : visibilityOn;
+
+                if (GUI.Button(visibilityRect, visibilityIcon, GUIStyle.none))
+                {
+                    isIgnored.boolValue = !isIgnored.boolValue;
+                }
+                
+                rect.xMin += visibilityRect.width;
 
                 if (GUI.Button(rect, tempContent, miniPullDown))
                 {
@@ -92,6 +114,10 @@ namespace AV.Hierarchy
                     });
                     SearchWindow.Open(context, popup);
                 }
+                
+                // PropertyField serialization doesn't work directly, something is totally wrong..
+                if (EditorGUI.EndChangeCheck())
+                    SaveChanges();
             };
 
             List.onChangedCallback += _ => SaveChanges();

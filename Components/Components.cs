@@ -80,6 +80,20 @@ namespace AV.Hierarchy
                 first = prioritized.First();
                 last = prioritized.Last();
             }
+            else if (prefs.preferLastComponent)
+            {
+                for (int i = components.Length - 1; i >= 0; i--)
+                {
+                    if (prefs.componentsPriority.IsIgnored(components[i]))
+                        continue;
+
+                    last = components[i];
+                    break;
+                }
+            }
+            
+            if (prefs.componentsPriority.IsIgnored(first))
+                first = null;
             
             return prefs.preferLastComponent ? last : first;
         }
