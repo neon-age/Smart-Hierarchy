@@ -104,7 +104,7 @@ namespace AV.Hierarchy
 
             var componentsFoldout = root.Query("Components").First();
 
-            provider.CreateTypesPriorityGUI("Prioritized Types", componentsFoldout, "componentsPriority");
+            provider.CreateTypesPriorityGUI("Types Priority", componentsFoldout, "componentsPriority");
             
             // this is stupid
             container.RegisterCallback<ChangeEvent<bool>>(evt => SaveToJson());

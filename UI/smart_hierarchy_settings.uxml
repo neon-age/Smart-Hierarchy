@@ -3,9 +3,9 @@
     <ui:ScrollView>
         <ui:Toggle label="Enable Extension" binding-path="enableSmartHierarchy" />
         <ui:Foldout text="Icons" name="Icons">
+            <ui:Toggle label="Gizmo Icon" binding-path="showGizmoIcon" focusable="true" style="margin-bottom: 3px;" />
             <uie:EnumField label="Effective Icon" binding-path="effectiveIcon" tooltip="Main component icon that is shown instead of GameObject or Prefab icon." />
             <uie:EnumField label="Transform Icon" binding-path="transformIcon" />
-            <ui:Toggle label="Show Gizmo Icons" binding-path="showGizmoIcon" />
         </ui:Foldout>
         <ui:Foldout text="Commands" name="Commands">
             <uie:EnumField label="Paste Object Place" binding-path="copyPastePlace" />
