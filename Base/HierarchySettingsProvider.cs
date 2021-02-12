@@ -44,6 +44,7 @@ namespace AV.Hierarchy
         
         public StickyIcon effectiveIcon = StickyIcon.NotOnPrefabs;
         public TransformIcon transformIcon = TransformIcon.OnUniqueOrigin;
+        public bool showGizmoIcon = true;
 
         public CopyPastePlace copyPastePlace;
         

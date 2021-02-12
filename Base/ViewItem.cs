@@ -10,7 +10,7 @@ namespace AV.Hierarchy
 {
     internal class ViewItem
     {
-        private static HierarchyPreferences preferences = HierarchySettingsProvider.Preferences;
+        private static HierarchyPreferences prefs => HierarchySettingsProvider.Preferences;
         
         public Rect rect;
         public TreeViewItem view;
@@ -27,6 +27,7 @@ namespace AV.Hierarchy
         public readonly Components components;
         public readonly Type mainType; 
         public readonly Texture2D icon;
+        public readonly Texture2D gizmoIcon;
         
         public readonly ViewItem child;
         
@@ -35,7 +36,8 @@ namespace AV.Hierarchy
         public readonly bool isCollection;
         public readonly bool isEmpty;
         
-        private static Texture2D collectionIcon = LoadAssetAtPath<Texture2D>(GUIDToAssetPath("6ee527fd28545e04593219b473dc26da"));
+        private static readonly Texture2D collectionIcon = LoadAssetAtPath<Texture2D>(GUIDToAssetPath("6ee527fd28545e04593219b473dc26da"));
+        private static readonly Texture2D nullComponentIcon = IconContent("DefaultAsset Icon").image as Texture2D;
         
         public ViewItem(GameObject instance)
         {
@@ -46,7 +48,14 @@ namespace AV.Hierarchy
             transform = instance.transform;
             components = new Components(instance);
 
+            gizmoIcon = ObjectIconUtil.GetIconForObject(instance);
             icon = components.icon;
+            
+            if (prefs.showGizmoIcon && gizmoIcon != null)
+                icon = gizmoIcon;
+
+            if (components.hasNullComponent)
+                icon = nullComponentIcon;
 
             isPrefab = PrefabUtility.GetPrefabAssetType(instance) == PrefabAssetType.Regular;
             isRootPrefab = PrefabUtility.IsAnyPrefabInstanceRoot(instance);
@@ -81,7 +90,7 @@ namespace AV.Hierarchy
             if (isCollection)
                 return collectionIcon;
             
-            switch (preferences.effectiveIcon)
+            switch (prefs.effectiveIcon)
             {
                 case StickyIcon.Never: 
                     break;

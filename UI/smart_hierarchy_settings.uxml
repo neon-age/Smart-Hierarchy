@@ -5,6 +5,7 @@
         <ui:Foldout text="Icons" name="Icons">
             <uie:EnumField label="Effective Icon" binding-path="effectiveIcon" tooltip="Main component icon that is shown instead of GameObject or Prefab icon." />
             <uie:EnumField label="Transform Icon" binding-path="transformIcon" />
+            <ui:Toggle label="Show Gizmo Icons" binding-path="showGizmoIcon" />
         </ui:Foldout>
         <ui:Foldout text="Commands" name="Commands">
             <uie:EnumField label="Paste Object Place" binding-path="copyPastePlace" />

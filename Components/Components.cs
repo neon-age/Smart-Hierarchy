@@ -8,10 +8,9 @@ namespace AV.Hierarchy
 {
     internal class Components
     {
-        private static readonly Texture2D nullComponentIcon = IconContent("DefaultAsset Icon").image as Texture2D;
-    
         public readonly Component main;
         public readonly Texture2D icon;
+        public readonly bool hasNullComponent;
         private readonly List<ComponentData> data;
 
         public ComponentData this[int index] => data[index];
@@ -25,7 +24,7 @@ namespace AV.Hierarchy
             {
                 if (component == null)
                 {
-                    icon = nullComponentIcon;
+                    hasNullComponent = true;
                     continue;
                 }
 
