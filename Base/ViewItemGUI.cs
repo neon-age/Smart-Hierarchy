@@ -6,12 +6,12 @@ namespace AV.Hierarchy
     internal static class ViewItemGUI
     {
         private static Material iconMaterial;
-        private static Color32 ffffff = new Color32(255, 255, 255, 255);
-        private static Color32 eeeeee = new Color32(238, 238, 238, 255);
         
-        private static readonly int Color = Shader.PropertyToID("_Color");
-        private static readonly int OnColor = Shader.PropertyToID("_OnColor");
-        private static readonly int IsOn = Shader.PropertyToID("_IsOn");
+        private static readonly Color32 OnColor = new Color32(240, 240, 240, 255);
+        
+        private static readonly int ColorID = Shader.PropertyToID("_Color");
+        private static readonly int OnColorID = Shader.PropertyToID("_OnColor");
+        private static readonly int IsOnID = Shader.PropertyToID("_IsOn");
 
         public static void DrawIcon(this ViewItem item, Rect rect, bool isOn)
         {
@@ -42,9 +42,9 @@ namespace AV.Hierarchy
             if (iconMaterial == null)
                 iconMaterial = new Material(Shader.Find("Hidden/Internal-IconClip"));
 
-            iconMaterial.SetColor(Color, color);
-            iconMaterial.SetColor(OnColor, isOn ? eeeeee : ffffff);
-            iconMaterial.SetInt(IsOn, isOn ? 1 : 0);
+            iconMaterial.SetColor(ColorID, color);
+            iconMaterial.SetColor(OnColorID, isOn ? OnColor : (Color32)Color.white);
+            iconMaterial.SetInt(IsOnID, isOn ? 1 : 0);
             EditorGUI.DrawPreviewTexture(position, texture, iconMaterial);
         }
         
