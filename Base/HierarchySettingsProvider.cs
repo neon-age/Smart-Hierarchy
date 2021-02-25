@@ -1,63 +1,11 @@
 ﻿using System;
-using System.Linq;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UIElements;
-using Object = UnityEngine.Object;
 
 namespace AV.Hierarchy
 {
-    internal enum StickyIcon
-    {
-        Never,
-        OnAnyObject,
-        NotOnPrefabs
-    }
-    internal enum CopyPastePlace
-    {
-        [InspectorName("After Selection (Recommended)")]
-        AfterSelection,
-        BeforeSelection,
-        [InspectorName("Last Sibling (Unity Default)")]
-        LastSibling
-    }
-    internal enum TransformIcon
-    {
-        Never,
-        Always,
-        OnUniqueOrigin,
-        OnlyRectTransform
-    }
-
-    internal enum ModificationKey
-    {
-        Alt,
-        Shift,
-        Control,
-    }
-    
-    internal class HierarchyPreferences : ScriptableObject
-    {
-        public bool enableSmartHierarchy = true;
-        
-        public StickyIcon effectiveIcon = StickyIcon.NotOnPrefabs;
-        public TransformIcon transformIcon = TransformIcon.OnUniqueOrigin;
-        public bool showGizmoIcon = true;
-
-        public CopyPastePlace copyPastePlace;
-        
-        [FormerlySerializedAs("keepFoldersInPlaymode")] 
-        public bool keepCollectionsInPlaymode;
-        
-        public bool enableHoverPreview;
-        public ModificationKey previewKey;
-
-        public bool preferLastComponent = true;
-        public TypesPriority componentsPriority = new TypesPriority();
-    }
-
     internal class HierarchySettingsProvider : SettingsProvider
     {
         private const string PreferencePath = "Preferences/Workflow/Smart Hierarchy";
