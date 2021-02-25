@@ -26,7 +26,6 @@ namespace AV.Hierarchy
         private ViewItem hoveredItem;
         private bool isHovering => hoveredItem != null;
         private int hoveredItemId => hierarchy.hoveredItem?.id ?? -1;
-        private bool wantsToShowPreview;
         private bool requiresUpdateBeforeGUI;
         private bool requiresGUISetup = true;
         private Vector2 localMousePosition;
@@ -58,7 +57,6 @@ namespace AV.Hierarchy
 
         private void Initialize()
         {
-            wantsToShowPreview = prefs.enableHoverPreview;
             requiresGUISetup = true;
         }
 
@@ -190,8 +188,6 @@ namespace AV.Hierarchy
             // Makes sure other items like scene headers are not interrupted 
             controller.gui.ResetCustomStyling();
             
-            HandleKeyboard(); 
-            
             // Mouse is relative to window during onGUIHandler
             if (evt.type != EventType.Used)
             {
@@ -217,20 +213,19 @@ namespace AV.Hierarchy
             
             controller.gui.SetSpaceBetweenIconAndText(18);
         }
-
-        private void HandleKeyboard()
-        {
-            switch (prefs.previewKey)
-            {
-                case ModificationKey.Alt: wantsToShowPreview = evt.alt; break;
-                case ModificationKey.Shift: wantsToShowPreview = evt.shift; break;
-                case ModificationKey.Control: wantsToShowPreview = evt.control; break;
-            }
-        }
-
+        
         private void HandleObjectPreview()
         {
-            if (isHovering && wantsToShowPreview)
+            var isPreviewKeyHold = false;
+        
+            switch (prefs.previewKey)
+            {
+                case ModificationKey.Alt: isPreviewKeyHold = evt.alt; break;
+                case ModificationKey.Shift: isPreviewKeyHold = evt.shift; break;
+                case ModificationKey.Control: isPreviewKeyHold = evt.control; break;
+            }
+        
+            if (isHovering && prefs.enableHoverPreview && isPreviewKeyHold)
             {
                 hoverPreview.OnItemPreview(hoveredItem);
             }
