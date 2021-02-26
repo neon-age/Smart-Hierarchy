@@ -1,7 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
+using UnityEditor.SceneManagement;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
@@ -30,9 +33,9 @@ namespace AV.Hierarchy
         
         private readonly VisualElement root;
         private readonly HoverPreview hoverPreview;
-        private IMGUIContainer guiContainer;
+        private readonly ComponentsBar componentsBar;
+        private readonly IMGUIContainer guiContainer;
         private readonly Dictionary<int, ViewItem> ItemsData = new Dictionary<int, ViewItem>();
-       
         
         public SmartHierarchy(EditorWindow window)
         {
@@ -40,6 +43,7 @@ namespace AV.Hierarchy
             this.window = new SceneHierarchyWindow(window);
             
             hoverPreview = new HoverPreview();
+            componentsBar = new ComponentsBar(root);
 
             Initialize();
             RegisterCallbacks();
@@ -50,7 +54,7 @@ namespace AV.Hierarchy
             
             // onGUIHandler is called after hierarchy GUI, thus has a slight delay
             guiContainer.onGUIHandler += OnAfterGUI;
-            
+
             root.Add(hoverPreview);
         }
 
@@ -145,15 +149,16 @@ namespace AV.Hierarchy
             GetInstanceViewItem(id, instance, rect, out var item);
             
             // Happens to be null when entering prefab mode
-            if (!item.EnsureViewExist(hierarchy))
+            if (!item.EnsureViewExist(hierarchy) || state == null)
                 return;
             
             HideDefaultIcon();
-            
-            var isSelected = controller.IsSelected(item.view);
-            var isOn = isSelected && controller.HasFocus();
 
-            item.DrawIcon(rect, isOn);
+            var hovered = hierarchy.hoveredItem == item.view;
+            var selected = controller.IsSelected(item.view);
+            var focused = selected && controller.HasFocus();
+
+            item.DrawIcon(rect, focused);
             
             if (item.isCollection)
             {
@@ -166,23 +171,25 @@ namespace AV.Hierarchy
                 }
             }
 
-            if (hierarchy.hoveredItem == item.view)
-            {
-                var fullWidthRect = GetFullWidthRect(rect);
-                OnHoverGUI(fullWidthRect, item);
-            }
+            var fullWidthRect = GetFullWidthRect(rect);
+            
+            if (hovered)
+                OnHoverGUI(fullWidthRect, item, focused);
+
+            if (selected || hovered || componentsBar.focusedItem == item)
+                componentsBar.OnGUI(fullWidthRect, item, hovered, selected, focused);
         }
         
         private void OnAfterGUI()
         {
             if (!prefs.enableSmartHierarchy)
                 return;
-            
+
             // Makes sure other items like scene headers are not interrupted 
             controller.gui.ResetCustomStyling();
-            
+
             if (EditorWindow.focusedWindow != actualWindow)
-                ObjectPopupWindow.Close();
+                ObjectPopupWindow.LoseFocus();
             
             HandleKeyboard(); 
             
@@ -197,6 +204,18 @@ namespace AV.Hierarchy
             HandleObjectPreview();
 
             requiresUpdateBeforeGUI = true;
+        }
+        
+        private void OnHoverGUI(Rect rect, ViewItem item, bool isOn)
+        {
+            var instance = item.instance;
+            
+            var toggleRect = new Rect(rect) { x = 32 };
+            if (OnLeftToggle(toggleRect, instance.activeSelf, out var isActive))
+            {
+                Undo.RecordObject(instance, "GameObject Set Active");
+                instance.SetActive(isActive);
+            }
         }
 
         private void HideDefaultIcon()
@@ -247,21 +266,11 @@ namespace AV.Hierarchy
             }
         }
 
-        private void OnHoverGUI(Rect rect, ViewItem item)
-        {
-            var instance = item.instance;
-            
-            var toggleRect = new Rect(rect) { x = 32 };
-            if (OnLeftToggle(toggleRect, instance.activeSelf, out var isActive))
-            {
-                Undo.RecordObject(instance, "GameObject Set Active");
-                instance.SetActive(isActive);
-            }
-        }
-
         private static Rect GetFullWidthRect(Rect rect)
         {
-            var fullWidthRect = new Rect(rect) { x = 0, width = Screen.width };
+            var fullWidthRect = new Rect(rect);
+            fullWidthRect.width += rect.x;
+            fullWidthRect.x = 0;
             return fullWidthRect;
         }
 

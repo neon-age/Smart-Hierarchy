@@ -11,24 +11,21 @@ namespace AV.Hierarchy
     {
         private static StyleSheet styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(AssetDatabase.GUIDToAssetPath("d7461833a510d124191fbed727ac19f0"));
         private static Texture2D arrowIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath("70cf301939ec64147b3b646ec72c2cf2"));
-
-        private static ObjectPopupWindow current;
         
-        public string title
-        {
-            get => titleText.text;
-            set => titleText.text = value;
-        }
+        private static int controlHash = nameof(ObjectPopupWindow).GetHashCode();
+        
+        public static ObjectPopupWindow current;
+        
         public VisualElement titleContainer { get; }
         public override VisualElement contentContainer { get; }
 
-        private TextElement titleText;
+        public TextElement title { get; }
         private VisualElement contextArrow;
 
         private Vector2 position;
         private VisualElement root;
 
-        private Color backgroundColor => isProSkin ? new Color32(35, 35, 35, 230) : new Color32(165, 165, 165, 230);
+        protected virtual Color backgroundColor => isProSkin ? new Color32(40, 40, 40, 230) : new Color32(165, 165, 165, 230);
         
         protected ObjectPopupWindow()
         {
@@ -44,8 +41,8 @@ namespace AV.Hierarchy
             titleContainer = new VisualElement();
             titleContainer.AddToClassList("title-container");
             
-            titleText = new TextElement { name = "Title" };
-            titleContainer.Add(titleText);
+            title = new TextElement { name = "Title" };
+            titleContainer.Add(title);
             
             hierarchy.Add(titleContainer);
             hierarchy.Add(CreateSeparator());
@@ -59,15 +56,22 @@ namespace AV.Hierarchy
             return separator;
         }
 
+        public virtual void OnLoseFocus()
+        {
+            Close();
+        }
+
+        public static void LoseFocus() => current?.OnLoseFocus();
+
         public static void Close()
         {
             current?.RemoveFromHierarchy();
+            current = null;
         }
 
         public void ShowInsideWindow(Vector2 position, VisualElement root)
         {
-            if (current != null)
-                current.RemoveFromHierarchy();
+            Close();
 
             current = this;
             
@@ -82,7 +86,7 @@ namespace AV.Hierarchy
             RegisterCallback<MouseDownEvent>(evt => evt.StopImmediatePropagation());
             RegisterCallback<ContextClickEvent>(evt => evt.StopImmediatePropagation());
             
-            Focus();
+            GUIUtility.keyboardControl = controlHash;
             
             root.RegisterCallback<GeometryChangedEvent>(OnRootGeometryChange);
             RegisterCallback<GeometryChangedEvent>(OnGeometryChange);

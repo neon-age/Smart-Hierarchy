@@ -27,21 +27,21 @@ namespace AV.Hierarchy
             
             var renderDisabled = item.colorCode >= 4;
             
-            if (renderDisabled)
-                color *= new Color(1f, 1f, 1f, 0.5f);
-
             if (item.effectiveIcon)
-                DrawIcon(iconRect, item.effectiveIcon, color, isOn);
+                DrawIcon(iconRect, item.effectiveIcon, color, isOn, renderDisabled);
 
             if (item.overlayIcon)
-                DrawIcon(iconRect, item.overlayIcon, color);
+                DrawIcon(iconRect, item.overlayIcon, color, renderDisabled);
         }
         
-        private static void DrawIcon(Rect position, Texture texture, Color color, bool isOn = false)
+        public static void DrawIcon(Rect position, Texture texture, Color color, bool isOn = false, bool isDisabled = false)
         {
             if (iconMaterial == null)
                 iconMaterial = new Material(Shader.Find("Hidden/Internal-IconClip"));
 
+            if (isDisabled)
+                color *= new Color(1f, 1f, 1f, 0.5f);
+            
             iconMaterial.SetColor(Color, color);
             iconMaterial.SetColor(OnColor, isOn ? eeeeee : ffffff);
             iconMaterial.SetInt(IsOn, isOn ? 1 : 0);

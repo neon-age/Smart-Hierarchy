@@ -9,7 +9,7 @@ namespace AV.Hierarchy
     {
         public readonly Component main;
         public readonly Texture2D icon;
-        private readonly List<ComponentData> data;
+        public readonly List<ComponentData> data;
 
         public ComponentData this[int index] => data[index];
 

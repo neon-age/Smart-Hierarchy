@@ -15,7 +15,7 @@ namespace AV.Hierarchy
         
         public CollectionPopup(Collection collection)
         {
-            title = $"Collection";
+            title.text = "Collection";
         
             serializedObject = new SerializedObject(collection);
             colorTagProperty = serializedObject.FindProperty("colorTag");

@@ -1,0 +1,33 @@
+﻿
+.popup-window {
+}
+
+.title-container {
+    overflow: hidden;
+    border-radius: 2;
+    margin: -5;
+    padding: 3 3 3 6;
+    background-color: rgba(255, 255, 255, 0);
+}
+
+.separator {
+    visibility: hidden;
+}
+
+#Title {
+    -unity-font-style: bold;
+    top: 1;
+    flex-grow: 1;
+}
+
+HeaderItems {
+    right: 4;
+}
+
+.content-container {
+    margin-left: -8;
+}
+
+ComponentInspector {
+    min-width: 85%;
+}

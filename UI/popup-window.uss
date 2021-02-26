@@ -1,8 +1,8 @@
 ﻿
 .popup-window {
     position: absolute;
-    flex-grow: 0;
-
+    overflow: visible;
+    
     background-color: rgba(35, 35, 35, 0.9);
     
     border-color: rgba(0, 0, 0, 0.05);
@@ -13,17 +13,21 @@
 .context-arrow {
     -unity-background-image-tint-color: rgba(35, 35, 35, 0.9);
     
-    width: 16;
-    height: 9;
-    top: -8;
-    right: -4;
+    width: 14;
+    height: 7;
+    top: -7;
 
     -unity-slice: 1;
     -unity-slice-top: 10;
 }
 
+.title-container {
+    flex-direction: row;
+}
+
 #Title {
-    opacity: 0.75;
+    margin-left: 2;
+    opacity: 0.85;
 }
 
 .separator {
