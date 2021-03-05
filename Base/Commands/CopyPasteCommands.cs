@@ -49,14 +49,41 @@ namespace AV.Hierarchy
                 return;
             }
             
+            if (Selection.transforms.Length == 0)
+            {
+                SmartHierarchy.active.window.hierarchy.PasteGO();
+                return;
+            }
+
+            var targetSelection = Selection.activeTransform;
+            var isTargetExpanded = SmartHierarchy.active.controller.IsExpanded(Selection.activeInstanceID) && 
+                                   Selection.activeTransform.childCount > 0;
+            
+            var alwaysPasteAsChild = prefs.autoPasteAsChild == AutoPasteAsChild.Always;
+            var pasteAsChildWhenExpanded = prefs.autoPasteAsChild == AutoPasteAsChild.OnExpandedSelection;
+
+            
             var oldSelection = GetSiblingsPlace(Selection.transforms, out var siblingIndex);
             
             SmartHierarchy.active.window.hierarchy.PasteGO();
 
             var selectionChanged = !Selection.transforms.SequenceEqual(oldSelection);
-            
-            if (selectionChanged)
+
+            if (alwaysPasteAsChild || pasteAsChildWhenExpanded && isTargetExpanded)
+            {
+                foreach (var transform in Selection.transforms)
+                {
+                    transform.SetParent(targetSelection);
+                }
+                SetSiblingsInPlaceAndFrame(0, Selection.transforms);
+                
+                SmartHierarchy.active.ReloadView();
+                EditorApplication.DirtyHierarchyWindowSorting();
+            }
+            else if (selectionChanged)
+            {
                 SetSiblingsInPlaceAndFrame(siblingIndex, Selection.transforms);
+            }
         }
         
         internal static void Duplicate()

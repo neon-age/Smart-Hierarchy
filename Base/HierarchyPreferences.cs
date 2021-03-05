@@ -12,6 +12,7 @@ namespace AV.Hierarchy
         public bool showGizmoIcon = true;
 
         public CopyPastePlace copyPastePlace;
+        public AutoPasteAsChild autoPasteAsChild = AutoPasteAsChild.OnExpandedSelection;
         
         [FormerlySerializedAs("keepFoldersInPlaymode")] 
         public bool keepCollectionsInPlaymode;
@@ -36,6 +37,13 @@ namespace AV.Hierarchy
         BeforeSelection,
         [InspectorName("Last Sibling (Unity Default)")]
         LastSibling
+    }
+
+    internal enum AutoPasteAsChild
+    {
+        Never,
+        Always,
+        OnExpandedSelection
     }
     internal enum TransformIcon
     {

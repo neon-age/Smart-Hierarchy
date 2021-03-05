@@ -14,12 +14,12 @@ namespace AV.Hierarchy
         public TreeViewGUI gui;
 
         public static Func<object, TreeViewItem> hoveredItemFunc;
-        public static Func<object, TreeViewItem, bool> isItemSelected;
-        public static Func<object, int, int> getRowFunc;
-        public static Func<object, bool> hasFocus;
+        private static Func<object, TreeViewItem, bool> isItemSelected;
+        private static Func<object, int, int> getRowFunc;
+        private static Func<object, bool> hasFocus;
 
-        public static Func<object, int, TreeViewItem> getItemFunc;
-        public static Func<object, int, bool> isExpandedFunc;
+        private static Func<object, int, TreeViewItem> getItemFunc;
+        private static Func<object, int, bool> isExpandedFunc;
 
         private static PropertyInfo dataProperty;
         private static PropertyInfo guiProperty;
@@ -95,6 +95,11 @@ namespace AV.Hierarchy
             {
                 return null;
             }
+        }
+
+        public bool IsExpanded(int instanceID)
+        {
+            return isExpandedFunc.Invoke(data, instanceID);
         }
 
         public bool IsSelected(TreeViewItem item)

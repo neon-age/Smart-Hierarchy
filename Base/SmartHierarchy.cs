@@ -83,7 +83,7 @@ namespace AV.Hierarchy
             ImmediateRepaint();
         }
         
-        private void ReloadView()
+        public void ReloadView()
         {
             ItemsData.Clear();
         }

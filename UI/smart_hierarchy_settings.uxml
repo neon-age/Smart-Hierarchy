@@ -1,4 +1,4 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <ui:Label text="Smart Hierarchy" name="Title" style="font-size: 19px; -unity-font-style: bold;" />
     <ui:ScrollView>
         <ui:Toggle label="Enable Extension" binding-path="enableSmartHierarchy" />
@@ -9,6 +9,7 @@
         </ui:Foldout>
         <ui:Foldout text="Commands" name="Commands">
             <uie:EnumField label="Paste Object Place" binding-path="copyPastePlace" />
+            <uie:EnumField label="Auto Paste As Child" binding-path="autoPasteAsChild" />
         </ui:Foldout>
         <ui:Foldout text="Collections" name="Collections">
             <ui:Toggle label="Keep In Playmode" binding-path="keepCollectionsInPlaymode" />
