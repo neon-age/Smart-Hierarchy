@@ -62,6 +62,9 @@ namespace AV.Hierarchy
                     textColor.a = 0.9f;
                     miniPullDown.normal.textColor = textColor;
                 }
+
+                var color = GUI.color;
+                var mousePos = Event.current.mousePosition;
             
                 var item = typesProperty.GetArrayElementAtIndex(index);
                 
@@ -90,10 +93,15 @@ namespace AV.Hierarchy
                 var visibilityRect = new Rect(rect) { width = 20 };
                 var visibilityIcon = isIgnored.boolValue ? visibilityOff : visibilityOn;
 
+                if (!isIgnored.boolValue)
+                    GUI.color = new Color(1, 1, 1, 0.5f);
+                
                 if (GUI.Button(visibilityRect, visibilityIcon, GUIStyle.none))
                 {
                     isIgnored.boolValue = !isIgnored.boolValue;
                 }
+
+                GUI.color = color;
                 
                 rect.xMin += visibilityRect.width;
 
