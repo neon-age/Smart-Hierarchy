@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
@@ -34,16 +35,23 @@ namespace AV.Hierarchy
         public readonly bool isPrefab;
         public readonly bool isRootPrefab;
         public readonly bool isCollection;
+        public readonly bool isSubSceneHeader;
         public readonly bool isEmpty;
-        
+       
         private static readonly Texture2D collectionIcon = LoadAssetAtPath<Texture2D>(GUIDToAssetPath("6ee527fd28545e04593219b473dc26da"));
         private static readonly Texture2D nullComponentIcon = IconContent("DefaultAsset Icon").image as Texture2D;
+        private static readonly Texture2D sceneAssetIcon = IconContent("SceneAsset Icon").image as Texture2D;
         
         public ViewItem(GameObject instance)
         {
             this.instance = instance;
-            
             id = instance.GetInstanceID();
+            
+            isPrefab = PrefabUtility.GetPrefabAssetType(instance) == PrefabAssetType.Regular;
+            isRootPrefab = PrefabUtility.IsAnyPrefabInstanceRoot(instance);
+            isCollection = instance.TryGetComponent(out collection);
+            isSubSceneHeader = TreeViewGUI.IsSubSceneHeader(instance);
+            isEmpty = instance.transform.childCount == 0;
             
             transform = instance.transform;
             components = new Components(instance);
@@ -54,14 +62,12 @@ namespace AV.Hierarchy
             if (prefs.showGizmoIcon && gizmoIcon != null)
                 icon = gizmoIcon;
 
+            if (isSubSceneHeader)
+                icon = sceneAssetIcon;
+            
             if (components.hasNullComponent)
                 icon = nullComponentIcon;
 
-            isPrefab = PrefabUtility.GetPrefabAssetType(instance) == PrefabAssetType.Regular;
-            isRootPrefab = PrefabUtility.IsAnyPrefabInstanceRoot(instance);
-            isCollection = instance.TryGetComponent(out collection);
-            isEmpty = instance.transform.childCount == 0;
-            
             mainType = components.main?.GetType() ?? typeof(GameObject);
 
             if (isRootPrefab)

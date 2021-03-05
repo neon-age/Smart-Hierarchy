@@ -19,7 +19,8 @@ namespace AV.Hierarchy
         private static PropertyInfo foldoutStyleProperty;
         private static PropertyInfo spaceBeforeIconProperty;
         
-        
+        private static MethodInfo isSubSceneHeader;
+
         private static GUIStyle foldout;
 
         private readonly float defaultIconWidth;
@@ -37,6 +38,8 @@ namespace AV.Hierarchy
             lineHeightProperty = type.GetProperty("k_LineHeight");
             foldoutStyleProperty = type.GetProperty("foldoutStyle", BindingFlags.NonPublic | BindingFlags.Instance);
             spaceBeforeIconProperty = type.GetProperty("extraSpaceBeforeIconAndLabel");
+            
+            isSubSceneHeader = typeof(Editor).Assembly.GetType("SubSceneGUI").GetMethod("IsSubSceneHeader", BindingFlags.NonPublic | BindingFlags.Static);
         }
 
         public TreeViewGUI(object gui)
@@ -45,6 +48,11 @@ namespace AV.Hierarchy
             
             defaultIconWidth = (float)iconWidthField.GetValue(gui);
             defaultSpaceBeforeIcon = (float)iconSpaceField.GetValue(gui);
+        }
+
+        public static bool IsSubSceneHeader(GameObject gameObject)
+        {
+            return (bool)isSubSceneHeader.Invoke(null, new object[] { gameObject });
         }
 
         public void SetLineHeight(float height)
