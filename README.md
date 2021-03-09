@@ -3,9 +3,6 @@ Brings intuitive features and important visual elements in the right place.
 
 • [View Changelog](CHANGELOG.md) • [🗺 Roadmap](https://github.com/neon-age/Smart-Hierarchy/projects/1) • [💬 Discussions](https://github.com/neon-age/Smart-Hierarchy/discussions) •
 
-[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L4L02M51R)
-[![patreon](.github/become-a-patron.png)](https://www.patreon.com/neonage?fan_landing=true)
-
 ## Installation
 ![Installation](.github/images/Installation.png)
 
