@@ -1,17 +1,16 @@
-# Smart Hierarchy v0.2.9
+# Smart Hierarchy v0.3.0
+Brings intuitive features and important visual elements in the right place.
 
-Collection of QoL improvements for Unity Hierarchy.\
-Designed with a native-feel and intuitiveness in mind.
-
-**Note:** Extension is at the early development stage, so feel free to bug-hunt, provide feedback and ideas!\
-Every contribution is highly appreciated! 😉
+• [View Changelog](CHANGELOG.md) • [🗺 Roadmap](https://github.com/neon-age/Smart-Hierarchy/projects/1) • [💬 Discussions](https://github.com/neon-age/Smart-Hierarchy/discussions) •
 
 [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L4L02M51R)
+[![patreon](.github/become-a-patron.png)](https://www.patreon.com/neonage?fan_landing=true)
 
 ## Installation
 ![Installation](.github/images/Installation.png)
 
-Customize plugin behaviour in "Preferences > Workflow > Smart Hierarchy".
+Requires Unity **2019.4** or higher.\
+Customize plugin in "Preferences > Workflow > Smart Hierarchy".
 
 ## Features
 ### Icons
@@ -44,25 +43,15 @@ No more need to select game object in order to (de)activate it.
 Bindable keys: Alt / Shift / Ctrl.\
 **Very Experimental!** Can be enabled in Preferences.
 
-## In progress:
-* Debug Log context
-* Components Toolbar
-* Entities transform optimizations
-* Customizable GameObject context-menu
-* Better Collection inspector
+## Participation
+Every contribution is highly appreciated — feel free to bug-hunt, provide feedback and ideas!\
+Savvy enough to pull a new feature? I'll be happy to review your code and design UX together!
 
-## Under investigation:
-* Multi-Rename
-* Nesting Branches
-* Depth Context
-* Local Hierarchy
-* Collection Children Filter
-* Scene highlight
-* Preview Icons
+## Sharing is caring
+I want to share my tools with everyone, without hiding behind a paywall.\
+If you like my work and feel generous — consider supporting me financially!
 
-## Test status:
-* Made in Unity 2020.2 
-* Tested with Unity 2019.4
-* Not tested with sub-scenes
-* Not tested with multiple hierarchy windows
-* Not tested with other workflow extensions like Peek
+[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L4L02M51R)
+[![patreon](.github/become-a-patron.png)](https://www.patreon.com/neonage?fan_landing=true)
+
+![ko-fi](.github/coffee%20cup.png)
