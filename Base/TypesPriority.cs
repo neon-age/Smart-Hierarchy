@@ -8,7 +8,7 @@ using UnityEngine;
 namespace AV.Hierarchy
 {
     [Serializable]
-    internal class TypesPriority
+    internal class TypesPriority : ISerializationCallbackReceiver
     {
         [Serializable]
         public class TypeItem
@@ -18,6 +18,7 @@ namespace AV.Hierarchy
 
             public string assemblyQualifiedName;
             public string fullName;
+            public bool isIgnored;
             public int priority;
             
             public static implicit operator TypeItem(string assemblyQualifiedName) => new TypeItem(assemblyQualifiedName);
@@ -28,6 +29,11 @@ namespace AV.Hierarchy
                 if (Type != null)
                     fullName = Type.FullName;
             }
+
+            public override string ToString()
+            {
+                return Type.AssemblyQualifiedName;
+            }
         }
         
         [SerializeField] private List<TypeItem> types = new List<TypeItem>
@@ -35,10 +41,18 @@ namespace AV.Hierarchy
             "UnityEngine.Canvas, UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
             "UnityEngine.Camera, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
             "UnityEngine.Light, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
-            "UnityEngine.ParticleSystem, UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
+            "UnityEngine.ParticleSystem, UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+            "UnityEngine.Collider, UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+            new TypeItem("UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null") { isIgnored = true },
         };
         
         private Dictionary<Type, TypeItem> lookup = new Dictionary<Type, TypeItem>();
+
+        public void OnBeforeSerialize() {}
+        public void OnAfterDeserialize()
+        {
+            Initialize();
+        }
 
         public void Initialize()
         {
@@ -57,6 +71,17 @@ namespace AV.Hierarchy
             }
         }
 
+        public bool IsIgnored(Component component)
+        {
+            if (component == null)
+                return false;
+                
+            if (TryGetItem(component.GetType(), out var item))
+                return item.isIgnored;
+                
+            return false;
+        }
+
         public IEnumerable<Component> SelectPrioritizedComponents(params Component[] components)
         {
             var lastPriority = int.MaxValue;
@@ -70,18 +95,21 @@ namespace AV.Hierarchy
 
                 var type = component.GetType();
                 
-                if (TryGetPriority(type, out var priority))
+                if (TryGetItem(type, out var item))
                 {
-                    if (priority <= lastPriority)
+                    if (item.isIgnored)
+                        continue;
+                        
+                    if (item.priority <= lastPriority)
                     {
                         yield return component;
-                        lastPriority = priority;
+                        lastPriority = item.priority;
                     }
                 }
             }
         }
 
-        public bool TryGetPriority(Type type, out int priority)
+        public bool TryGetItem(Type type, out TypeItem item)
         {
             bool TryGetValue(Type key, out TypeItem value)
             {
@@ -89,14 +117,7 @@ namespace AV.Hierarchy
                 return key != null && lookup.TryGetValue(key, out value);
             }
             
-            if (TryGetValue(type, out var item) || TryGetValue(type.BaseType, out item))
-            {
-                priority = item.priority;
-                return true;
-            }
-
-            priority = int.MaxValue;
-            return false;
+            return TryGetValue(type, out item) || TryGetValue(type.BaseType, out item);
         }
     }
 }

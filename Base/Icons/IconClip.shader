@@ -16,7 +16,7 @@ Shader "Hidden/Internal-IconClip"
 
     struct appdata_t {
         float4 vertex : POSITION;
-        fixed4 color : COLOR;
+        half4 color : COLOR;
         float2 texcoord : TEXCOORD0;
         UNITY_VERTEX_INPUT_INSTANCE_ID
     };
@@ -59,22 +59,27 @@ Shader "Hidden/Internal-IconClip"
             colTex.rgb = LinearToGammaSpace(colTex.rgb);
 
         half4 col = colTex * i.color * _Color;
-        col.a *= tex2D(_GUIClipTexture, i.clipUV).a;
+        half clip = tex2D(_GUIClipTexture, i.clipUV).a;
+
+        col.a *= clip;
 
         if (_IsOn == 0)
             return col;
 
-        half left = tex2D(_MainTex, float2(0.3, 0.5));
-        half right = tex2D(_MainTex, float2(0.7, 0.5));
-        half top = tex2D(_MainTex, float2(0.5, 0.9));
-        half bottom = tex2D(_MainTex, float2(0.5, 0.1));
+        half left   = tex2D(_MainTex, float2(0.30, 0.50));
+        half right  = tex2D(_MainTex, float2(0.70, 0.50));
+        half top    = tex2D(_MainTex, float2(0.50, 0.90));
+        half bottom = tex2D(_MainTex, float2(0.50, 0.10));
 
         // Special case for "file" icons, where background color is white and content is not in alpha channel
-        if (left > 0.9 && right > 0.9 > top > 0.9 && bottom > 0.9)
+        if (left   > 0.8 && 
+            right  > 0.8 && 
+            top    > 0.8 && 
+            bottom > 0.8)
             return col;
         
         col = i.color * _Color * _OnColor;
-        col.a *= colTex.a;
+        col.a *= colTex.a * clip;
         
         return col;
     }

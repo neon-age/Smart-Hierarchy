@@ -6,50 +6,14 @@ using UnityEngine.UIElements;
 
 namespace AV.Hierarchy
 {
-    internal enum StickyIcon
-    {
-        Never,
-        OnAnyObject,
-        NotOnPrefabs
-    }
-    internal enum TransformIcon
-    {
-        Never,
-        Always,
-        OnUniqueOrigin,
-        OnlyRectTransform
-    }
-
-    internal enum ModificationKey
-    {
-        Alt,
-        Shift,
-        Control,
-    }
-    
-    internal class HierarchyPreferences : ScriptableObject
-    {
-        public bool enableSmartHierarchy = true;
-        
-        public StickyIcon effectiveIcon = StickyIcon.NotOnPrefabs;
-        public TransformIcon transformIcon = TransformIcon.OnUniqueOrigin;
-        
-        public bool keepFoldersInPlaymode;
-        
-        public bool enableHoverPreview;
-        public bool alwaysShowPreview;
-        public ModificationKey previewKey;
-
-        public bool preferLastComponent = true;
-        public TypesPriority componentsPriority = new TypesPriority();
-    }
-
     internal class HierarchySettingsProvider : SettingsProvider
     {
         private const string PreferencePath = "Preferences/Workflow/Smart Hierarchy";
         private static string UIPath = AssetDatabase.GUIDToAssetPath("f0d92e1f03926664991b2f7fbfbd6268") + "/";
 
         private static HierarchySettingsProvider provider;
+        private static HierarchyPreferences preferences;
+        
         public static HierarchyPreferences Preferences 
         {
             get
@@ -60,17 +24,20 @@ namespace AV.Hierarchy
             }
         }
 
-        private static HierarchyPreferences preferences;
         public static event Action onChange;
-
+        
         private SerializedObject serializedObject;
+        private TypesPriorityGUI typesPriorityGui;
+
 
         private HierarchySettingsProvider(string path, SettingsScope scope)
             : base(path, scope){}
 
         public override void OnActivate(string searchContext, VisualElement root)
         {
-            LoadFromJson();
+            if (!preferences)
+                LoadFromJson();
+                
             serializedObject = new SerializedObject(preferences);
             keywords = GetSearchKeywordsFromSerializedObject(serializedObject);
             
@@ -85,7 +52,7 @@ namespace AV.Hierarchy
 
             var componentsFoldout = root.Query("Components").First();
 
-            provider.CreateTypesPriorityGUI("Prioritized Types", componentsFoldout, "componentsPriority");
+            provider.CreateTypesPriorityGUI("Types Priority", componentsFoldout, "componentsPriority");
             
             // this is stupid
             container.RegisterCallback<ChangeEvent<bool>>(evt => SaveToJson());
@@ -94,16 +61,15 @@ namespace AV.Hierarchy
 
         public override void OnDeactivate()
         {
-            if (preferences)
-                SaveToJson();
+            SaveToJson();
         }
 
         private void CreateTypesPriorityGUI(string header, VisualElement parent, string propertyName)
         {
-            var gui = new TypesPriorityGUI(header, serializedObject.FindProperty(propertyName));
-            gui.onChange += SaveToJson;
+            typesPriorityGui = new TypesPriorityGUI(header, serializedObject.FindProperty(propertyName));
+            typesPriorityGui.onChange += SaveToJson;
             
-            var container = new IMGUIContainer(() => gui.List.DoLayoutList());
+            var container = new IMGUIContainer(() => typesPriorityGui.List.DoLayoutList());
 
             parent.Add(container);
         }
@@ -121,17 +87,22 @@ namespace AV.Hierarchy
                 root.styleSheets.Add(foldoutDarkStyle);
             }
         }
-
+        
         private static void LoadFromJson()
         {
-            preferences = ScriptableObject.CreateInstance<HierarchyPreferences>();
+            if (!preferences)
+                preferences = ScriptableObject.CreateInstance<HierarchyPreferences>();
+
             var json = EditorPrefs.GetString(PreferencePath);
-            EditorJsonUtility.FromJsonOverwrite(json, preferences);
+            JsonUtility.FromJsonOverwrite(json, preferences);
         }
 
         private static void SaveToJson()
         {
-            var json = EditorJsonUtility.ToJson(preferences, true);
+            if (!preferences)
+                return;
+        
+            var json = JsonUtility.ToJson(preferences, true);
             EditorPrefs.SetString(PreferencePath, json);
             
             onChange?.Invoke();

@@ -15,7 +15,7 @@ namespace AV.Hierarchy
         {
             var preferences = HierarchySettingsProvider.Preferences;
 
-            if (Application.isEditor && preferences.keepFoldersInPlaymode)
+            if (Application.isEditor && preferences.keepCollectionsInPlaymode)
                 return;
                 
             var sceneRoots = scene.GetRootGameObjects();

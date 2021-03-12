@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 using static UnityEditor.EditorGUIUtility;
 
@@ -9,6 +10,8 @@ namespace AV.Hierarchy
     {
         public readonly Component main;
         public readonly Texture2D icon;
+        
+        public readonly bool hasNullComponent;
         public readonly List<ComponentData> data;
 
         public ComponentData this[int index] => data[index];
@@ -20,14 +23,18 @@ namespace AV.Hierarchy
 
             foreach (var component in components)
             {
-                // TODO: Show null component in hierarchy
-                if (component)
-                    data.Add(new ComponentData(component));
+                if (component == null)
+                {
+                    hasNullComponent = true;
+                    continue;
+                }
+
+                data.Add(new ComponentData(component));
             }
 
             main = ChooseMainComponent(components);
 
-            if (main)
+            if (main && !icon)
                 icon = ObjectContent(main, main.GetType()).image as Texture2D;
         }
         
@@ -63,7 +70,7 @@ namespace AV.Hierarchy
 
                 return null;
             }
-            
+
             var first = components[1];
             var last = components[length - 1];
 
@@ -74,6 +81,20 @@ namespace AV.Hierarchy
                 first = prioritized.First();
                 last = prioritized.Last();
             }
+            else if (prefs.preferLastComponent)
+            {
+                for (int i = components.Length - 1; i >= 0; i--)
+                {
+                    if (prefs.componentsPriority.IsIgnored(components[i]))
+                        continue;
+
+                    last = components[i];
+                    break;
+                }
+            }
+            
+            if (prefs.componentsPriority.IsIgnored(first))
+                first = null;
             
             return prefs.preferLastComponent ? last : first;
         }

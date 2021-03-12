@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -7,27 +8,34 @@ using PopupWindow = UnityEngine.UIElements.PopupWindow;
 
 namespace AV.Hierarchy
 {
-    public abstract class ObjectPopupWindow : VisualElement
+    public abstract class PopupElement : VisualElement
     {
         private static StyleSheet styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(AssetDatabase.GUIDToAssetPath("d7461833a510d124191fbed727ac19f0"));
         private static Texture2D arrowIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath("70cf301939ec64147b3b646ec72c2cf2"));
-        
-        private static int controlHash = nameof(ObjectPopupWindow).GetHashCode();
-        
-        public static ObjectPopupWindow current;
-        
+
+        private static PopupElement active;
+        private static Dictionary<Type, PopupElement> activePopups = new Dictionary<Type, PopupElement>();
+
+        public string title
+        {
+            get => titleText.text;
+            set => titleText.text = value;
+        }
         public VisualElement titleContainer { get; }
         public override VisualElement contentContainer { get; }
 
-        public TextElement title { get; }
+        public override bool canGrabFocus => true;
+
+        private TextElement titleText;
         private VisualElement contextArrow;
 
         private Vector2 position;
         private VisualElement root;
 
-        protected virtual Color backgroundColor => isProSkin ? new Color32(40, 40, 40, 230) : new Color32(165, 165, 165, 230);
+        private Color backgroundColor => isProSkin ? new Color32(35, 35, 35, 230) : new Color32(165, 165, 165, 230);
+
         
-        protected ObjectPopupWindow()
+        protected PopupElement()
         {
             styleSheets.Add(styleSheet);
             style.backgroundColor = backgroundColor;
@@ -41,12 +49,23 @@ namespace AV.Hierarchy
             titleContainer = new VisualElement();
             titleContainer.AddToClassList("title-container");
             
-            title = new TextElement { name = "Title" };
-            titleContainer.Add(title);
+            titleText = new TextElement { name = "Title" };
+            titleContainer.Add(titleText);
             
             hierarchy.Add(titleContainer);
             hierarchy.Add(CreateSeparator());
             hierarchy.Add(contentContainer);
+
+            if (!activePopups.ContainsKey(GetType()))
+                activePopups.Add(GetType(), this);
+            else
+                activePopups[GetType()] = this;
+        }
+
+        public static T GetPopup<T>() where T : PopupElement
+        {
+            activePopups.TryGetValue(typeof(T), out var popup);
+            return (T)popup;
         }
 
         public VisualElement CreateSeparator()
@@ -56,24 +75,17 @@ namespace AV.Hierarchy
             return separator;
         }
 
-        public virtual void OnLoseFocus()
+        public void Close()
         {
-            Close();
+            RemoveFromHierarchy();
+            activePopups.Remove(GetType());
         }
-
-        public static void LoseFocus() => current?.OnLoseFocus();
-
-        public static void Close()
-        {
-            current?.RemoveFromHierarchy();
-            current = null;
-        }
-
+        
         public void ShowInsideWindow(Vector2 position, VisualElement root)
         {
-            Close();
+            active?.RemoveFromHierarchy();
 
-            current = this;
+            active = this;
             
             position.x -= 7;
             position.y -= 5;
@@ -83,13 +95,13 @@ namespace AV.Hierarchy
             
             root.Add(this);
             
-            RegisterCallback<MouseDownEvent>(evt => evt.StopImmediatePropagation());
-            RegisterCallback<ContextClickEvent>(evt => evt.StopImmediatePropagation());
-            
-            GUIUtility.keyboardControl = controlHash;
+            GUI.SetNextControlName("PopupElement");
+            GUI.FocusControl("PopupElement");
+            Focus();
             
             root.RegisterCallback<GeometryChangedEvent>(OnRootGeometryChange);
             RegisterCallback<GeometryChangedEvent>(OnGeometryChange);
+            RegisterCallback<FocusOutEvent>(evt => Close());
             
             style.top = position.y;
             

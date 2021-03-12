@@ -1,6 +1,7 @@
-﻿using System.Collections;
+
+using System;
 using System.Collections.Generic;
-using System.Reflection;
+using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
@@ -14,9 +15,10 @@ namespace AV.Hierarchy
     {
         internal static HierarchyPreferences prefs => HierarchySettingsProvider.Preferences;
         internal static Event evt => Event.current;
-        internal static SmartHierarchy lastHierarchy;
-        
+        internal static SmartHierarchy active { get; private set; }
+
         internal SceneHierarchyWindow window { get; }
+        internal EditorWindow editorWindow => window.actualWindow;
         internal SceneHierarchy hierarchy => window.hierarchy;
         internal TreeViewState state => hierarchy.state;
         internal TreeViewController controller => hierarchy.controller;
@@ -26,14 +28,13 @@ namespace AV.Hierarchy
         private ViewItem hoveredItem;
         private bool isHovering => hoveredItem != null;
         private int hoveredItemId => hierarchy.hoveredItem?.id ?? -1;
-        private bool wantsToShowPreview;
         private bool requiresUpdateBeforeGUI;
         private bool requiresGUISetup = true;
         private Vector2 localMousePosition;
         
         private readonly VisualElement root;
         private readonly HoverPreview hoverPreview;
-        private readonly ComponentsBar componentsBar;
+        private readonly ComponentsToolbar componentsToolbar;
         private readonly IMGUIContainer guiContainer;
         private readonly Dictionary<int, ViewItem> ItemsData = new Dictionary<int, ViewItem>();
         
@@ -43,14 +44,13 @@ namespace AV.Hierarchy
             this.window = new SceneHierarchyWindow(window);
             
             hoverPreview = new HoverPreview();
-            componentsBar = new ComponentsBar(root);
+            componentsToolbar = new ComponentsToolbar(root);
 
             Initialize();
             RegisterCallbacks();
             hierarchy.ReassignCallbacks();
             
             guiContainer = root.parent.Query<IMGUIContainer>().First();
-            guiContainer.RegisterCallback<MouseDownEvent>(_ => ObjectPopupWindow.Close());
             
             // onGUIHandler is called after hierarchy GUI, thus has a slight delay
             guiContainer.onGUIHandler += OnAfterGUI;
@@ -60,9 +60,6 @@ namespace AV.Hierarchy
 
         private void Initialize()
         {
-            prefs.componentsPriority.Initialize();
-            
-            wantsToShowPreview = prefs.enableHoverPreview && prefs.alwaysShowPreview;
             requiresGUISetup = true;
         }
 
@@ -75,10 +72,11 @@ namespace AV.Hierarchy
         private void RegisterCallbacks()
         {
             HierarchySettingsProvider.onChange += OnSettingsChange;
-            
+
             Selection.selectionChanged += ReloadView;
             hierarchy.onVisibleRowsChanged += ReloadView;
             EditorApplication.hierarchyChanged += ReloadView;
+            EditorApplication.playModeStateChanged += change => Initialize();
         }
 
         private void OnSettingsChange()
@@ -88,7 +86,7 @@ namespace AV.Hierarchy
             ImmediateRepaint();
         }
         
-        private void ReloadView()
+        public void ReloadView()
         {
             ItemsData.Clear();
         }
@@ -103,9 +101,9 @@ namespace AV.Hierarchy
             if (!prefs.enableSmartHierarchy)
                 return;
             
-            lastHierarchy = HierarchyInitialization.GetLastHierarchy();
+            active = HierarchyInitialization.GetLastHierarchy();
 
-            lastHierarchy.OnItemCallback(id, rect);
+            active.OnItemCallback(id, rect);
         }
 
         private void OnItemCallback(int id, Rect rect)
@@ -133,11 +131,13 @@ namespace AV.Hierarchy
         private void OnBeforeGUI()
         {
             hierarchy.EnsureValidData();
-            
+
             ItemsData.TryGetValue(hoveredItemId, out hoveredItem);
 
+            CopyPasteCommands.ExecuteCommands();
             HideDefaultIcon();
         }
+        
         
         private void OnItemGUI(int id, Rect rect)
         {
@@ -145,7 +145,7 @@ namespace AV.Hierarchy
 
             if (!instance)
                 return;
-
+                
             GetInstanceViewItem(id, instance, rect, out var item);
             
             // Happens to be null when entering prefab mode
@@ -158,16 +158,22 @@ namespace AV.Hierarchy
             var selected = controller.IsSelected(item.view);
             var focused = selected && controller.HasFocus();
 
-            item.DrawIcon(rect, focused);
+            item.DrawItemIcon(rect, focused);
             
             if (item.isCollection)
             {
-                if (ViewItemGUI.OnIconClick(rect))
+                if (ViewItemGUI.OnClick(rect))
                 {
-                    var popup = new CollectionPopup(item.collection);
+                    var collectionPopup = PopupElement.GetPopup<CollectionPopup>();
+                    if (collectionPopup == null)
+                    {
+                        var popup = new CollectionPopup(item.collection);
 
-                    var position = new Vector2(rect.x, rect.yMax - state.scrollPos.y + 32);
-                    popup.ShowInsideWindow(position, root);
+                        var position = new Vector2(rect.x, rect.yMax - state.scrollPos.y + 32);
+                        popup.ShowInsideWindow(position, root);
+                    }
+                    else
+                        collectionPopup.Close();
                 }
             }
 
@@ -176,8 +182,8 @@ namespace AV.Hierarchy
             if (hovered)
                 OnHoverGUI(fullWidthRect, item, focused);
 
-            if (selected || hovered || componentsBar.focusedItem == item)
-                componentsBar.OnGUI(fullWidthRect, item, hovered, selected, focused);
+            if (selected || hovered || componentsToolbar.focusedItem == item)
+                componentsToolbar.OnGUI(fullWidthRect, item, hovered, selected, focused);
         }
         
         private void OnAfterGUI()
@@ -185,14 +191,9 @@ namespace AV.Hierarchy
             if (!prefs.enableSmartHierarchy)
                 return;
 
-            // Makes sure other items like scene headers are not interrupted 
+            // Makes sure other items like scene headers are not changed 
             controller.gui.ResetCustomStyling();
 
-            if (EditorWindow.focusedWindow != actualWindow)
-                ObjectPopupWindow.LoseFocus();
-            
-            HandleKeyboard(); 
-            
             // Mouse is relative to window during onGUIHandler
             if (evt.type != EventType.Used)
             {
@@ -230,23 +231,19 @@ namespace AV.Hierarchy
             
             controller.gui.SetSpaceBetweenIconAndText(18);
         }
-
-        private void HandleKeyboard()
-        {
-            if (!prefs.alwaysShowPreview)
-            {
-                switch (prefs.previewKey)
-                {
-                    case ModificationKey.Alt: wantsToShowPreview = evt.alt; break;
-                    case ModificationKey.Shift: wantsToShowPreview = evt.shift; break;
-                    case ModificationKey.Control: wantsToShowPreview = evt.control; break;
-                }
-            }
-        }
-
+        
         private void HandleObjectPreview()
         {
-            if (isHovering && wantsToShowPreview)
+            var isPreviewKeyHold = false;
+        
+            switch (prefs.previewKey)
+            {
+                case ModificationKey.Alt: isPreviewKeyHold = evt.alt; break;
+                case ModificationKey.Shift: isPreviewKeyHold = evt.shift; break;
+                case ModificationKey.Control: isPreviewKeyHold = evt.control; break;
+            }
+        
+            if (isHovering && prefs.enableHoverPreview && isPreviewKeyHold)
             {
                 hoverPreview.OnItemPreview(hoveredItem);
             }
@@ -268,9 +265,7 @@ namespace AV.Hierarchy
 
         private static Rect GetFullWidthRect(Rect rect)
         {
-            var fullWidthRect = new Rect(rect);
-            fullWidthRect.width += rect.x;
-            fullWidthRect.x = 0;
+            var fullWidthRect = new Rect(rect) { xMin = 0 };
             return fullWidthRect;
         }
 

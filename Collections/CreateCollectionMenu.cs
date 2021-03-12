@@ -35,9 +35,9 @@ namespace AV.Hierarchy
                 }
             }
             
-            var folder = new GameObject("New Collection", typeof(Collection));
-            Undo.RegisterCreatedObjectUndo(folder, "Create Collection");
-
+            var collection = new GameObject("New Collection", typeof(Collection));
+            Undo.RegisterCreatedObjectUndo(collection, "Create Collection");
+            
             if (selections.Length > 0)
             {
                 selections = selections
@@ -51,20 +51,21 @@ namespace AV.Hierarchy
                 var siblings = new int[selections.Length];
                 var folderSibling = firstSelection.transform.GetSiblingIndex();
 
-                Undo.SetTransformParent(folder.transform, firstSelection.transform.parent, "Create Collection");
+                Undo.SetTransformParent(collection.transform, firstSelection.transform.parent, "Create Collection");
             
                 for (int i = 0; i < selections.Length; i++)
                 {
-                    Undo.SetTransformParent(selections[i].transform, folder.transform, "Create Collection");
+                    Undo.SetTransformParent(selections[i].transform, collection.transform, "Create Collection");
                     selections[i].transform.SetSiblingIndex(siblings[i]);
                 }
 
-                folder.name = CollectionNaming.ChooseCollectionName(firstSelection);
-                folder.transform.SetSiblingIndex(folderSibling);
-
-                SmartHierarchy.lastHierarchy.window.FrameObject(firstSelection.GetInstanceID());
-                Selection.activeGameObject = folder;
+                collection.name = CollectionNaming.ChooseCollectionName(firstSelection);
+                collection.transform.SetSiblingIndex(folderSibling);
+                
+                SmartHierarchy.active.window.FrameObject(firstSelection.GetInstanceID());
             }
+            
+            Selection.activeGameObject = collection;
             
             isExecuted = true;
         }

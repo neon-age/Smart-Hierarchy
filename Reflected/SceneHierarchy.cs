@@ -19,6 +19,9 @@ namespace AV.Hierarchy
 
         public TreeViewItem hoveredItem => TreeViewController.hoveredItemFunc(controller.controller);
 
+        private static MethodInfo pasteGO;
+        private static MethodInfo duplicateGO;
+        
         private static FieldInfo controllerField;
         private static FieldInfo stateField;
 
@@ -38,9 +41,21 @@ namespace AV.Hierarchy
         {
             var sceneHierarchyType = typeof(Editor).Assembly.GetType("UnityEditor.SceneHierarchy");
 
+            pasteGO = sceneHierarchyType.GetMethod("PasteGO", BindingFlags.NonPublic | BindingFlags.Instance);
+            duplicateGO = sceneHierarchyType.GetMethod("DuplicateGO", BindingFlags.NonPublic | BindingFlags.Instance);
+
             controllerField = sceneHierarchyType.GetField("m_TreeView", BindingFlags.NonPublic | BindingFlags.Instance);
-            
             stateField = sceneHierarchyType.GetField("m_TreeViewState", BindingFlags.NonPublic | BindingFlags.Instance);
+        }
+
+        public void PasteGO()
+        {
+            pasteGO.Invoke(hierarchy, null);
+        }
+
+        public void DuplicateGO()
+        {
+            duplicateGO.Invoke(hierarchy, null);
         }
 
         public TreeViewItem GetViewItem(int id)
