@@ -1,13 +1,40 @@
-# Smart Hierarchy v0.3.0
+# Smart Hierarchy for Unity
 Brings intuitive features and important visual elements in the right place.
 
 • [View Changelog](CHANGELOG.md) • [🗺 Roadmap](https://github.com/neon-age/Smart-Hierarchy/projects/1) • [💬 Discussions](https://github.com/neon-age/Smart-Hierarchy/discussions) •
 
 ## Installation
-![Installation](.github/images/Installation.png)
+Requires Unity **2019.4** or higher.
+<details>
+<summary>Add from <a href="https://openupm.com/packages/com.av.smart-hierarchy/">OpenUPM</a> <em>| via scoped registry or <a href="https://openupm.com/packages/com.av.smart-hierarchy/#modal-packageinstaller">package installer</a>, recommended</em></summary>
+  
+&emsp;To add a package via scoped registry:
+  
+- Open `Edit/Project Settings/Package Manager`
+- Add a new Scoped Registry:
+  ```
+  Name: OpenUPM
+  URL:  https://package.openupm.com/
+  Scope(s): com.av
+  ```
+- Open `Window/Package Manager`
+- Click <kbd>+</kbd>
+- <kbd>Add from Git URL</kbd>
+- `com.av.smart-hierarchy` <kbd>Add</kbd>
+</details>
 
-Requires Unity **2019.4** or higher.\
-Customize plugin in "Preferences > Workflow > Smart Hierarchy".
+<details>
+<summary>Add from GitHub | <em>not recommended, no updates </em></summary>
+  
+- Open `Window/Package Manager`
+- Click <kbd>+</kbd>
+- <kbd>Add from Git URL</kbd>
+- `https://github.com/neon-age/Smart-Hierarchy.git` `#branch-name` <kbd>Add</kbd>
+
+&emsp;Note that you won't be able to receive updates through Package Manager this way, you'll have to update manually.
+</details>
+
+Customization is available in `Preferences > Workflow > Smart Hierarchy`.
 
 ## Features
 ### Icons
