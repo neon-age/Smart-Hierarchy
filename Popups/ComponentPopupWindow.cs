@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Unity.Collections;
 using UnityEditor;
@@ -13,45 +14,75 @@ using Object = UnityEngine.Object;
 
 namespace AV.Hierarchy
 {
-    public class ComponentPopupWindow : EditorWindow
+    public class ComponentPopupWindow : EditorPopupWindow
     {
-        public Component target { get; private set; }
-        public Action onClose;
-
-        private VisualElement root => rootVisualElement;
+        public Component target => component;
         
-        private ComponentPopup popup;
-        private Vector2 newSize;
-        private bool layoutChanged;
+        [SerializeField] Component component;
+        [SerializeField] Vector2 newSize;
+        [SerializeField] bool isPinned; // to be implemented
         
-        private static MethodInfo repaintImmediately = typeof(EditorWindow).GetMethod("RepaintImmediately", BindingFlags.NonPublic | BindingFlags.Instance);
-
-        public static ComponentPopupWindow Show(Component component, Rect buttonRect, Vector2 size)
+        VisualElement root => rootVisualElement;
+        ComponentPopup popup;
+        bool layoutChanged;
+        
+        
+        [InitializeOnLoadMethod]
+        private static void OnLoad()
+        {
+            EditorApplication.delayCall += () =>
+            {
+                Resources.FindObjectsOfTypeAll<ComponentPopupWindow>()
+                    .Where(x => x.isPinned).ToList()
+                    .ForEach(x => x.Close());
+            };
+        }
+        
+        public static ComponentPopupWindow CreateAndShow(Component component, Rect buttonRect, Vector2 size)
         {
             size.y += 2; // Border size
 
+            var window = CreateInstance<ComponentPopupWindow>();
+            
+            window.component = component;
+            window.GetLocalSize(buttonRect, size);
+            
+            buttonRect = GUIUtility.GUIToScreenRect(buttonRect);
+            window.CreateAt(buttonRect, size);
+            
+            return window;
+        }
+
+        private void GetLocalSize(Rect buttonRect, Vector2 size)
+        {
             var localRect = new Rect(buttonRect.position, size);
             localRect.y += buttonRect.height;
             
-            var popup = CreateInstance<ComponentPopupWindow>();
-            popup.Create(component, localRect);
+            newSize = localRect.size;
+        }
 
+        public void ShowWith(Component component, Rect buttonRect, Vector2 size)
+        {
+            size.y += 2;
+            
+            this.component = component;
+            GetLocalSize(buttonRect, size);
+            
+            Initialize();
+            EditorUtility.SetDirty(this);
+            Repaint();
+            EditorApplication.update.Invoke();
+            
             buttonRect = GUIUtility.GUIToScreenRect(buttonRect);
-            popup.ShowAsDropDown(buttonRect, size);
-            
-            GUI.UnfocusWindow();
-            
-            return popup;
+            ShowAt(buttonRect, size);
         }
-        
-        private void Create(Component component, Rect rect)
+
+        private void Initialize()
         {
-            target = component;
-            newSize = rect.size;
-        }
+            if (target == null)
+                return;
         
-        public void OnBecameVisible()
-        {
+            root.Clear();
             this.SetAntiAliasing(8);
             
             popup = new ComponentPopup(target);
@@ -69,8 +100,13 @@ namespace AV.Hierarchy
                 newSize = evt.newRect.size;
                 layoutChanged = true;
             });
-
-            repaintImmediately.Invoke(this, null);
+            // Closing window during Update throws null exceptions.
+            popup.onDestroy = Close;
+        }
+        
+        public void OnBecameVisible()
+        {
+            Initialize();
         }
         
         public void OnDisable()
@@ -78,17 +114,22 @@ namespace AV.Hierarchy
             popup?.Dispose();
         }
 
-        private void OnBecameInvisible()
-        {
-            onClose?.Invoke();
-        }
-
         // Window must be resized during update, or otherwise we'll get flickering.
         private void Update()
         {
             if (target == null)
-                Close();
-            
+            {
+                try
+                {
+                    Close();
+                }
+                catch
+                {
+                    DestroyImmediate(this);
+                    return;
+                }
+            }
+
             if (layoutChanged)
             {
                 layoutChanged = false;
@@ -96,17 +137,16 @@ namespace AV.Hierarchy
                 minSize = newSize;
                 maxSize = newSize;
                 
-                repaintImmediately.Invoke(this, null);
-
-                // TODO (not important): Find a way to fix black frame that may appear when clicking on enum popup during any expansion animation.
+                this.RepaintImmediately();
             }
         }
 
         private void ApplyBackgroundStyle()
         {
+            popup.style.SetBorderWidth(1);
             popup.style.SetBorderRadius(0);
             popup.style.SetBorderColor(popup.style.backgroundColor.value);
-            popup.style.SetBorderWidth(1);
+           
             popup.style.backgroundColor = (Color)(isProSkin ? new Color32(60, 60, 60, 255) : new Color32(200, 200, 200, 255));
         }
     }

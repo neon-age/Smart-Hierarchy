@@ -8,7 +8,7 @@ using Object = UnityEngine.Object;
 
 namespace AV.Hierarchy
 {
-    internal class ComponentPopup : ObjectPopupWindow, IDisposable
+    internal class ComponentPopup : PopupElement, IDisposable
     {
         private static StyleSheet styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(AssetDatabase.GUIDToAssetPath("948d877375c46ee479e97f6b60c07fc0"));
         private static Texture2D prefabOverlayAddedIcon = EditorGUIUtility.IconContent("PrefabOverlayAdded Icon").image as Texture2D;
@@ -22,6 +22,7 @@ namespace AV.Hierarchy
         private static int TitlebarHash = "GenericTitlebar".GetHashCode();
 
         public Component target { get; }
+        public Action onDestroy;
         
         private Editor editor;
 
@@ -43,7 +44,7 @@ namespace AV.Hierarchy
                              PrefabUtility.GetCorrespondingObjectFromSource(component) == null;
 
             target = component;
-            title.text = ObjectNames.GetInspectorTitle(component);
+            title = ObjectNames.GetInspectorTitle(component);
             
             styleSheets.Add(styleSheet);
             
@@ -96,8 +97,12 @@ namespace AV.Hierarchy
         private void DrawComponentIMGUI()
         {
             if (target == null)
+            {
+                onDestroy.Invoke();
+                Dispose();
                 return;
-        
+            }
+
             var marginLeft = contentContainer.resolvedStyle.marginLeft;
 
             GUILayout.BeginHorizontal();
