@@ -59,7 +59,7 @@ Children are detached during scene process.
 ### Activation Toggle
 ![Activation Toggle](.github/images/ActivationToggle.png)
 
-No more need to select game object in order to (de)activate it.
+\#ProTip: Swipe to (de)activate multiple objects!
 
 ### Hover Preview
 ![Hover Preview](.github/images/HoverPreview.png)
