@@ -30,11 +30,10 @@ namespace AV.Hierarchy
         private bool requiresGUISetup = true;
         private Vector2 localMousePosition;
         
-        private readonly VisualElement root;
+        public readonly VisualElement root;
         private readonly HoverPreview hoverPreview;
-        private IMGUIContainer guiContainer;
+        private readonly IMGUIContainer guiContainer;
         private readonly Dictionary<int, ViewItem> ItemsData = new Dictionary<int, ViewItem>();
-       
         
         public SmartHierarchy(EditorWindow window)
         {
@@ -122,6 +121,7 @@ namespace AV.Hierarchy
 
         private void OnGUISetup()
         {
+            hierarchy.EnsureValidData();
             actualWindow.SetAntiAliasing(8);
         }
         
@@ -152,32 +152,10 @@ namespace AV.Hierarchy
             HideDefaultIcon();
             
             var isSelected = controller.IsSelected(item.view);
+            var isHover = hierarchy.hoveredItem == item.view;
             var isOn = isSelected && controller.HasFocus();
-
-            item.DrawIcon(rect, isOn);
             
-            if (item.isCollection)
-            {
-                if (ViewItemGUI.OnClick(rect))
-                {
-                    var collectionPopup = ObjectPopupWindow.GetPopup<CollectionPopup>();
-                    if (collectionPopup == null)
-                    {
-                        var popup = new CollectionPopup(item.collection);
-
-                        var position = new Vector2(rect.x, rect.yMax - state.scrollPos.y + 32);
-                        popup.ShowInsideWindow(position, root);
-                    }
-                    else
-                        collectionPopup.Close();
-                }
-            }
-
-            if (hierarchy.hoveredItem == item.view)
-            {
-                var fullWidthRect = GetFullWidthRect(rect);
-                OnHoverGUI(fullWidthRect, item);
-            }
+            item.DoItemGUI(this, rect, isHover, isOn);
         }
         
         private void OnAfterGUI()
@@ -243,33 +221,6 @@ namespace AV.Hierarchy
 
                 ItemsData.Add(id, item);
             }
-        }
-
-        private void OnHoverGUI(Rect rect, ViewItem item)
-        {
-            var instance = item.instance;
-            
-            var toggleRect = new Rect(rect) { x = 32 };
-            if (OnLeftToggle(toggleRect, instance.activeSelf, out var isActive))
-            {
-                Undo.RecordObject(instance, "GameObject Set Active");
-                instance.SetActive(isActive);
-            }
-        }
-
-        private static Rect GetFullWidthRect(Rect rect)
-        {
-            var fullWidthRect = new Rect(rect) { x = 0, width = Screen.width };
-            return fullWidthRect;
-        }
-
-        private static bool OnLeftToggle(Rect rect, bool isActive, out bool value)
-        {
-            var toggleRect = new Rect(rect) { width = 16 };
-            
-            EditorGUI.BeginChangeCheck();
-            value = GUI.Toggle(toggleRect, isActive, GUIContent.none);
-            return EditorGUI.EndChangeCheck();
         }
     }
 }

@@ -5,6 +5,8 @@ namespace AV.Hierarchy
 {
     internal static class ViewItemGUI
     {
+        private static Event evt => Event.current;
+        
         private static Material iconMaterial;
         
         private static readonly Color32 OnColor = new Color32(240, 240, 240, 255);
@@ -13,6 +15,44 @@ namespace AV.Hierarchy
         private static readonly int OnColorID = Shader.PropertyToID("_OnColor");
         private static readonly int IsOnID = Shader.PropertyToID("_IsOn");
 
+        
+        public static void DoItemGUI(this ViewItem item, SmartHierarchy hierarchy, Rect rect, bool isHover, bool isOn)
+        {
+            item.DrawIcon(rect, isOn);
+            
+            if (item.isCollection)
+            {
+                if (OnIconClick(rect))
+                {
+                    var collectionPopup = ObjectPopupWindow.GetPopup<CollectionPopup>();
+                    if (collectionPopup == null)
+                    {
+                        var popup = new CollectionPopup(item.collection);
+
+                        var scrollPos = hierarchy.state.scrollPos.y;
+                        var position = new Vector2(rect.x, rect.yMax - scrollPos + 32);
+                        
+                        popup.ShowInsideWindow(position, hierarchy.root);
+                    }
+                    else
+                        collectionPopup.Close();
+                }
+            }
+            
+            var fullWidthRect = new Rect(rect) { x = 0, width = Screen.width };
+            var toggleRect = new Rect(fullWidthRect) { x = 32 };
+
+            var isSwiped = SwipeToggle.IsRectSwiped(toggleRect);
+
+            if (isSwiped)
+            {
+                var c = EditorGUIUtility.isProSkin ? new Color(1, 1, 1, 1) : new Color(0, 0, 0, 1);
+                EditorGUI.DrawRect(toggleRect, new Color(c.r, c.g, c.b, 0.0666f));
+            }
+
+            ActivationToggle.DoActivationToggle(toggleRect, item.instance, isHover || isSwiped);
+        }
+        
         public static void DrawIcon(this ViewItem item, Rect rect, bool isOn)
         {
             var isCollection = item.isCollection;
@@ -48,17 +88,16 @@ namespace AV.Hierarchy
             EditorGUI.DrawPreviewTexture(position, texture, iconMaterial);
         }
         
-        public static bool OnClick(Rect rect)
+        public static bool OnIconClick(Rect rect)
         {
             var iconRect = new Rect(rect) { width = rect.height, height = rect.height };
 
-            var clicked = iconRect.Contains(Event.current.mousePosition) &&
-                        Event.current.type == EventType.MouseDown &&
-                        Event.current.button == 0;
+            var hovered = iconRect.Contains(evt.mousePosition);
+            var clicked = evt.type == EventType.MouseDown && evt.button == 0;
             
-            if (clicked)
+            if (hovered && clicked)
             {
-                Event.current.Use();
+                evt.Use();
                 return true;
             }
             return false;
