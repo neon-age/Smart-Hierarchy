@@ -42,15 +42,15 @@ namespace AV.Hierarchy
             var fullWidthRect = new Rect(rect) { x = 0, width = Screen.width };
             var toggleRect = new Rect(fullWidthRect) { x = 32 };
 
-            var isSwiped = SwipeToggle.IsRectSwiped(toggleRect);
+            var isDragged = ActivationToggle.IsObjectDragged(item.instance);
 
-            if (isSwiped)
+            if (isDragged)
             {
                 var c = EditorGUIUtility.isProSkin ? new Color(1, 1, 1, 1) : new Color(0, 0, 0, 1);
                 EditorGUI.DrawRect(toggleRect, new Color(c.r, c.g, c.b, 0.0666f));
             }
 
-            ActivationToggle.DoActivationToggle(toggleRect, item.instance, isHover || isSwiped);
+            ActivationToggle.DoActivationToggle(toggleRect, item.instance, isHover || isDragged);
         }
         
         public static void DrawIcon(this ViewItem item, Rect rect, bool isOn)
