@@ -23,12 +23,13 @@ namespace AV.Hierarchy
             if (shurikenToggle == null)
                 shurikenToggle = "ShurikenToggle";
 
-            var evtType = Event.current.type;
-            if (evtType == EventType.MouseDown || evtType == EventType.MouseUp)
-            {
+            var evt = Event.current;
+            
+            if (evt.type == EventType.MouseDown)
                 targetDepth = GetTransformDepth(instance.transform);
+                
+            if (evt.rawType == EventType.MouseUp || evt.rawType == EventType.ValidateCommand)
                 draggedObjects.Clear();
-            }
 
             var style = isShown ? shurikenToggle : GUIStyle.none;
             

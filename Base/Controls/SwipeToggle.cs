@@ -67,8 +67,8 @@ namespace AV.Hierarchy
 
                     evt.Use();
                 }
-
-                if (eventType == EventType.MouseUp || eventType == EventType.ValidateCommand)
+                
+                if (evt.rawType == EventType.MouseUp || evt.rawType == EventType.ValidateCommand)
                 {
                     if (isHotControl)
                         GUIUtility.hotControl = 0;
@@ -94,7 +94,7 @@ namespace AV.Hierarchy
                     willToggle = true;
                 }
             }
-
+            
             var hasFocus = isHover && isHolding && GUIUtility.hotControl == controlID;
 
             var drawRect = toggleRect;
