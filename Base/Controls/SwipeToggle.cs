@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -5,30 +6,45 @@ using UnityEngine;
 
 namespace AV.Hierarchy
 {
-    internal static class SwipeToggle
+    internal struct SwipeArgs
+    {
+        public Rect rect;
+    }
+    
+    internal class SwipeToggle<T>
     {
         private static Event evt => Event.current;
-        
-        private static Rect startRect;
-        private static bool targetValue;
-        private static bool isHolding;
-        private static HashSet<Rect> draggedRects = new HashSet<Rect>();
-        private static VirtualCursor virtualCursor = new VirtualCursor();
+
+        private Rect startRect;
+        private bool targetState;
+        private bool isHolding;
+        private HashSet<Rect> draggedRects = new HashSet<Rect>();
+        private VirtualCursor virtualCursor = new VirtualCursor();
 
         private static readonly int ToggleHash = "SwipeToggle".GetHashCode();
 
-        public static bool IsRectSwiped(Rect rect)
+        
+        protected virtual void OnMouseDown(SwipeArgs args, T userData) {}
+        protected virtual void OnStopDragging() {}
+
+        
+        public bool WillStopDragging()
+        {
+            return evt.rawType == EventType.MouseUp || evt.rawType == EventType.ValidateCommand;
+        }
+        
+        public bool IsRectDragged(Rect rect)
         {
             return draggedRects.Contains(rect) || startRect == rect;
         }
 
-        public static bool DoVerticalToggle(Rect rect, bool isActive, GUIContent content = default, GUIStyle style = default)
+        public bool DoVerticalToggle(Rect rect, bool isActive, GUIContent content = default, GUIStyle style = default, T userData = default)
         {
             var overlapRect = new Rect(rect) { x = 0, width = Screen.width };
-            return DoControl(rect, isActive, content, overlapRect, style);
+            return DoControl(rect, isActive, content, overlapRect, style, userData);
         }
         
-        public static bool DoControl(Rect rect, bool isActive, GUIContent content = default, Rect overlapRect = default, GUIStyle style = default)
+        public bool DoControl(Rect rect, bool isActive, GUIContent content = default, Rect overlapRect = default, GUIStyle style = default, T userData = default)
         {
             if (content == default)
                 content = GUIContent.none;
@@ -60,31 +76,19 @@ namespace AV.Hierarchy
                     isHolding = true;
                     willToggle = true;
 
-                    targetValue = isActive;
+                    targetState = isActive;
 
                     startRect = rect;
                     draggedRects.Clear();
 
+                    OnMouseDown(new SwipeArgs { rect = rect }, userData);
+
                     evt.Use();
-                }
-                
-                if (evt.rawType == EventType.MouseUp || evt.rawType == EventType.ValidateCommand)
-                {
-                    if (isHotControl)
-                        GUIUtility.hotControl = 0;
-
-                    isHolding = false;
-
-                    startRect = default;
-                    draggedRects.Clear();
-
-                    if (isHotControl)
-                        evt.Use();
                 }
 
                 var isDrag = isHover && isHolding && startRect != rect;
 
-                if (isDrag && isActive == targetValue && !draggedRects.Contains(rect))
+                if (isDrag && isActive == targetState && !draggedRects.Contains(rect))
                 {
                     // Start swiping
                     draggedRects.Add(startRect);
@@ -92,6 +96,24 @@ namespace AV.Hierarchy
                     startRect = default;
 
                     willToggle = true;
+                }
+            }
+            
+            if (evt.rawType == EventType.MouseUp || evt.rawType == EventType.ValidateCommand)
+            {
+                if (isHolding || startRect != default)
+                {
+                    isHolding = false;
+                    startRect = default;
+                    draggedRects.Clear();
+                        
+                    OnStopDragging();
+                }
+
+                if (isHotControl)
+                {
+                    GUIUtility.hotControl = 0;
+                    evt.Use();
                 }
             }
             

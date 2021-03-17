@@ -5,35 +5,26 @@ using UnityEngine;
 
 namespace AV.Hierarchy
 {
-    internal static class ActivationToggle
+    internal class ActivationToggle : SwipeToggle<GameObject>
     {
         private static GUIStyle shurikenToggle;
 
-        private static int targetDepth;
-        private static HashSet<GameObject> draggedObjects = new HashSet<GameObject>();
+        private int targetDepth;
+        private HashSet<GameObject> draggedObjects = new HashSet<GameObject>();
 
-
-        internal static bool IsObjectDragged(GameObject instance)
+        internal bool IsObjectDragged(GameObject instance)
         {
             return draggedObjects.Contains(instance);
         }
-        
-        internal static void DoActivationToggle(Rect rect, GameObject instance, bool isShown)
+
+        internal void DoActivationToggle(Rect rect, GameObject instance, bool isShown)
         {
             if (shurikenToggle == null)
                 shurikenToggle = "ShurikenToggle";
-
-            var evt = Event.current;
             
-            if (evt.type == EventType.MouseDown)
-                targetDepth = GetTransformDepth(instance.transform);
-                
-            if (evt.rawType == EventType.MouseUp || evt.rawType == EventType.ValidateCommand)
-                draggedObjects.Clear();
-
             var style = isShown ? shurikenToggle : GUIStyle.none;
             
-            if (SwipeToggle.DoVerticalToggle(rect, instance.activeSelf, style: style))
+            if (DoVerticalToggle(rect, instance.activeSelf, userData: instance, style: style))
             {
                 var depth = GetTransformDepth(instance.transform);
                 
@@ -44,6 +35,16 @@ namespace AV.Hierarchy
                 Undo.RecordObject(instance, "GameObject Set Active");
                 instance.SetActive(!instance.activeSelf);
             }
+        }
+        
+        protected override void OnMouseDown(SwipeArgs args, GameObject instance)
+        {
+            targetDepth = GetTransformDepth(instance.transform);
+        }
+
+        protected override void OnStopDragging()
+        {
+            draggedObjects.Clear();
         }
 
         private static int GetTransformDepth(Transform target)

@@ -15,6 +15,8 @@ namespace AV.Hierarchy
         private static readonly int OnColorID = Shader.PropertyToID("_OnColor");
         private static readonly int IsOnID = Shader.PropertyToID("_IsOn");
 
+        private static readonly ActivationToggle activationToggle = new ActivationToggle();
+
         
         public static void DoItemGUI(this ViewItem item, SmartHierarchy hierarchy, Rect rect, bool isHover, bool isOn)
         {
@@ -42,7 +44,7 @@ namespace AV.Hierarchy
             var fullWidthRect = new Rect(rect) { x = 0, width = Screen.width };
             var toggleRect = new Rect(fullWidthRect) { x = 32 };
 
-            var isDragged = ActivationToggle.IsObjectDragged(item.instance);
+            var isDragged = activationToggle.IsObjectDragged(item.instance);
 
             if (isDragged)
             {
@@ -50,7 +52,7 @@ namespace AV.Hierarchy
                 EditorGUI.DrawRect(toggleRect, new Color(c.r, c.g, c.b, 0.0666f));
             }
 
-            ActivationToggle.DoActivationToggle(toggleRect, item.instance, isHover || isDragged);
+            activationToggle.DoActivationToggle(toggleRect, item.instance, isHover || isDragged);
         }
         
         public static void DrawIcon(this ViewItem item, Rect rect, bool isOn)
