@@ -10,6 +10,7 @@ namespace AV.Hierarchy
         private static GUIStyle shurikenToggle;
 
         private int targetDepth;
+        private bool isSelectionBounded;
         private HashSet<GameObject> draggedObjects = new HashSet<GameObject>();
 
         internal bool IsObjectDragged(GameObject instance)
@@ -31,6 +32,9 @@ namespace AV.Hierarchy
                 if (depth != targetDepth)
                     return;
 
+                if (isSelectionBounded && !Selection.Contains(instance))
+                    return;
+
                 draggedObjects.Add(instance);
                 Undo.RecordObject(instance, "GameObject Set Active");
                 instance.SetActive(!instance.activeSelf);
@@ -40,11 +44,15 @@ namespace AV.Hierarchy
         protected override void OnMouseDown(SwipeArgs args, GameObject instance)
         {
             targetDepth = GetTransformDepth(instance.transform);
+
+            if (Selection.Contains(instance))
+                isSelectionBounded = true;
         }
 
         protected override void OnStopDragging()
         {
             draggedObjects.Clear();
+            isSelectionBounded = false;
         }
 
         private static int GetTransformDepth(Transform target)
