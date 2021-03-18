@@ -45,7 +45,7 @@ namespace AV.Hierarchy
         {
             targetDepth = GetTransformDepth(instance.transform);
 
-            if (Selection.Contains(instance))
+            if (Selection.count > 1 && Selection.Contains(instance))
                 isSelectionBounded = true;
         }
 
