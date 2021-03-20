@@ -13,8 +13,10 @@ namespace AV.Hierarchy
 {
     internal class SmartHierarchy
     {
-        internal static HierarchyPreferences prefs => HierarchySettingsProvider.Preferences;
         internal static Event evt => Event.current;
+        internal static HierarchyPreferences prefs => HierarchySettingsProvider.Preferences;
+
+        internal static bool isPluginEnabled { get; private set; } = prefs.enableSmartHierarchy;
         internal static SmartHierarchy active { get; private set; }
 
         internal SceneHierarchyWindow window { get; }
@@ -23,10 +25,11 @@ namespace AV.Hierarchy
         internal TreeViewController controller => hierarchy.controller;
         
         private EditorWindow actualWindow => window.actualWindow;
-        private HierarchyItem hoveredItem;
         private bool isHovering => hoveredItem != null;
         private int hoveredItemId => hierarchy.hoveredItem?.id ?? -1;
-        private bool requiresUpdateBeforeGUI;
+        
+        private HierarchyItem hoveredItem;
+        
         private bool requiresGUISetup = true;
         private Vector2 localMousePosition;
         
@@ -47,8 +50,10 @@ namespace AV.Hierarchy
             hierarchy.ReassignCallbacks();
             
             guiContainer = root.parent.Query<IMGUIContainer>().First();
+            var guiHandler = guiContainer.onGUIHandler;
             
-            // onGUIHandler is called after hierarchy GUI, thus has a slight delay
+            guiContainer.onGUIHandler = OnBeforeGUI;
+            guiContainer.onGUIHandler += guiHandler;
             guiContainer.onGUIHandler += OnAfterGUI;
             
             root.Add(hoverPreview);
@@ -94,7 +99,7 @@ namespace AV.Hierarchy
         
         private static void OnHierarchyItemGUI(int id, Rect rect)
         {
-            if (!prefs.enableSmartHierarchy)
+            if (!isPluginEnabled)
                 return;
             
             active = HierarchyInitialization.GetLastHierarchy();
@@ -110,12 +115,6 @@ namespace AV.Hierarchy
                 OnGUISetup();
             }
 
-            if (requiresUpdateBeforeGUI)
-            {
-                requiresUpdateBeforeGUI = false;
-                OnBeforeGUI();
-            }
-            
             OnItemGUI(id, rect);
         }
 
@@ -124,17 +123,31 @@ namespace AV.Hierarchy
             hierarchy.EnsureValidData();
             actualWindow.SetAntiAliasing(8);
         }
+
+        private void OnDisable()
+        {
+            controller.gui.ResetCustomStyling();
+        }
+        
         
         private void OnBeforeGUI()
         {
+            if (!prefs.enableSmartHierarchy)
+            {
+                isPluginEnabled = false;
+                OnDisable();
+                return;
+            }
+            isPluginEnabled = true;
+
             hierarchy.EnsureValidData();
+            HideDefaultIcon();
 
             itemsData.TryGetValue(hoveredItemId, out hoveredItem);
 
             CopyPasteCommands.ExecuteCommands();
             HideDefaultIcon();
         }
-        
         
         private void OnItemGUI(int id, Rect rect)
         {
@@ -157,10 +170,9 @@ namespace AV.Hierarchy
         
         private void OnAfterGUI()
         {
-            if (!prefs.enableSmartHierarchy)
+            if (!isPluginEnabled)
                 return;
 
-            // Makes sure other items like scene headers are not interrupted 
             controller.gui.ResetCustomStyling();
             
             // Mouse is relative to window during onGUIHandler
@@ -172,8 +184,6 @@ namespace AV.Hierarchy
             }
 
             HandleObjectPreview();
-
-            requiresUpdateBeforeGUI = true;
         }
 
         private void HideDefaultIcon()
