@@ -27,14 +27,14 @@ namespace AV.Hierarchy
             visible = false;
         }
 
-        public void OnItemPreview(ViewItem item)
+        public void OnItemPreview(HierarchyItem item)
         {
             visible = true;
             
-            if (preview == null || preview.GetTargetType() != item.mainType)
+            if (preview == null || preview.GetTargetType() != item.targetType)
             {
                 // Target type has changed, switch preview
-                if (!ObjectPreviewBase.TryGetAvailablePreview(item.mainType, out preview))
+                if (!ObjectPreviewBase.TryGetAvailablePreview(item.targetType, out preview))
                 {
                     // No preview available for such type...
                     Hide();

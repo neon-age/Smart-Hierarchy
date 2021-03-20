@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace AV.Hierarchy
 {
-    internal static class ViewItemGUI
+    internal static class HierarchyItemGUI
     {
         private static Event evt => Event.current;
         
@@ -16,29 +16,13 @@ namespace AV.Hierarchy
         private static readonly int IsOnID = Shader.PropertyToID("_IsOn");
 
         
-        public static void DoItemGUI(this ViewItem item, SmartHierarchy hierarchy, Rect rect, bool isHover, bool isOn)
+        internal static void DoItemGUI(this HierarchyItem item, HierarchyItemArgs args)
         {
-            item.DrawIcon(rect, isOn);
-            
-            if (item.isCollection)
-            {
-                if (OnIconClick(rect))
-                {
-                    var collectionPopup = ObjectPopupWindow.GetPopup<CollectionPopup>();
-                    if (collectionPopup == null)
-                    {
-                        var popup = new CollectionPopup(item.collection);
+            item.DoItemGUI(args);
+        }
 
-                        var scrollPos = hierarchy.state.scrollPos.y;
-                        var position = new Vector2(rect.x, rect.yMax - scrollPos + 32);
-                        
-                        popup.ShowInsideWindow(position, hierarchy.root);
-                    }
-                    else
-                        collectionPopup.Close();
-                }
-            }
-            
+        public static void DoActivationToggle(this GameObjectItem item, Rect rect, bool isHover)
+        {
             var fullWidthRect = new Rect(rect) { x = 0, width = Screen.width };
             var toggleRect = new Rect(fullWidthRect) { x = 32 };
 
@@ -50,34 +34,22 @@ namespace AV.Hierarchy
                 EditorGUI.DrawRect(toggleRect, new Color(c.r, c.g, c.b, 0.0666f));
             }
 
-            ActivationToggle.DoActivationToggle(toggleRect, item.instance, isHover || isSwiped);
+            ActivationToggle.DoActivationToggle(toggleRect, item.gameObject, isHover || isSwiped);
         }
         
-        public static void DrawIcon(this ViewItem item, Rect rect, bool isOn)
+        public static void DrawIcon(this HierarchyItem item, Rect rect, Color color, bool isOn)
         {
-            var isCollection = item.isCollection;
-            
             var iconRect = new Rect(rect) { width = 16, height = 16 };
             iconRect.y += (rect.height - 16) / 2;
-            
-            var color = GUI.color;
-
-            if (isCollection && !isOn)
-                color *= ColorTags.GetColor(item.collection.colorTag);
-            
-            var renderDisabled = item.colorCode >= 4;
-            
-            if (renderDisabled)
-                color *= new Color(1f, 1f, 1f, 0.5f);
 
             if (item.effectiveIcon)
-                DrawIcon(iconRect, item.effectiveIcon, color, isOn);
+                DrawIconTexture(iconRect, item.effectiveIcon, color, isOn);
 
             if (item.overlayIcon)
-                DrawIcon(iconRect, item.overlayIcon, color);
+                DrawIconTexture(iconRect, item.overlayIcon, color);
         }
         
-        private static void DrawIcon(Rect position, Texture texture, Color color, bool isOn = false)
+        public static void DrawIconTexture(Rect position, Texture texture, Color color, bool isOn = false)
         {
             if (iconMaterial == null)
                 iconMaterial = new Material(Shader.Find("Hidden/Internal-IconClip"));

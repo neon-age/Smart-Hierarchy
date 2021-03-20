@@ -25,7 +25,7 @@ namespace AV.Hierarchy
             if (selections.Length == 1)
             {
                 var components = selections[0].GetComponents<Component>();
-                var mainComponent = Components.ChooseMainComponent(components);
+                var mainComponent = ComponentsList.ChooseMainComponent(components);
             
                 if (!mainComponent || mainComponent is Transform)
                 {

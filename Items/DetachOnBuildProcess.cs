@@ -13,28 +13,24 @@ namespace AV.Hierarchy
         
         public void OnProcessScene(Scene scene, BuildReport report)
         {
-            var preferences = HierarchySettingsProvider.Preferences;
-
-            if (Application.isEditor && preferences.keepCollectionsInPlaymode)
+            if (!Application.isEditor)
                 return;
-                
+            
             var sceneRoots = scene.GetRootGameObjects();
             foreach (var root in sceneRoots)
             {
-                var folders = root.GetComponentsInChildren<Collection>(true);
+                var items = root.GetComponentsInChildren<HierarchyComponent>(true);
                 
-                foreach (var folder in folders)
+                foreach (var item in items)
                 {
-                    if (folder.keepTransformHierarchy)
-                        continue;
-                    DetachRootChildren(folder.transform);
+                    if (item.detachChildren)
+                        DetachRootChildren(item.transform);
                 }
 
-                foreach (var folder in folders)
+                foreach (var item in items)
                 {
-                    if (folder.keepTransformHierarchy)
-                        continue;
-                    Object.DestroyImmediate(folder.gameObject);
+                    if (item.detachChildren)
+                        Object.DestroyImmediate(item.gameObject);
                 }
             }
         }

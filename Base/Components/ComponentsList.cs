@@ -6,7 +6,7 @@ using static UnityEditor.EditorGUIUtility;
 
 namespace AV.Hierarchy
 {
-    internal class Components
+    public class ComponentsList
     {
         public readonly Component main;
         public readonly Texture2D icon;
@@ -15,7 +15,7 @@ namespace AV.Hierarchy
 
         public ComponentData this[int index] => data[index];
 
-        public Components(GameObject instance)
+        public ComponentsList(GameObject instance)
         {
             var components = instance.GetComponents<Component>();
             data = new List<ComponentData>(components.Length);

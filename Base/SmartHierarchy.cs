@@ -7,6 +7,7 @@ using UnityEditor.IMGUI.Controls;
 using UnityEditor.SceneManagement;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
+using Object = UnityEngine.Object;
 
 namespace AV.Hierarchy
 {
@@ -20,10 +21,9 @@ namespace AV.Hierarchy
         internal SceneHierarchy hierarchy => window.hierarchy;
         internal TreeViewState state => hierarchy.state;
         internal TreeViewController controller => hierarchy.controller;
-        internal float time => Time.realtimeSinceStartup;
         
         private EditorWindow actualWindow => window.actualWindow;
-        private ViewItem hoveredItem;
+        private HierarchyItem hoveredItem;
         private bool isHovering => hoveredItem != null;
         private int hoveredItemId => hierarchy.hoveredItem?.id ?? -1;
         private bool requiresUpdateBeforeGUI;
@@ -33,7 +33,7 @@ namespace AV.Hierarchy
         public readonly VisualElement root;
         private readonly HoverPreview hoverPreview;
         private readonly IMGUIContainer guiContainer;
-        private readonly Dictionary<int, ViewItem> ItemsData = new Dictionary<int, ViewItem>();
+        private readonly Dictionary<int, HierarchyItem> itemsData = new Dictionary<int, HierarchyItem>();
         
         public SmartHierarchy(EditorWindow window)
         {
@@ -84,7 +84,7 @@ namespace AV.Hierarchy
         
         public void ReloadView()
         {
-            ItemsData.Clear();
+            itemsData.Clear();
         }
         
         private static void ImmediateRepaint()
@@ -129,7 +129,7 @@ namespace AV.Hierarchy
         {
             hierarchy.EnsureValidData();
 
-            ItemsData.TryGetValue(hoveredItemId, out hoveredItem);
+            itemsData.TryGetValue(hoveredItemId, out hoveredItem);
 
             CopyPasteCommands.ExecuteCommands();
             HideDefaultIcon();
@@ -138,12 +138,9 @@ namespace AV.Hierarchy
         
         private void OnItemGUI(int id, Rect rect)
         {
-            var instance = EditorUtility.InstanceIDToObject(id) as GameObject;
+            var instance = EditorUtility.InstanceIDToObject(id);
 
-            if (!instance)
-                return;
-                
-            GetInstanceViewItem(id, instance, rect, out var item);
+            GetInstanceViewItem(id, instance, out var item);
             
             // Happens to be null when entering prefab mode
             if (!item.EnsureViewExist(hierarchy))
@@ -155,7 +152,7 @@ namespace AV.Hierarchy
             var isHover = hierarchy.hoveredItem == item.view;
             var isOn = isSelected && controller.HasFocus();
             
-            item.DoItemGUI(this, rect, isHover, isOn);
+            item.DoItemGUI(new HierarchyItemArgs { rect = rect, focused = isSelected, hovered = isHover, on = isOn });
         }
         
         private void OnAfterGUI()
@@ -213,13 +210,13 @@ namespace AV.Hierarchy
             }
         }
         
-        private void GetInstanceViewItem(int id, GameObject instance, Rect rect, out ViewItem item)
+        private void GetInstanceViewItem(int id, Object instance, out HierarchyItem item)
         {
-            if (!ItemsData.TryGetValue(id, out item))
+            if (!itemsData.TryGetValue(id, out item))
             {
-                item = new ViewItem(instance) { rect = rect };
+                item = HierarchyItemCreator.CreateForInstance(id, instance);
 
-                ItemsData.Add(id, item);
+                itemsData.Add(id, item);
             }
         }
     }

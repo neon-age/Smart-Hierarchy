@@ -40,7 +40,7 @@ namespace AV.Hierarchy
             
             if (components.Length > 1)
             {
-                var mainComponent = Components.ChooseMainComponent(components);
+                var mainComponent = ComponentsList.ChooseMainComponent(components);
 
                 if (TryGetNamingByComponent(mainComponent, out var naming))
                     return naming;
