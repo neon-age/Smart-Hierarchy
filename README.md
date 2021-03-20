@@ -1,7 +1,10 @@
 # Smart Hierarchy for Unity
 Brings intuitive features and important visual elements in the right place.
 
-• [View Changelog](CHANGELOG.md) • [🗺 Roadmap](https://github.com/neon-age/Smart-Hierarchy/projects/1) • [💬 Discussions](https://github.com/neon-age/Smart-Hierarchy/discussions) •
+• [View Changelog](CHANGELOG.md) 
+• [🗺 Roadmap](https://github.com/neon-age/Smart-Hierarchy/projects/1) 
+• [💬 Discussions](https://github.com/neon-age/Smart-Hierarchy/discussions)
+• [📚 Wiki](https://github.com/neon-age/Smart-Hierarchy/wiki) •
 
 ## Installation
 Requires Unity **2019.4** or higher.
@@ -59,7 +62,8 @@ Children are detached during scene process.
 ### Activation Toggle
 ![Activation Toggle](.github/images/ActivationToggle.png)
 
-\#ProTip: Swipe to (de)activate multiple objects!
+Lets you (de)activate game-objects while keeping your selection.
+> [Swipe to affect multiple objects!](https://github.com/neon-age/Smart-Hierarchy/wiki/Activation-Toggle)
 
 ### Hover Preview
 ![Hover Preview](.github/images/HoverPreview.png)

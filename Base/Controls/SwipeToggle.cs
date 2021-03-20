@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -5,30 +6,65 @@ using UnityEngine;
 
 namespace AV.Hierarchy
 {
-    internal static class SwipeToggle
+    internal struct SwipeArgs
+    {
+        public Rect rect;
+    }
+
+    internal class SwipeToggle<T>
     {
         private static Event evt => Event.current;
         
-        private static Rect startRect;
-        private static bool targetValue;
-        private static bool isHolding;
-        private static HashSet<Rect> draggedRects = new HashSet<Rect>();
-        private static VirtualCursor virtualCursor = new VirtualCursor();
-
         private static readonly int ToggleHash = "SwipeToggle".GetHashCode();
+        
+        private static bool wasInitialized;
+        private static bool wasUndoPerformed;
+        
+        private Rect startRect;
+        private bool targetState;
+        private bool isHolding;
+        private HashSet<Rect> draggedRects = new HashSet<Rect>();
+        private VirtualCursor virtualCursor = new VirtualCursor();
 
-        public static bool IsRectSwiped(Rect rect)
+        public SwipeToggle()
+        {
+            if (!wasInitialized)
+            {
+                wasInitialized = true;
+                Undo.undoRedoPerformed += () => wasUndoPerformed = true;
+            }
+        }
+        
+        protected virtual void OnMouseDown(SwipeArgs args, T userData) {}
+        protected virtual void OnStopDragging() {}
+
+        
+        public bool WillStopDragging()
+        {
+            return evt.rawType == EventType.MouseUp || evt.rawType == EventType.ValidateCommand;
+        }
+        
+        public bool IsRectDragged(Rect rect)
         {
             return draggedRects.Contains(rect) || startRect == rect;
         }
 
-        public static bool DoVerticalToggle(Rect rect, bool isActive, GUIContent content = default, GUIStyle style = default)
+        public void Cancel()
+        {
+            isHolding = false;
+            startRect = default;
+            draggedRects.Clear();
+                    
+            OnStopDragging();
+        }
+
+        public bool DoVerticalToggle(Rect rect, bool isActive, GUIContent content = default, GUIStyle style = default, T userData = default)
         {
             var overlapRect = new Rect(rect) { x = 0, width = Screen.width };
-            return DoControl(rect, isActive, content, overlapRect, style);
+            return DoControl(rect, isActive, content, overlapRect, style, userData);
         }
         
-        public static bool DoControl(Rect rect, bool isActive, GUIContent content = default, Rect overlapRect = default, GUIStyle style = default)
+        public bool DoControl(Rect rect, bool isActive, GUIContent content = default, Rect overlapRect = default, GUIStyle style = default, T userData = default)
         {
             if (content == default)
                 content = GUIContent.none;
@@ -42,57 +78,56 @@ namespace AV.Hierarchy
             var controlID = GUIUtility.GetControlID(ToggleHash, FocusType.Passive, rect);
             var eventType = evt.GetTypeForControl(controlID);
             var isHotControl = GUIUtility.hotControl == controlID;
-            
+
             var toggleRect = new Rect(rect) { width = 16 };
 
             var button = evt.button;
             var isHover = isHolding ? virtualCursor.Overlaps(overlapRect) : toggleRect.Contains(evt.mousePosition);
             var willToggle = false;
-            
+
             virtualCursor.UpdateMousePosition();
 
-            if (button == 0)
+            if (button == 0 && isHover && eventType == EventType.MouseDown)
             {
-                if (isHover && eventType == EventType.MouseDown)
+                GUIUtility.hotControl = controlID;
+
+                isHolding = true;
+                willToggle = true;
+
+                targetState = isActive;
+
+                startRect = rect;
+                draggedRects.Clear();
+
+                OnMouseDown(new SwipeArgs { rect = rect }, userData);
+
+                evt.Use();
+            }
+            
+            if (evt.rawType == EventType.MouseUp || wasUndoPerformed)
+            {
+                wasUndoPerformed = false;
+                
+                if (isHolding || startRect != default)
+                    Cancel();
+
+                if (isHotControl)
                 {
-                    GUIUtility.hotControl = controlID;
-
-                    isHolding = true;
-                    willToggle = true;
-
-                    targetValue = isActive;
-
-                    startRect = rect;
-                    draggedRects.Clear();
-
+                    GUIUtility.hotControl = 0;
                     evt.Use();
                 }
+            }
 
-                if (eventType == EventType.MouseUp || eventType == EventType.ValidateCommand)
-                {
-                    if (isHotControl)
-                        GUIUtility.hotControl = 0;
+            var isDrag = button == 0 && isHover && isHolding && startRect != rect;
 
-                    isHolding = false;
+            if (isDrag && isActive == targetState && !draggedRects.Contains(rect))
+            {
+                // Start swiping
+                draggedRects.Add(startRect);
+                draggedRects.Add(rect);
+                startRect = default;
 
-                    startRect = default;
-                    draggedRects.Clear();
-
-                    if (isHotControl)
-                        evt.Use();
-                }
-
-                var isDrag = isHover && isHolding && startRect != rect;
-
-                if (isDrag && isActive == targetValue && !draggedRects.Contains(rect))
-                {
-                    // Start swiping
-                    draggedRects.Add(startRect);
-                    draggedRects.Add(rect);
-                    startRect = default;
-
-                    willToggle = true;
-                }
+                willToggle = true;
             }
 
             var hasFocus = isHover && isHolding && GUIUtility.hotControl == controlID;
@@ -110,10 +145,7 @@ namespace AV.Hierarchy
                     style.Draw(drawRect, content, isHover, hasFocus, isActive, hasFocus);
             }
 
-            if (willToggle)
-                return true;
-
-            return false;
+            return willToggle;
         }
     }
 }
