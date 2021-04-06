@@ -34,7 +34,7 @@ namespace AV.Hierarchy
             main = ChooseMainComponent(components);
 
             if (main && !icon)
-                icon = ObjectContent(main, main.GetType()).image as Texture2D;
+                icon = FastObjectUtils.GetObjectIcon(main);
         }
         
         public static Component ChooseMainComponent(params Component[] components)
@@ -72,7 +72,7 @@ namespace AV.Hierarchy
 
             var first = components[1];
             var last = components[length - 1];
-
+            
             var prioritized = prefs.componentsPriority.SelectPrioritizedComponents(components).ToArray();
 
             if (prioritized.Any())

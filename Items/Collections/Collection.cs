@@ -7,7 +7,9 @@ namespace AV.Hierarchy
     {
         private static HierarchyPreferences prefs => HierarchySettingsProvider.Preferences;
         
-        public override bool detachChildren => !skipStripping;
+        public override bool detachChildrenOnStripping => !skipStripping;
+        public override bool destroyOnStripping => false;
+        
         public bool skipStripping => keepTransformHierarchy || (prefs.keepCollectionsInPlaymode && Application.isEditor);
         
         [Tooltip("Will skip collection stripping during scene process.\n" +

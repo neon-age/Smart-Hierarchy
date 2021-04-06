@@ -19,12 +19,18 @@ namespace AV.Hierarchy
         
         private static bool wasInitialized;
         private static bool wasUndoPerformed;
-        
+
         private Rect startRect;
+        private int targetButton;
         private bool targetState;
         private bool isHolding;
         private HashSet<Rect> draggedRects = new HashSet<Rect>();
         private VirtualCursor virtualCursor = new VirtualCursor();
+
+        public SwipeToggle(int targetButton) : this()
+        {
+            this.targetButton = targetButton;
+        }
 
         public SwipeToggle()
         {
@@ -79,15 +85,14 @@ namespace AV.Hierarchy
             var eventType = evt.GetTypeForControl(controlID);
             var isHotControl = GUIUtility.hotControl == controlID;
 
-            var toggleRect = new Rect(rect) { width = 16 };
-
             var button = evt.button;
-            var isHover = isHolding ? virtualCursor.Overlaps(overlapRect) : toggleRect.Contains(evt.mousePosition);
+            var isClick = button == targetButton;
+            var isHover = isHolding ? virtualCursor.Overlaps(overlapRect) : rect.Contains(evt.mousePosition);
             var willToggle = false;
 
             virtualCursor.UpdateMousePosition();
 
-            if (button == 0 && isHover && eventType == EventType.MouseDown)
+            if (isClick && isHover && eventType == EventType.MouseDown)
             {
                 GUIUtility.hotControl = controlID;
 
@@ -118,7 +123,7 @@ namespace AV.Hierarchy
                 }
             }
 
-            var isDrag = button == 0 && isHover && isHolding && startRect != rect;
+            var isDrag = isClick && isHover && isHolding && startRect != rect;
 
             if (isDrag && isActive == targetState && !draggedRects.Contains(rect))
             {
@@ -132,9 +137,9 @@ namespace AV.Hierarchy
 
             var hasFocus = isHover && isHolding && GUIUtility.hotControl == controlID;
 
-            var drawRect = toggleRect;
-            drawRect.yMin = drawRect.center.y - toggleRect.height / 2;
-            drawRect.yMax = drawRect.center.y + toggleRect.height / 2;
+            var drawRect = rect;
+            drawRect.yMin = drawRect.center.y - rect.height / 2;
+            drawRect.yMax = drawRect.center.y + rect.height / 2;
 
             if (willToggle)
                 isActive = !isActive;

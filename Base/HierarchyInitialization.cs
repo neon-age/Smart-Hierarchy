@@ -36,6 +36,9 @@ namespace AV.Hierarchy
         {
             var lastHierarchyWindow = getLastHierarchyWindowFunc();
 
+            if (lastHierarchyWindow == null)
+                return null;
+
             if (!Hierarchies.TryGetValue(lastHierarchyWindow, out var hierarchy))
             {
                 hierarchy = new SmartHierarchy(lastHierarchyWindow as EditorWindow);

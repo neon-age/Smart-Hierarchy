@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Reflection;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
@@ -17,18 +18,18 @@ namespace AV.Hierarchy
         public Action onVisibleRowsChanged;
         public Action onTreeViewReload;
 
-        public TreeViewItem hoveredItem => TreeViewController.hoveredItemFunc(controller.controller);
+        public TreeViewItem hoveredItem => TreeViewController.hoveredItemFunc(controller.instance);
 
         private static MethodInfo pasteGO;
         private static MethodInfo duplicateGO;
         
-        private static FieldInfo controllerField;
-        private static FieldInfo stateField;
+        private static Func<object, object> getController;
+        private static Func<object, TreeViewState> getTreeViewState;
 
         public SceneHierarchy(object hierarchy)
         {
             this.hierarchy = hierarchy;
-            controller = new TreeViewController(controllerField.GetValue(hierarchy));
+            controller = new TreeViewController(getController.Invoke(hierarchy));
         }
 
         public void ReassignCallbacks()
@@ -44,8 +45,15 @@ namespace AV.Hierarchy
             pasteGO = sceneHierarchyType.GetMethod("PasteGO", BindingFlags.NonPublic | BindingFlags.Instance);
             duplicateGO = sceneHierarchyType.GetMethod("DuplicateGO", BindingFlags.NonPublic | BindingFlags.Instance);
 
-            controllerField = sceneHierarchyType.GetField("m_TreeView", BindingFlags.NonPublic | BindingFlags.Instance);
-            stateField = sceneHierarchyType.GetField("m_TreeViewState", BindingFlags.NonPublic | BindingFlags.Instance);
+            var controllerProperty = sceneHierarchyType.GetProperty("treeView", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            var objParam = Parameter(typeof(object));
+            var convert = Convert(objParam, sceneHierarchyType);
+            getController = Lambda<Func<object, object>>(Property(convert, controllerProperty), objParam).Compile();
+            
+            var stateField = sceneHierarchyType.GetField("m_TreeViewState", BindingFlags.NonPublic | BindingFlags.Instance);
+            
+            getTreeViewState = Lambda<Func<object, TreeViewState>>(Field(convert, stateField), objParam).Compile();
         }
 
         public void PasteGO()
@@ -71,18 +79,17 @@ namespace AV.Hierarchy
 
         public void EnsureValidData()
         {
-            var actualController = controllerField.GetValue(hierarchy);
+            state = getTreeViewState.Invoke(hierarchy);
+            
+            var actualController = getController.Invoke(hierarchy);
 
-            // Was controller been re-initialized?
-            if (actualController != controller.controller)
+            if (actualController != controller.instance)
             {
                 controller = new TreeViewController(actualController);
                 
                 controller.SetOnVisibleRowsChanged(onVisibleRowsChanged);
                 onTreeViewReload?.Invoke();
             }
-            
-            state = stateField.GetValue(hierarchy) as TreeViewState;
         }
     }
 }

@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 namespace AV.Hierarchy
 {
-    internal class DetachOnBuildProcess : IProcessSceneWithReport
+    internal class SceneStrippingProcess : IProcessSceneWithReport
     {
         public int callbackOrder { get; }
         
@@ -23,13 +23,13 @@ namespace AV.Hierarchy
                 
                 foreach (var item in items)
                 {
-                    if (item.detachChildren)
+                    if (item.detachChildrenOnStripping)
                         DetachRootChildren(item.transform);
                 }
 
                 foreach (var item in items)
                 {
-                    if (item.detachChildren)
+                    if (item.destroyOnStripping)
                         Object.DestroyImmediate(item.gameObject);
                 }
             }

@@ -29,13 +29,14 @@ Shader "Hidden/Internal-IconClip"
         UNITY_VERTEX_OUTPUT_STEREO
     };
 
+    static const half4 ON_Color = half4(0.94, 0.94, 0.94, 1);
+
     sampler2D _MainTex;
     sampler2D _GUIClipTexture;
     uniform bool _ManualTex2SRGB;
 
     uniform float4 _MainTex_ST;
     uniform half4 _Color;
-    uniform half4 _OnColor;
     uniform int _IsOn;
     uniform float4x4 unity_GUIClipTextureMatrix;
 
@@ -58,7 +59,7 @@ Shader "Hidden/Internal-IconClip"
         if (_ManualTex2SRGB)
             colTex.rgb = LinearToGammaSpace(colTex.rgb);
 
-        half4 col = colTex * i.color * _Color;
+        half4 col = colTex * i.color;
         half clip = tex2D(_GUIClipTexture, i.clipUV).a;
 
         col.a *= clip;
@@ -78,7 +79,7 @@ Shader "Hidden/Internal-IconClip"
             bottom > 0.8)
             return col;
         
-        col = i.color * _Color * _OnColor;
+        col = i.color * ON_Color;
         col.a *= colTex.a * clip;
         
         return col;

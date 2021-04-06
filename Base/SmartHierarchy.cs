@@ -16,27 +16,34 @@ namespace AV.Hierarchy
         internal static Event evt => Event.current;
         internal static HierarchyPreferences prefs => HierarchySettingsProvider.Preferences;
 
-        internal static bool isPluginEnabled { get; private set; } = prefs.enableSmartHierarchy;
         internal static SmartHierarchy active { get; private set; }
+        internal static bool isPluginEnabled => prefs.enableSmartHierarchy;
+
+        private static bool isGUIPatched;
 
         internal SceneHierarchyWindow window { get; }
         internal SceneHierarchy hierarchy => window.hierarchy;
+        
+        internal TreeViewGUI gui => controller.gui;
         internal TreeViewState state => hierarchy.state;
         internal TreeViewController controller => hierarchy.controller;
         
         private EditorWindow actualWindow => window.actualWindow;
         private bool isHovering => hoveredItem != null;
         private int hoveredItemId => hierarchy.hoveredItem?.id ?? -1;
+        public TreeViewItem hoveredItem => hierarchy.hoveredItem;
         
-        private HierarchyItem hoveredItem;
-        
-        private bool requiresGUISetup = true;
+        private bool isInitialized;
         private Vector2 localMousePosition;
         
         public readonly VisualElement root;
         private readonly HoverPreview hoverPreview;
         private readonly IMGUIContainer guiContainer;
-        private readonly Dictionary<int, HierarchyItem> itemsData = new Dictionary<int, HierarchyItem>();
+        private readonly TreeViewGUIArgs treeViewArgs = new TreeViewGUIArgs();
+        private readonly Dictionary<int, HierarchyItemBase> itemsData = new Dictionary<int, HierarchyItemBase>();
+        
+        public static readonly Dictionary<object, SmartHierarchy> Instances = new Dictionary<object, SmartHierarchy>();
+        
         
         public SmartHierarchy(EditorWindow window)
         {
@@ -45,7 +52,6 @@ namespace AV.Hierarchy
             
             hoverPreview = new HoverPreview();
 
-            Initialize();
             RegisterCallbacks();
             hierarchy.ReassignCallbacks();
             
@@ -57,17 +63,27 @@ namespace AV.Hierarchy
             guiContainer.onGUIHandler += OnAfterGUI;
             
             root.Add(hoverPreview);
+            
+            hierarchy.EnsureValidData();
         }
-
-        private void Initialize()
+        
+        private static void OnGUIPatch()
         {
-            requiresGUISetup = true;
+            TreeViewGUIPatch.Initialize();
+            GameObjectTreeViewGUIPatch.Initialize();
         }
 
         [InitializeOnLoadMethod]
         private static void OnInitialize()
         {
-            EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyItemGUI;
+            EditorApplication.update += GetLastActiveHierarchy;
+            
+            //EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyItemGUI;
+        }
+
+        private static void GetLastActiveHierarchy()
+        {
+            active = HierarchyInitialization.GetLastHierarchy();
         }
 
         private void RegisterCallbacks()
@@ -77,12 +93,12 @@ namespace AV.Hierarchy
             Selection.selectionChanged += ReloadView;
             hierarchy.onVisibleRowsChanged += ReloadView;
             EditorApplication.hierarchyChanged += ReloadView;
-            EditorApplication.playModeStateChanged += change => Initialize();
+            EditorApplication.playModeStateChanged += change => isInitialized = false;
         }
 
         private void OnSettingsChange()
         {
-            Initialize();
+            isInitialized = false;
             ReloadView();
             ImmediateRepaint();
         }
@@ -97,84 +113,80 @@ namespace AV.Hierarchy
             EditorApplication.DirtyHierarchyWindowSorting();
         }
         
-        private static void OnHierarchyItemGUI(int id, Rect rect)
+        private void OnEnable()
         {
-            if (!isPluginEnabled)
-                return;
-            
-            active = HierarchyInitialization.GetLastHierarchy();
+            if (!Instances.ContainsKey(gui.instance))
+                Instances.Add(gui.instance, this);
 
-            active.OnItemCallback(id, rect);
-        }
-
-        private void OnItemCallback(int id, Rect rect)
-        {
-            if (requiresGUISetup)
-            {
-                requiresGUISetup = false;
-                OnGUISetup();
-            }
-
-            OnItemGUI(id, rect);
-        }
-
-        private void OnGUISetup()
-        {
             hierarchy.EnsureValidData();
             actualWindow.SetAntiAliasing(8);
+            actualWindow.minSize = new Vector2(4, 64);
         }
 
         private void OnDisable()
         {
-            controller.gui.ResetCustomStyling();
+            if (Instances.ContainsKey(gui.instance))
+                Instances.Remove(gui.instance);
         }
-        
         
         private void OnBeforeGUI()
         {
             if (!prefs.enableSmartHierarchy)
             {
-                isPluginEnabled = false;
+                isInitialized = false;
                 OnDisable();
                 return;
             }
-            isPluginEnabled = true;
+            
+            if (!isGUIPatched)
+            {
+                isGUIPatched = true;
+                OnGUIPatch();
+            }
+            
+            if (!isInitialized)
+            {
+                isInitialized = true;
+                OnEnable();
+            }
+            
+            active = HierarchyInitialization.GetLastHierarchy();
 
             hierarchy.EnsureValidData();
-            HideDefaultIcon();
-
-            itemsData.TryGetValue(hoveredItemId, out hoveredItem);
-
+            treeViewArgs.baseIndent = gui.GetBaseIndent();
+            treeViewArgs.controller = controller;
+            
             CopyPasteCommands.ExecuteCommands();
-            HideDefaultIcon();
         }
-        
-        private void OnItemGUI(int id, Rect rect)
-        {
-            var instance = EditorUtility.InstanceIDToObject(id);
 
-            GetInstanceViewItem(id, instance, out var item);
-            
-            // Happens to be null when entering prefab mode
-            if (!item.EnsureViewExist(hierarchy))
-                return;
-            
-            HideDefaultIcon();
-            
-            var isSelected = controller.IsSelected(item.view);
-            var isHover = hierarchy.hoveredItem == item.view;
-            var isOn = isSelected && controller.HasFocus();
-            
-            item.DoItemGUI(new HierarchyItemArgs { rect = rect, focused = isSelected, hovered = isHover, on = isOn });
+        internal void RemoveItem(int id)
+        {
+            itemsData.Remove(id);
         }
         
+        public bool TryGetOrCreateItem(TreeViewItem treeItem, out HierarchyItemBase item)
+        {
+            var id = treeItem.id;
+            
+            if (!itemsData.TryGetValue(id, out item))
+            {
+                var instance = EditorUtility.InstanceIDToObject(id);
+                
+                item = HierarchyItemCreator.CreateForInstance(id, instance, treeItem);
+                item.SetTreeViewData(treeItem, treeViewArgs);
+                item.OnAfterCreation();
+
+                itemsData.Add(id, item);
+            }
+
+            return item != null;
+        }
+
         private void OnAfterGUI()
         {
             if (!isPluginEnabled)
                 return;
 
-            controller.gui.ResetCustomStyling();
-            
             // Mouse is relative to window during onGUIHandler
             if (evt.type != EventType.Used)
             {
@@ -186,19 +198,6 @@ namespace AV.Hierarchy
             HandleObjectPreview();
         }
 
-        private void HideDefaultIcon()
-        {
-            // Changing icon in TreeViewItem is not enough,
-            // When item is selected, it is hardcoded to use "On" icon (white version for blue background).
-            // https://github.com/Unity-Technologies/UnityCsReference/blob/2019.4/Editor/Mono/GUI/TreeView/TreeViewGUI.cs#L157
-            
-            // Setting width to zero will hide default icon, so we can draw our own on top,
-            // But this also removes item text indentation and "Pinging" icon..
-            controller.gui.SetIconWidth(0);
-            
-            controller.gui.SetSpaceBetweenIconAndText(18);
-        }
-        
         private void HandleObjectPreview()
         {
             var isPreviewKeyHold = false;
@@ -212,21 +211,12 @@ namespace AV.Hierarchy
         
             if (isHovering && prefs.enableHoverPreview && isPreviewKeyHold)
             {
-                hoverPreview.OnItemPreview(hoveredItem);
+                itemsData.TryGetValue(hoveredItemId, out var item);
+                hoverPreview.OnItemPreview(item);
             }
             else
             {
                 hoverPreview.Hide();
-            }
-        }
-        
-        private void GetInstanceViewItem(int id, Object instance, out HierarchyItem item)
-        {
-            if (!itemsData.TryGetValue(id, out item))
-            {
-                item = HierarchyItemCreator.CreateForInstance(id, instance);
-
-                itemsData.Add(id, item);
             }
         }
     }

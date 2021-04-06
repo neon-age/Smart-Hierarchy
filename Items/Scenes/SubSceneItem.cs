@@ -12,28 +12,22 @@ using Object = UnityEngine.Object;
 namespace AV.Hierarchy
 {
     [HierarchyItem("subSceneType")]
-    internal class SubSceneItem : GameObjectItem
+    internal class SubSceneItem : GameObjectItemBase
     {
         private static Type subSceneType = TypeCache.GetTypesDerivedFrom<MonoBehaviour>().FirstOrDefault(t => t.FullName == "Unity.Scenes.SubScene");
         private static Texture2D sceneIcon = EditorGUIUtility.IconContent("SceneAsset Icon").image as Texture2D;
 
-        public SubSceneItem(GameObject instance) : base(instance)
+        public SubSceneItem(GameObject gameObject) : base(gameObject)
         {
+            if (!TreeViewGUI.IsSubSceneHeader(gameObject))
+                CancelCreation();
         }
-/*
-        protected override HierarchyItem CreateForInstance(Object instance)
-        {
-            if (!(instance is GameObject go))
-                return null;
 
-            var isSubScene = TreeViewGUI.IsSubSceneHeader(go);
-            
-            if (!isSubScene)
-                return null;
-            
-            return new SubSceneItem(go);
-        }*/
-        
+        public override void OnBeforeIcon(ref IconGUIArgs args)
+        {
+            args.icon = sceneIcon;
+        }
+
         protected override Texture2D GetEffectiveIcon()
         {
             return sceneIcon;

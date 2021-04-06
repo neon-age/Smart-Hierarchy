@@ -4,9 +4,10 @@ using UnityEngine;
 
 namespace AV.Hierarchy
 {
-    [DisallowMultipleComponent]
-    internal class HierarchyComponent : MonoBehaviour
+    //[DisallowMultipleComponent]
+    public class HierarchyComponent : MonoBehaviour
     {
-        public virtual bool detachChildren => true;
+        public virtual bool detachChildrenOnStripping => true;
+        public virtual bool destroyOnStripping => false;
     }
 }

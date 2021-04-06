@@ -1,61 +1,101 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEditor;
+using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using static UnityEditor.EditorGUIUtility;
+using Debug = UnityEngine.Debug;
 
 namespace AV.Hierarchy
 {
     [HierarchyItem(typeof(Header))]
-    internal class HeaderItem : GameObjectItem
+    internal class HeaderItem : GameObjectItemBase
     {
-        private static readonly Color normalColor = isProSkin ? new Color32(78, 78, 78, 255) : new Color32(79, 78, 78, 255);
-        private static readonly Color hoverColor = isProSkin ? new Color32(89, 89, 89, 255) : new Color32(90, 89, 89, 255);
-        private static readonly Color onColor = isProSkin ? new Color32(44, 93, 135, 255) : new Color32(45, 93, 135, 255);
+        public override int preservedColumnSpace => 16;
 
-        private static GUIStyle labelStyle;
-        private static GUIContent labelContent = new GUIContent();
+        private static Texture2D menuIcon = GetEditorIconContent("_Menu");
         
-        private static Texture2D headerIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath("4751b09d2e04542479ec3838da599e0c"));
+        private Header header;
         
-        
-        public HeaderItem(GameObject instance) : base(instance)
+        public HeaderItem(Header component) : base(component)
         {
-            if (labelStyle == null)
-                labelStyle = new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleLeft };
+            this.header = component;
         }
 
-        public override void OnItemGUI()
+        protected internal override void OnAfterCreation()
         {
-            var fullWidthRect = new Rect(rect) { xMax = Screen.width };
-            fullWidthRect.xMin = 32 + 12;
-            fullWidthRect.yMax -= 1;
+            if (TryGetItem<ActivationToggleItem>(out var activationToggle))
+                activationToggle.enabled = false;
+        }
 
-            var backgroundColor = isOn ? onColor : (isHover ? hoverColor : normalColor);
-            
-            EditorGUI.DrawRect(fullWidthRect, backgroundColor);
-            
-            var labelRect = new Rect(fullWidthRect);
+        public override void OnHandleUnusedEvents(ItemEventArgs args)
+        {
+            var rect = args.rect;
+            rect.xMin -= 4;
 
-            var content = ObjectContent(gameObject, typeof(GameObject));
+            //return;
             
-            labelContent.text = null;
-            labelContent.image = headerIcon;
+            if (!rect.Contains(evt.mousePosition))
+                return;
+            
+            var mouseClick = !itemArgs.isSelected ? evt.type == EventType.MouseDown : evt.type == EventType.MouseUp;
+            
+            if (mouseClick && evt.button == 0)
+            {
+                ChangeExpandedState();
+                evt.Use();
+            }
 
-            var labelWidth = labelStyle.CalcSize(labelContent).x;
+            if (evt.type == EventType.ContextClick)
+            {
+                if (args.IsHovered())
+                    evt.Use();
+            }
+        }
 
-            var contentColor = GUI.contentColor;
-            GUI.contentColor = isProSkin ? new Color32(194, 194, 194, 255) : new Color32(195, 194, 194, 255);
+        public override void OnItemGUI(ItemGUIArgs args)
+        {
             
-            GUI.Box(labelRect, labelContent, labelStyle);
-            
-            GUI.contentColor = contentColor;
+        }
 
-            labelRect.x += 32 - 12;
+        public override void OnBeforeIcon(ref IconGUIArgs args)
+        {
+            args.rect.xMin -= 14;
+            args.icon = header.icon;
+        }
+
+        public override void OnBeforeLabel(ref LabelGUIArgs args)
+        {
+            args.rect.xMin -= 14;
             
-            labelContent.text = content.text;
-            labelContent.image = null;
-            GUI.Box(labelRect, labelContent, labelStyle);
+            //if (!renderDisabled)
+            //    args.color *= new Color(1, 1, 1, 0.85f);
+            //else
+            //    args.color *= new Color(1, 1, 1, 1.25f);
+            
+            args.boldFont = header.boldLabel;
+        }
+
+        public override void OnDrawBackground(ItemGUIArgs args)
+        {
+            var rect = new Rect(args.rect) { 
+                xMin = args.contentIndent - 16,
+                xMax = Screen.width, 
+            };
+            rect.yMax -= 1;
+
+            var backgroundColor = isProSkin ? new Color(1, 1, 1, 1) : new Color(0, 0, 0, 0);
+            backgroundColor.a = args.isHovered ? 0.133f : 0.1f;
+            
+            if (renderDisabled)
+                backgroundColor.a *= 0.5f;
+
+            var borderWidth = Vector4.one * 32;
+            var borderRadius = Vector4.one * 3;
+            
+            GUI.DrawTexture(rect, Texture2D.whiteTexture, ScaleMode.StretchToFill, true, 0, backgroundColor, borderWidth, borderRadius);
+            //DrawRect(rect, backgroundColor);
         }
     }
 }

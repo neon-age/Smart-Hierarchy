@@ -1,4 +1,6 @@
-﻿using UnityEditor;
+﻿using System;
+using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 namespace AV.Hierarchy
@@ -11,7 +13,8 @@ namespace AV.Hierarchy
         public ComponentData(Component component)
         {
             this.component = component;
-            content = new GUIContent(EditorGUIUtility.ObjectContent(component, component.GetType()).image);
+
+            content = FastObjectUtils.GetObjectContent(component);
         }
     }
 }

@@ -4,15 +4,16 @@ using UnityEngine;
 namespace AV.Hierarchy
 {
     /// <summary>
-    /// Automatically creates <see cref="HierarchyItem"/> for instances that represent specified type.<para/>
-    /// Target type can be <see cref="Component"/>, <see cref="GameObject"/> or <see cref="UnityEngine.Object"/>.<para/>
+    /// Automatically creates item for instances that represent specified type.<para/>
+    /// <para/>
+    /// Needs to be used on types inherited from <see cref="GameObjectItemBase"/> or <see cref="ViewItemBase"/>.<para/>
+    /// Target type constraints - <see cref="HierarchyItemBase"/>, <see cref="Component"/>, <see cref="GameObject"/> or <see cref="UnityEngine.Object"/>.<para/>
     /// <remarks>
     /// Example:<para/>
     /// <para/>
     /// [HierarchyItem(typeof(Header))]<para/>
-    /// public class HeaderItem : <see cref="HierarchyItem"/><para/>
+    /// public class HeaderItem : <see cref="GameObjectItemBase"/><para/>
     /// {<para/>
-    ///     // Must have a single argument that is assignable from <see cref="UnityEngine.Object"/>!<para/>
     ///     public HeaderItem(GameObject instance) : base(instance) {}<para/>
     /// }
     /// <para/>

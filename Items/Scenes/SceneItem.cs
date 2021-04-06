@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 
 namespace AV.Hierarchy
 {
-    internal class SceneItem : ViewItem
+    internal class SceneItem : ViewItemBase
     {
         private static MethodInfo getSceneByHandleInfo = typeof(EditorSceneManager).GetMethod("GetSceneByHandle", BindingFlags.NonPublic | BindingFlags.Static);
         private static Func<int, Scene> getSceneHandle = Delegate.CreateDelegate(typeof(Func<int, Scene>), getSceneByHandleInfo) as Func<int, Scene>;
@@ -18,7 +18,8 @@ namespace AV.Hierarchy
         
         public SceneItem(int id) : base(id) {}
         
-        protected override HierarchyItem CreateForInstance(int id)
+        
+        protected override HierarchyItemBase CreateForInstance(int id)
         {
             var scene = getSceneHandle.Invoke(id);
 

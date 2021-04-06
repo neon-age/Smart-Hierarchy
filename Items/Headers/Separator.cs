@@ -4,10 +4,7 @@ using UnityEngine;
 
 namespace AV.Hierarchy
 {
-    internal class ViewItem : HierarchyItem
+    public class Separator : HierarchyComponent
     {
-        public ViewItem(int id) : base(id)
-        {
-        }
     }
 }

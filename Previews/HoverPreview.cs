@@ -27,7 +27,7 @@ namespace AV.Hierarchy
             visible = false;
         }
 
-        public void OnItemPreview(HierarchyItem item)
+        public void OnItemPreview(HierarchyItemBase item)
         {
             visible = true;
             
