@@ -1,17 +1,13 @@
 {
-    "name": "AV.Hierarchy",
+    "name": "AV.Hierarchy.Runtime",
     "rootNamespace": "AV.Hierarchy",
-    "references": [
-        "GUID:35739e21ec434a844bd7b2b7ed9bd7ac"
-    ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "references": [],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
-    "overrideReferences": false,
+    "overrideReferences": true,
     "precompiledReferences": [],
-    "autoReferenced": true,
+    "autoReferenced": false,
     "defineConstraints": [],
     "versionDefines": [],
     "noEngineReferences": false

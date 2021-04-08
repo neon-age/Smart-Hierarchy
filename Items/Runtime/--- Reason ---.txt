@@ -1,0 +1,5 @@
+
+Runtime assembly is required to avoid error when trying to add component from Editor-only assembly.
+We have to move MonoBehaviours (and referenced types in them) into this folder.
+
+This assembly is referenced in AV.Hierarchy
