@@ -58,13 +58,14 @@ namespace AV.Hierarchy
             OnStopDragging();
         }
 
-        public bool DoVerticalToggle(Rect rect, bool isActive, GUIContent content = default, GUIStyle style = default, T userData = default)
+        public bool DoVerticalToggle(Rect rect, bool isActive, GUIContent content = default, Rect drawRect = default, GUIStyle style = default, T userData = default)
         {
             var overlapRect = new Rect(rect) { x = 0, width = Screen.width };
-            return DoControl(rect, isActive, content, overlapRect, style, userData);
+            return DoControl(rect, isActive, content, overlapRect, drawRect, style, userData);
         }
         
-        public bool DoControl(Rect rect, bool isActive, GUIContent content = default, Rect overlapRect = default, GUIStyle style = default, T userData = default)
+        public bool DoControl(Rect rect, bool isActive, GUIContent content = default, 
+            Rect overlapRect = default, Rect drawRect = default, GUIStyle style = default, T userData = default)
         {
             if (content == default)
                 content = GUIContent.none;
@@ -132,9 +133,11 @@ namespace AV.Hierarchy
 
             var hasFocus = isHover && isHolding && GUIUtility.hotControl == controlID;
 
-            var drawRect = toggleRect;
-            drawRect.yMin = drawRect.center.y - toggleRect.height / 2;
-            drawRect.yMax = drawRect.center.y + toggleRect.height / 2;
+            if (drawRect == Rect.zero)
+            {
+                drawRect = new Rect(toggleRect) { height = 16 };
+                drawRect = GetCenteredRect(drawRect, toggleRect);
+            }
 
             if (willToggle)
                 isActive = !isActive;
@@ -146,6 +149,11 @@ namespace AV.Hierarchy
             }
 
             return willToggle;
+        }
+        
+        protected static Rect GetCenteredRect(Rect targetRect, Rect area)
+        {
+            return RectUtils.GetCenteredRect(targetRect, area);
         }
     }
 }

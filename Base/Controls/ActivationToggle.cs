@@ -25,7 +25,11 @@ namespace AV.Hierarchy
             
             var style = isShown ? shurikenToggle : GUIStyle.none;
             
-            if (DoVerticalToggle(rect, instance.activeSelf, userData: instance, style: style))
+            var drawRect = new Rect(rect) { width = 16 };
+            drawRect = GetCenteredRect(drawRect, drawRect);
+            drawRect.y += 1;
+            
+            if (DoVerticalToggle(rect, instance.activeSelf, userData: instance, drawRect: drawRect, style: style))
             {
                 var depth = GetTransformDepth(instance.transform);
                 
