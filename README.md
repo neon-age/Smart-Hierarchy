@@ -1,6 +1,6 @@
 # Smart Hierarchy for Unity
 Brings intuitive features and important visual elements in the right place.\
-Focusing on resolving most pain points and improving overall Unity workflow. 
+Focused on solving most pain points and improving overall Unity workflow. 
 
 • [View Changelog](CHANGELOG.md) 
 • [🗺 Roadmap](https://github.com/neon-age/Smart-Hierarchy/projects/1) 
