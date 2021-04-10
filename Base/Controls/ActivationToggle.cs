@@ -31,22 +31,37 @@ namespace AV.Hierarchy
             
             if (DoVerticalToggle(rect, instance.activeSelf, userData: instance, drawRect: drawRect, style: style))
             {
-                var depth = GetTransformDepth(instance.transform);
-                
-                if (depth != targetDepth)
-                    return;
-
-                if (isSelectionBounded && !Selection.Contains(instance))
-                    return;
-
                 draggedObjects.Add(instance);
                 Undo.RecordObject(instance, "GameObject Set Active");
                 instance.SetActive(!instance.activeSelf);
             }
         }
-        
+
+        protected override void OnDraw(DrawArgs args)
+        {
+            using (new GUIColorScope(new Color(1, 1, 1, 0.5f), !args.isSwipeValid))
+                base.OnDraw(args);
+        }
+
+        protected override bool OnSwipeValidate(SwipeArgs args, GameObject instance)
+        {
+            if (targetState != args.isActive)
+                return false;
+            
+            var depth = GetTransformDepth(instance.transform);
+                
+            if (depth != targetDepth)
+                return false;
+
+            if (isSelectionBounded && !Selection.Contains(instance))
+                return false;
+            
+            return true;
+        }
+
         protected override void OnMouseDown(SwipeArgs args, GameObject instance)
         {
+            targetState = args.isActive;
             targetDepth = GetTransformDepth(instance.transform);
 
             if (Selection.gameObjects.Length > 1 && Selection.Contains(instance))
