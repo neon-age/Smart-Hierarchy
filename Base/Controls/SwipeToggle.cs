@@ -6,13 +6,35 @@ using UnityEngine;
 
 namespace AV.Hierarchy
 {
-    internal struct SwipeArgs
-    {
-        public Rect rect;
-    }
-
     internal class SwipeToggle<T>
     {
+        protected struct SwipeArgs
+        {
+            public Rect rect;
+            public bool isActive;
+
+            public SwipeArgs(Rect rect, bool isActive)
+            {
+                this.rect = rect;
+                this.isActive = isActive;
+            }
+        }
+        protected struct DrawArgs
+        {
+            public Rect rect;
+            public GUIStyle style;
+            public GUIContent content;
+            public bool isHover;
+            public bool isFocus;
+            public bool isActive;
+            public bool isSwipeValid;
+        }
+
+        private struct Item
+        {
+            public bool isValid;
+        }
+        
         private static Event evt => Event.current;
         
         private static readonly int ToggleHash = "SwipeToggle".GetHashCode();
@@ -20,12 +42,14 @@ namespace AV.Hierarchy
         private static bool wasInitialized;
         private static bool wasUndoPerformed;
         
+        protected bool targetState;
+        
         private Rect startRect;
-        private bool targetState;
         private bool isHolding;
-        private HashSet<Rect> draggedRects = new HashSet<Rect>();
+        private Dictionary<Rect, Item> draggedItems = new Dictionary<Rect, Item>();
         private VirtualCursor virtualCursor = new VirtualCursor();
 
+        
         public SwipeToggle()
         {
             if (!wasInitialized)
@@ -34,10 +58,24 @@ namespace AV.Hierarchy
                 Undo.undoRedoPerformed += () => wasUndoPerformed = true;
             }
         }
-        
-        protected virtual void OnMouseDown(SwipeArgs args, T userData) {}
+
+        protected virtual void OnMouseDown(SwipeArgs args, T userData)
+        {
+            targetState = args.isActive;
+        }
+        protected virtual bool OnSwipeValidate(SwipeArgs args, T userData)
+        {
+            return targetState == args.isActive;
+        }
+        protected virtual void OnStartDragging(SwipeArgs args) {}
         protected virtual void OnStopDragging() {}
 
+        protected virtual void OnDraw(DrawArgs args)
+        {
+            if (args.style != GUIStyle.none || args.content != GUIContent.none)
+                args.style.Draw(args.rect, args.content, args.isHover, args.isFocus, args.isActive, args.isFocus);
+        }
+        
         
         public bool WillStopDragging()
         {
@@ -46,14 +84,14 @@ namespace AV.Hierarchy
         
         public bool IsRectDragged(Rect rect)
         {
-            return draggedRects.Contains(rect) || startRect == rect;
+            return draggedItems.ContainsKey(rect) || startRect == rect;
         }
 
         public void Cancel()
         {
             isHolding = false;
             startRect = default;
-            draggedRects.Clear();
+            draggedItems.Clear();
                     
             OnStopDragging();
         }
@@ -95,12 +133,10 @@ namespace AV.Hierarchy
                 isHolding = true;
                 willToggle = true;
 
-                targetState = isActive;
-
                 startRect = rect;
-                draggedRects.Clear();
+                draggedItems.Clear();
 
-                OnMouseDown(new SwipeArgs { rect = rect }, userData);
+                OnMouseDown(new SwipeArgs(rect, isActive), userData);
 
                 evt.Use();
             }
@@ -120,15 +156,28 @@ namespace AV.Hierarchy
             }
 
             var isDrag = button == 0 && isHover && isHolding && startRect != rect;
+            var isDraggedItem = draggedItems.TryGetValue(rect, out var draggedItem);
+            var isValid = true;
 
-            if (isDrag && isActive == targetState && !draggedRects.Contains(rect))
+            if (isDrag && !isDraggedItem)
             {
-                // Start swiping
-                draggedRects.Add(startRect);
-                draggedRects.Add(rect);
-                startRect = default;
+                isValid = OnSwipeValidate(new SwipeArgs(rect, isActive), userData);
 
-                willToggle = true;
+                if (isValid)
+                {
+                    // Start swiping
+                    if (startRect != default)
+                    {
+                        draggedItems.Add(startRect, new Item {isValid = true});
+                        OnStartDragging(new SwipeArgs(startRect, isActive));
+                        startRect = default;
+                    }
+
+                    draggedItem = new Item {isValid = isValid};
+
+                    draggedItems.Add(rect, draggedItem);
+                    willToggle = true;
+                }
             }
 
             var hasFocus = isHover && isHolding && GUIUtility.hotControl == controlID;
@@ -142,13 +191,23 @@ namespace AV.Hierarchy
             if (willToggle)
                 isActive = !isActive;
 
+            if (isDraggedItem)
+                isValid = draggedItem.isValid;
+
             if (eventType == EventType.Repaint)
             {
-                if (style != GUIStyle.none || content != GUIContent.none)
-                    style.Draw(drawRect, content, isHover, hasFocus, isActive, hasFocus);
+                OnDraw(new DrawArgs { 
+                    rect = drawRect,
+                    style = style, 
+                    content = content, 
+                    isHover = isHover, 
+                    isFocus = hasFocus, 
+                    isActive = isActive, 
+                    isSwipeValid = isValid
+                });
             }
 
-            return willToggle;
+            return willToggle && isValid;
         }
         
         protected static Rect GetCenteredRect(Rect targetRect, Rect area)
