@@ -29,11 +29,6 @@ namespace AV.Hierarchy
             public bool isActive;
             public bool isSwipeValid;
         }
-
-        private struct Item
-        {
-            public bool isValid;
-        }
         
         private static Event evt => Event.current;
         
@@ -46,7 +41,7 @@ namespace AV.Hierarchy
         
         private Rect startRect;
         private bool isHolding;
-        private Dictionary<Rect, Item> draggedItems = new Dictionary<Rect, Item>();
+        private HashSet<Rect> draggedItems = new HashSet<Rect>();
         private VirtualCursor virtualCursor = new VirtualCursor();
 
         
@@ -84,7 +79,7 @@ namespace AV.Hierarchy
         
         public bool IsRectDragged(Rect rect)
         {
-            return draggedItems.ContainsKey(rect) || startRect == rect;
+            return draggedItems.Contains(rect) || startRect == rect;
         }
 
         public void Cancel()
@@ -156,7 +151,7 @@ namespace AV.Hierarchy
             }
 
             var isDrag = button == 0 && isHover && isHolding && startRect != rect;
-            var isDraggedItem = draggedItems.TryGetValue(rect, out var draggedItem);
+            var isDraggedItem = draggedItems.Contains(rect);
             var isValid = true;
 
             if (isDrag && !isDraggedItem)
@@ -168,14 +163,12 @@ namespace AV.Hierarchy
                     // Start swiping
                     if (startRect != default)
                     {
-                        draggedItems.Add(startRect, new Item {isValid = true});
+                        draggedItems.Add(startRect);
                         OnStartDragging(new SwipeArgs(startRect, isActive));
                         startRect = default;
                     }
 
-                    draggedItem = new Item {isValid = isValid};
-
-                    draggedItems.Add(rect, draggedItem);
+                    draggedItems.Add(rect);
                     willToggle = true;
                 }
             }
@@ -192,7 +185,7 @@ namespace AV.Hierarchy
                 isActive = !isActive;
 
             if (isDraggedItem)
-                isValid = draggedItem.isValid;
+                isValid = true;
 
             if (eventType == EventType.Repaint)
             {
