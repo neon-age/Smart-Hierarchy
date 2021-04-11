@@ -52,8 +52,6 @@ can be defined in Preferences.
 ### Collections
 ![Collections](.github/images/Collections.png)
 
-`GameObject / Create Collection`
-
 [Collection](https://github.com/neon-age/Smart-Hierarchy/wiki/Collections) 
 is used to organize game-objects in Editor.\
 Unlike game-object parent, it does not affect runtime transform hierarchy.
@@ -77,7 +75,7 @@ Bindable keys: Alt / Shift / Ctrl.\
 - [Auto Paste as Child](https://github.com/neon-age/Smart-Hierarchy/wiki/Custom-Paste---Duplicate)
 
 ## Participation
-Feel free to provide [feedback and ideas](https://github.com/neon-age/Smart-Hierarchy/discussions)!
+Feel free to fork / pull request or provide [feedback and ideas](https://github.com/neon-age/Smart-Hierarchy/discussions)!
 
 ## Sharing is caring 💗
 I want to share my tools with everyone, without hiding behind a paywall.\
