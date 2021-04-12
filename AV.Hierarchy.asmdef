@@ -1,11 +1,10 @@
 {
     "name": "AV.Hierarchy",
     "rootNamespace": "AV.Hierarchy",
-    "references": [
-        "GUID:35739e21ec434a844bd7b2b7ed9bd7ac"
-    ],
+    "references": [],
     "includePlatforms": [
-        "Editor"
+        "Editor",
+        "Stadia"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
