@@ -1,3 +1,7 @@
+## [0.6.0] - Unreleased
+- Toolbars API
+- Components Toolbar
+
 ## [0.5.5] - Unreleased
 - Compact Settings / Filtering Menu
 - Hiding Scene Visibility columns
@@ -18,10 +22,7 @@ Branch: #view-items-refactoring
 -  Activation Toggle [Swiping](https://github.com/neon-age/Smart-Hierarchy/wiki/Activation-Toggle).
 
     ![Activation Swiping](https://i.imgur.com/wzSsNOb.gif)
-### Changed
-- Collection component has moved into separate Runtime assembly.
-- Main assembly is now Editor-only. (it was unchecked for Stadia as a temp fix for "Can't add editor script")
-
+    
 ## [0.3.0] - 2021-03-09
 ### Added
 - Collection "Keep Transform Hierarchy" option. 
