@@ -9,29 +9,22 @@ using UnityEngine;
 
 namespace AV.Hierarchy
 {
-    internal static class TreeViewGUIPatch
+    internal class TreeViewGUIPatch : HarmonyPatchBase<TreeViewGUIPatch>
     {
         private static Texture2D indentIcon;
         
-        internal static void Initialize()
+        protected override void OnInitialize()
         {
-            var harmony = new Harmony(nameof(TreeViewGUIPatch));
-            
             var guiType = typeof(Editor).Assembly.GetType("UnityEditor.IMGUI.Controls.TreeViewGUI");
 
             var onRowGUI = guiType.GetMethod("OnRowGUI", BindingFlags.Public | BindingFlags.Instance);
             var getEffectiveIcon = guiType.GetMethod("GetEffectiveIcon", BindingFlags.NonPublic| BindingFlags.Instance);
             
-            harmony.Patch(onRowGUI, prefix: GetPatch("OnRowGUI"));
-            harmony.Patch(getEffectiveIcon, prefix: GetPatch("GetEffectiveIcon"));
+            Patch(onRowGUI, prefix: nameof(OnRowGUI_Prefix));
+            Patch(getEffectiveIcon, prefix: nameof(GetEffectiveIcon_Prefix));
         }
-
-        private static HarmonyMethod GetPatch(string methodName)
-        {
-            return new HarmonyMethod(typeof(TreeViewGUIPatch).GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static));
-        }
-
-        private static void OnRowGUI(object __instance, Rect rowRect, TreeViewItem item, int row, bool selected, bool focused)
+        
+        private static void OnRowGUI_Prefix(object __instance, Rect rowRect, TreeViewItem item, int row, bool selected, bool focused)
         {
             if (!SmartHierarchy.Instances.TryGetValue(__instance, out var hierarchy))
                 return;
@@ -60,7 +53,7 @@ namespace AV.Hierarchy
             viewItem.DoItemGUI(args);
         }
 
-        private static bool GetEffectiveIcon(object __instance, ref Texture __result, TreeViewItem item)
+        private static bool GetEffectiveIcon_Prefix(object __instance, ref Texture __result, TreeViewItem item)
         {
             if (!SmartHierarchy.Instances.TryGetValue(__instance, out _))
                 return true;

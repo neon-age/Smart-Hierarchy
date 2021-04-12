@@ -8,24 +8,17 @@ using UnityEngine;
 
 namespace AV.Hierarchy
 {
-    public class TreeViewControllerPatch
+    internal class TreeViewControllerPatch : HarmonyPatchBase<TreeViewControllerPatch>
     {
-        internal static void Initialize()
+        protected override void OnInitialize()
         {
-            var harmony = new Harmony(nameof(TreeViewGUIPatch));
-            
             var controllerType = typeof(Editor).Assembly.GetType("UnityEditor.IMGUI.Controls.TreeViewController");
 
             var handleUnusedEvents = controllerType.GetMethod("HandleUnusedMouseEventsForItem", BindingFlags.Public | BindingFlags.Instance);
-            
-            harmony.Patch(handleUnusedEvents, prefix: GetPatch("HandleUnusedMouseEventsForItem"));
-        }
 
-        private static HarmonyMethod GetPatch(string methodName)
-        {
-            return new HarmonyMethod(typeof(TreeViewGUIPatch).GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static));
+            Patch(handleUnusedEvents, prefix: nameof(HandleUnusedMouseEventsForItem_Prefix));
         }
-
+        
         private static void HandleUnusedMouseEventsForItem_Prefix(object __instance, Rect rect, TreeViewItem item, int row)
         {
             var gui = TreeViewController.GetTreeViewGUI(__instance);

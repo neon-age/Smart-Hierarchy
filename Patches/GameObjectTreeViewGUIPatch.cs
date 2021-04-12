@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace AV.Hierarchy
 {
-    internal static class GameObjectTreeViewGUIPatch
+    internal class GameObjectTreeViewGUIPatch : HarmonyPatchBase<GameObjectTreeViewGUIPatch>
     {
         private static GUIContent tempContent = new GUIContent();
         
@@ -17,28 +17,22 @@ namespace AV.Hierarchy
         
         private static readonly Color WhiteColor = new Color(1, 1, 1, 1);
         
-        internal static void Initialize()
+        
+        protected override void OnInitialize()
         {
-            var harmony = new Harmony(nameof(TreeViewGUIPatch));
-            
             var goGuiType = typeof(Editor).Assembly.GetType("UnityEditor.GameObjectTreeViewGUI");
 
             var drawItemBackground = goGuiType.GetMethod("DrawItemBackground", BindingFlags.NonPublic| BindingFlags.Instance);
             var onAdditionalGUI = goGuiType.GetMethod("OnAdditionalGUI", BindingFlags.NonPublic| BindingFlags.Instance);
             var onContentGUI = goGuiType.GetMethod("OnContentGUI", BindingFlags.NonPublic| BindingFlags.Instance);
             
-            harmony.Patch(drawItemBackground, postfix: GetPatch("DrawItemBackground"));
-            harmony.Patch(onAdditionalGUI, postfix: GetPatch("OnAdditionalGUI"));
+            Patch(drawItemBackground, postfix: nameof(DrawItemBackground));
+            Patch(onAdditionalGUI, postfix: nameof(OnAdditionalGUI));
             
-            harmony.Patch(onContentGUI, prefix: GetPatch("OnContentGUI_Prefix"));
-            harmony.Patch(onContentGUI, postfix: GetPatch("OnContentGUI_Postfix"));
+            Patch(onContentGUI, prefix: nameof(OnContentGUI_Prefix));
+            Patch(onContentGUI, postfix: nameof(OnContentGUI_Postfix));
         }
-
-        private static HarmonyMethod GetPatch(string methodName)
-        {
-            return new HarmonyMethod(typeof(GameObjectTreeViewGUIPatch).GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static));
-        }
-
+        
         private static void DrawItemBackground(object __instance, Rect rect, int row, TreeViewItem item, bool selected, bool focused)
         {
             if (Event.current.type != EventType.Repaint)

@@ -70,6 +70,7 @@ namespace AV.Hierarchy
         private static void OnGUIPatch()
         {
             TreeViewGUIPatch.Initialize();
+            TreeViewControllerPatch.Initialize();
             GameObjectTreeViewGUIPatch.Initialize();
         }
 
