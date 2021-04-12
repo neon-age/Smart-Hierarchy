@@ -43,14 +43,14 @@ Customization is available in `Preferences > Workflow > Smart Hierarchy`.
 ## Features
 
 ### Icons
-![Icons](.github/images/Icons.png)
+[![Icons](.github/readme/Icons.png)](https://github.com/neon-age/Smart-Hierarchy/wiki/Icons)
 
 Most important components are shown to help you orientate visually.\
 [Types Priority](https://github.com/neon-age/Smart-Hierarchy/wiki/Icons#types-priority) 
 can be defined in Preferences.
 
 ### Collections
-![Collections](.github/images/Collections.png)
+[![Collections](.github/readme/Collections.png)](https://github.com/neon-age/Smart-Hierarchy/wiki/Collections)
 
 [Collection](https://github.com/neon-age/Smart-Hierarchy/wiki/Collections) 
 is used to organize game-objects in Editor.\
@@ -59,15 +59,13 @@ Unlike game-object parent, it does not affect runtime transform hierarchy.
 
 
 ### Activation Toggle
-![Activation Toggle](.github/images/ActivationToggle.png)
+[![Activation Toggle](.github/readme/ActivationToggle.png)](https://github.com/neon-age/Smart-Hierarchy/wiki/Activation-Toggle)
 
 Lets you (de)activate game-objects while keeping your selection.
 
 ### Hover Preview
-![Hover Preview](.github/images/HoverPreview.png)
+[![Hover Preview](.github/readme/HoverPreview.png)](https://github.com/neon-age/Smart-Hierarchy/wiki/Hover-Preview)
 
-Bindable keys: Alt / Shift / Ctrl.\
-**Very Experimental!** Can be enabled in Preferences.
 
 ### And more...
 - [Activation Swiping](https://github.com/neon-age/Smart-Hierarchy/wiki/Activation-Toggle#swiping)
