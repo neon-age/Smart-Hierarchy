@@ -2,7 +2,7 @@
 Brings intuitive features and important visual elements in the right place.\
 Focused on solving most pain points and improving overall Unity workflow. 
 
-• [View Changelog](CHANGELOG.md) 
+• [📝 Changelog](CHANGELOG.md) 
 • [🗺 Roadmap](https://github.com/neon-age/Smart-Hierarchy/projects/1) 
 • [💬 Discussions](https://github.com/neon-age/Smart-Hierarchy/discussions)
 • [📚 Wiki](https://github.com/neon-age/Smart-Hierarchy/wiki) •
