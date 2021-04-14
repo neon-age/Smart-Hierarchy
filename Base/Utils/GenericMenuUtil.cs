@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace AV.Hierarchy
 {
-    internal class GenericMenuUtil : MonoBehaviour
+    internal class GenericMenuUtil
     {
         private static readonly Type menuItemType = typeof(GenericMenu).GetNestedType("MenuItem", BindingFlags.NonPublic | BindingFlags.Instance);
       

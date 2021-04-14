@@ -1,7 +1,11 @@
 # Smart Hierarchy for Unity
-Brings intuitive features and important visual elements in the right place.
+Brings intuitive features and important visual elements in the right place.\
+Focused on solving most pain points and improving overall Unity workflow. 
 
-• [View Changelog](CHANGELOG.md) • [🗺 Roadmap](https://github.com/neon-age/Smart-Hierarchy/projects/1) • [💬 Discussions](https://github.com/neon-age/Smart-Hierarchy/discussions) •
+• [📝 Changelog](https://github.com/neon-age/Smart-Hierarchy/wiki/Changelog) 
+• [🗺 Roadmap](https://github.com/neon-age/Smart-Hierarchy/projects/1) 
+• [💬 Discussions](https://github.com/neon-age/Smart-Hierarchy/discussions)
+• [📚 Wiki](https://github.com/neon-age/Smart-Hierarchy/wiki) •
 
 ## Installation
 Requires Unity **2019.4** or higher.
@@ -37,43 +41,43 @@ Requires Unity **2019.4** or higher.
 Customization is available in `Preferences > Workflow > Smart Hierarchy`.
 
 ## Features
+
 ### Icons
-![Icons](.github/images/Icons.png)
+[![Icons](.github/readme/Icons.png)](https://github.com/neon-age/Smart-Hierarchy/wiki/Icons)
 
 Most important components are shown to help you orientate visually.\
-Types Priority can be defined in Preferences.
+[Types Priority](https://github.com/neon-age/Smart-Hierarchy/wiki/Icons#types-priority) 
+can be defined in Preferences.
 
 ### Collections
-![Collections](.github/images/Collections.png)
+[![Collections](.github/readme/Collections.png)](https://github.com/neon-age/Smart-Hierarchy/wiki/Collections)
 
-*"GameObject / Create Collection".*
+[Collection](https://github.com/neon-age/Smart-Hierarchy/wiki/Collections) 
+is used to organize game-objects in Editor.\
+Unlike game-object parent, it does not affect runtime transform hierarchy.
+                                                                           
 
-Collection is used to group objects in Editor without affecting runtime transform hierarchy.\
-Children are detached during scene process.
-
-[Best Practices: Transforms Optimization](https://unity.com/ru/how-to/best-practices-performance-optimization-unity#transforms) \
-[Best Practices: Optimizing the Hierarchy](https://blogs.unity3d.com/ru/2017/06/29/best-practices-from-the-spotlight-team-optimizing-the-hierarchy/)
-
-**Note:** There is an option in Preferences to keep collections in Playmode.
 
 ### Activation Toggle
-![Activation Toggle](.github/images/ActivationToggle.png)
+[![Activation Toggle](.github/readme/ActivationToggle.png)](https://github.com/neon-age/Smart-Hierarchy/wiki/Activation-Toggle)
 
-\#ProTip: Swipe to (de)activate multiple objects!
+Lets you (de)activate game-objects while keeping your selection.
 
 ### Hover Preview
-![Hover Preview](.github/images/HoverPreview.png)
+[![Hover Preview](.github/readme/HoverPreview.png)](https://github.com/neon-age/Smart-Hierarchy/wiki/Hover-Preview)
 
-Bindable keys: Alt / Shift / Ctrl.\
-**Very Experimental!** Can be enabled in Preferences.
+
+### And more...
+- [Activation Swiping](https://github.com/neon-age/Smart-Hierarchy/wiki/Activation-Toggle#swiping)
+- [Custom Paste / Duplicate](https://github.com/neon-age/Smart-Hierarchy/wiki/Custom-Paste---Duplicate)
+- [Auto Paste as Child](https://github.com/neon-age/Smart-Hierarchy/wiki/Custom-Paste---Duplicate)
 
 ## Participation
-Every contribution is highly appreciated — feel free to bug-hunt, provide feedback and ideas!\
-Savvy enough to pull a new feature? I'll be happy to review your code and design UX together!
+Feel free to fork / pull request or provide [feedback and ideas](https://github.com/neon-age/Smart-Hierarchy/discussions)!
 
-## Sharing is caring
+## Sharing is caring 💗
 I want to share my tools with everyone, without hiding behind a paywall.\
-If you like my work and feel generous — consider supporting me financially!
+If you like my work and feel generous — consider supporting [me](https://twitter.com/_neonage) financially!
 
 [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L4L02M51R)
 [![patreon](.github/become-a-patron.png)](https://www.patreon.com/neonage?fan_landing=true)

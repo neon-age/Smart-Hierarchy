@@ -2,7 +2,8 @@
 
 namespace AV.Hierarchy
 {
-    [AddComponentMenu("GameObject/Collection")]
+    [DisallowMultipleComponent]
+    [AddComponentMenu("Miscellaneous/Hierarchy/Collection")]
     internal class Collection : MonoBehaviour
     {
         [Tooltip("Will skip collection stripping during scene process.\n" +
