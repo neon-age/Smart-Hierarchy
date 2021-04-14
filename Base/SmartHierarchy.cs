@@ -13,6 +13,7 @@ namespace AV.Hierarchy
     internal class SmartHierarchy
     {
         internal static HierarchyPreferences prefs => HierarchySettingsProvider.Preferences;
+        internal static HierarchyOptions options => HierarchyOptions.instance;
         internal static Event evt => Event.current;
         internal static SmartHierarchy active { get; private set; }
 
@@ -21,12 +22,13 @@ namespace AV.Hierarchy
         internal TreeViewState state => hierarchy.state;
         internal TreeViewController controller => hierarchy.controller;
         internal float time => Time.realtimeSinceStartup;
+        internal float baseIndent => controller.gui.GetBaseIndent();
         
         private EditorWindow actualWindow => window.actualWindow;
         private ViewItem hoveredItem;
         private bool isHovering => hoveredItem != null;
         private int hoveredItemId => hierarchy.hoveredItem?.id ?? -1;
-        private bool requiresUpdateBeforeGUI;
+        private bool isInitialized = true;
         private bool requiresGUISetup = true;
         private Vector2 localMousePosition;
         
@@ -50,7 +52,12 @@ namespace AV.Hierarchy
             
             // onGUIHandler is called after hierarchy GUI, thus has a slight delay
             guiContainer.onGUIHandler += OnAfterGUI;
-            
+            var guiAction = guiContainer.onGUIHandler;
+
+            guiContainer.onGUIHandler = OnBeforeGUI;
+            guiContainer.onGUIHandler += guiAction;
+            guiContainer.onGUIHandler += OnAfterGUI;
+
             root.Add(hoverPreview);
         }
 
@@ -63,6 +70,12 @@ namespace AV.Hierarchy
         private static void OnInitialize()
         {
             EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyItemGUI;
+        }
+
+        internal void OnDisable()
+        {
+            isInitialized = false;
+            controller.gui.SetBaseIndent(32);
         }
 
         private void RegisterCallbacks()
@@ -86,12 +99,37 @@ namespace AV.Hierarchy
         {
             ItemsData.Clear();
         }
-        
+
         private static void ImmediateRepaint()
         {
-            EditorApplication.DirtyHierarchyWindowSorting();
+            EditorApplication.RepaintHierarchyWindow();
         }
         
+        private void OnBeforeGUI()
+        {
+            if (!prefs.enableSmartHierarchy)
+            {
+                if (isInitialized)
+                    OnDisable();
+                return;
+            }
+
+            isInitialized = true;
+
+            if (requiresGUISetup)
+            {
+                requiresGUISetup = false;
+                OnGUISetup();
+            }
+            hierarchy.EnsureValidData();
+
+            ItemsData.TryGetValue(hoveredItemId, out hoveredItem);
+
+            CopyPasteCommands.ExecuteCommands();
+            SetupBaseIndent();
+            HideDefaultIcon();
+        }
+
         private static void OnHierarchyItemGUI(int id, Rect rect)
         {
             if (!prefs.enableSmartHierarchy)
@@ -104,37 +142,31 @@ namespace AV.Hierarchy
 
         private void OnItemCallback(int id, Rect rect)
         {
-            if (requiresGUISetup)
-            {
-                requiresGUISetup = false;
-                OnGUISetup();
-            }
-
-            if (requiresUpdateBeforeGUI)
-            {
-                requiresUpdateBeforeGUI = false;
-                OnBeforeGUI();
-            }
-            
             OnItemGUI(id, rect);
         }
 
         private void OnGUISetup()
         {
-            hierarchy.EnsureValidData();
+            //hierarchy.EnsureValidData();
             actualWindow.SetAntiAliasing(8);
+            SceneVisGUIPatch.Initialize();
         }
-        
-        private void OnBeforeGUI()
+
+        private void SetupBaseIndent()
         {
-            hierarchy.EnsureValidData();
+            var visibility = options.showVisibilityToggle;
+            var picking = options.showPickingToggle;
+            
+            var indent = !visibility && !picking ? 6 : 0;
 
-            ItemsData.TryGetValue(hoveredItemId, out hoveredItem);
-
-            CopyPasteCommands.ExecuteCommands();
-            HideDefaultIcon();
+            if (options.showVisibilityToggle)
+                indent += 16;
+            
+            if (options.showPickingToggle)
+                indent += 16;
+            
+            controller.gui.SetBaseIndent(indent);
         }
-        
         
         private void OnItemGUI(int id, Rect rect)
         {
@@ -162,7 +194,7 @@ namespace AV.Hierarchy
         {
             if (!prefs.enableSmartHierarchy)
                 return;
-
+            
             // Makes sure other items like scene headers are not interrupted 
             controller.gui.ResetCustomStyling();
             
@@ -175,8 +207,6 @@ namespace AV.Hierarchy
             }
 
             HandleObjectPreview();
-
-            requiresUpdateBeforeGUI = true;
         }
 
         private void HideDefaultIcon()

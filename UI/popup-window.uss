@@ -26,6 +26,11 @@
     opacity: 0.75;
 }
 
+.label {
+    opacity: 0.75;
+    padding: 0 0 4 0;
+}
+
 .separator {
     flex-grow: 1;
     height: 1;
@@ -38,8 +43,9 @@
 }
 
 .unity-toolbar {
-    padding: 1;
+    padding: 0;
     border-radius: 4;
+    overflow: hidden;
 }
 
 .highlight-button {
@@ -56,4 +62,38 @@
 
 .highlight-button :hover {
     background-color: rgba(255, 255, 255, 0.15);
+}
+
+.active-toggle {
+    width: 25;
+    height: 20;
+    flex-direction: initial;
+
+    border-width: 0 0 0 1;
+
+    background-color: rgba(255, 255, 255, 0.1);
+    align-items: center;
+}
+
+.active-toggle-icon {
+    width: 16;
+    height: 16;
+    margin-right: 1;
+    margin-bottom: 2;
+}
+
+.active-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.active-toggle:checked {
+    background-color: rgba(72, 105, 160, 1);
+}
+
+.active-toggle > .active-toggle-icon {
+    opacity: 0.75;
+}
+
+.active-toggle:checked > .active-toggle-icon {
+    opacity: 1;
 }

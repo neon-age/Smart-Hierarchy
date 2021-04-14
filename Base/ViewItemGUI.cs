@@ -40,7 +40,7 @@ namespace AV.Hierarchy
             }
             
             var fullWidthRect = new Rect(rect) { x = 0, width = Screen.width };
-            var toggleRect = new Rect(fullWidthRect) { x = 32 };
+            var toggleRect = new Rect(fullWidthRect) { x = SmartHierarchy.active.baseIndent };
 
             var isSwiped = SwipeToggle.IsRectSwiped(toggleRect);
 
@@ -71,13 +71,13 @@ namespace AV.Hierarchy
                 color *= new Color(1f, 1f, 1f, 0.5f);
 
             if (item.effectiveIcon)
-                DrawIcon(iconRect, item.effectiveIcon, color, isOn);
+                DrawIconTexture(iconRect, item.effectiveIcon, color, isOn);
 
             if (item.overlayIcon)
-                DrawIcon(iconRect, item.overlayIcon, color);
+                DrawIconTexture(iconRect, item.overlayIcon, color);
         }
         
-        private static void DrawIcon(Rect position, Texture texture, Color color, bool isOn = false)
+        public static void DrawIconTexture(Rect position, Texture texture, Color color, bool isOn = false)
         {
             if (iconMaterial == null)
                 iconMaterial = new Material(Shader.Find("Hidden/Internal-IconClip"));

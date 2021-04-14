@@ -53,12 +53,20 @@ namespace AV.Hierarchy
             titleContainer.Add(titleText);
             
             hierarchy.Add(titleContainer);
-            hierarchy.Add(CreateSeparator());
+            
+            if (!string.IsNullOrEmpty(title))
+                hierarchy.Add(CreateSeparator());
+            
             hierarchy.Add(contentContainer);
 
-            activePopups.Add(GetType(), this);
-        }
+            var type = GetType();
+            
+            if (activePopups.TryGetValue(GetType(), out var activePopup))
+                activePopup.Close();
 
+            activePopups.Add(type, this);
+        }
+        
         public static T GetPopup<T>() where T : ObjectPopupWindow
         {
             activePopups.TryGetValue(typeof(T), out var popup);
@@ -80,8 +88,6 @@ namespace AV.Hierarchy
         
         public void ShowInsideWindow(Vector2 position, VisualElement root)
         {
-            active?.RemoveFromHierarchy();
-
             active = this;
             
             position.x -= 7;
@@ -96,10 +102,12 @@ namespace AV.Hierarchy
             GUI.FocusControl("PopupElement");
             Focus();
             
+            // BUG: All children must be NOT focusable, or they will steal the focus and blur event will not be sent.
+            RegisterCallback<BlurEvent>(evt => Close());
+            
             root.RegisterCallback<GeometryChangedEvent>(OnRootGeometryChange);
             RegisterCallback<GeometryChangedEvent>(OnGeometryChange);
-            RegisterCallback<FocusOutEvent>(evt => Close());
-            
+
             style.top = position.y;
             
             contextArrow = new VisualElement { style = { backgroundImage = arrowIcon, position = Position.Absolute } };
