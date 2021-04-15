@@ -82,7 +82,8 @@ namespace AV.Hierarchy
                 if (components.hasNullComponent)
                     icon = nullComponentIcon;
                 
-                mainType = components.main?.GetType() ?? typeof(GameObject);
+                //mainType = components.main?.GetType() ?? typeof(GameObject);
+                mainType = typeof(GameObject);
             }
         }
         

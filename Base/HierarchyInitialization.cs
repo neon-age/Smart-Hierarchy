@@ -7,22 +7,18 @@ using static System.Linq.Expressions.Expression;
 
 namespace AV.Hierarchy
 {
-    public static class HierarchyInitialization
+    internal static class HierarchyInitialization
     {
+        public static EditorWindow ActiveWindow;
+        
         private static PropertyInfo lastInteractedHierarchyWindow;
-
         private static Func<object> getLastHierarchyWindowFunc;
         
-        private static Dictionary<object, SmartHierarchy> Hierarchies = new Dictionary<object, SmartHierarchy>();
+        private static readonly Dictionary<EditorWindow, SmartHierarchy> Hierarchies = new Dictionary<EditorWindow, SmartHierarchy>();
         
         
         [InitializeOnLoadMethod]
         private static void OnInitialize()
-        {
-            DoReflection();
-        }
-        
-        private static void DoReflection()
         {
             var sceneHierarchyWindowType = typeof(Editor).Assembly.GetType("UnityEditor.SceneHierarchyWindow");
             
@@ -32,16 +28,29 @@ namespace AV.Hierarchy
             getLastHierarchyWindowFunc = Lambda<Func<object>>(Property(null, lastInteractedHierarchyWindow)).Compile();
         }
         
-        internal static SmartHierarchy GetLastHierarchy()
+        internal static void GerOrCreateForWindow(EditorWindow window, out SmartHierarchy hierarchy)
         {
-            var lastHierarchyWindow = getLastHierarchyWindowFunc();
-
-            if (!Hierarchies.TryGetValue(lastHierarchyWindow, out var hierarchy))
+            if (!Hierarchies.TryGetValue(window, out hierarchy))
             {
-                hierarchy = new SmartHierarchy(lastHierarchyWindow as EditorWindow);
-                Hierarchies.Add(lastHierarchyWindow, hierarchy);
+                hierarchy = new SmartHierarchy(window);
+                Hierarchies.Add(window, hierarchy);
             }
+        }
+
+        internal static SmartHierarchy GetActiveHierarchy()
+        {
+            Hierarchies.TryGetValue(ActiveWindow, out var hierarchy);
             return hierarchy;
+        }
+        
+        internal static SmartHierarchy GetLastInteractedHierarchy()
+        {
+            var lastHierarchyWindow = getLastHierarchyWindowFunc() as EditorWindow;
+
+            if (lastHierarchyWindow == null)
+                return null;
+            
+            return Hierarchies[lastHierarchyWindow];
         }
     }
 }

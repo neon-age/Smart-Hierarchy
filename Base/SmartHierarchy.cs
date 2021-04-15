@@ -49,12 +49,12 @@ namespace AV.Hierarchy
             RegisterCallbacks();
             hierarchy.ReassignCallbacks();
             
-            guiContainer = root.parent.Query<IMGUIContainer>().First();
-            var originalGUI = guiContainer.onGUIHandler;
+            //guiContainer = root.parent.Query<IMGUIContainer>().First();
+            //var originalGUI = guiContainer.onGUIHandler;
 
-            guiContainer.onGUIHandler = OnBeforeGUI;
-            guiContainer.onGUIHandler += originalGUI;
-            guiContainer.onGUIHandler += OnAfterGUI;
+            //guiContainer.onGUIHandler = OnBeforeGUI;
+            //guiContainer.onGUIHandler = originalGUI;
+            //guiContainer.onGUIHandler += OnAfterGUI;
 
             root.Add(hoverPreview);
         }
@@ -103,15 +103,15 @@ namespace AV.Hierarchy
             EditorApplication.RepaintHierarchyWindow();
         }
         
-       
+        
         private static void OnHierarchyItemGUI(int id, Rect rect)
         {
             if (!prefs.enableSmartHierarchy)
                 return;
             
-            active = HierarchyInitialization.GetLastHierarchy();
+            active = HierarchyInitialization.GetActiveHierarchy();
 
-            active.OnItemCallback(id, rect);
+            active?.OnItemCallback(id, rect);
         }
 
         private void OnItemCallback(int id, Rect rect)
@@ -141,7 +141,7 @@ namespace AV.Hierarchy
             controller.gui.SetBaseIndent(indent);
         }
         
-        private void OnBeforeGUI()
+        internal void OnBeforeGUI()
         {
             if (!prefs.enableSmartHierarchy)
             {
@@ -183,7 +183,7 @@ namespace AV.Hierarchy
             item.DoItemGUI(this, rect, isHover, isOn);
         }
         
-        private void OnAfterGUI()
+        internal void OnAfterGUI()
         {
             if (!prefs.enableSmartHierarchy)
                 return;
@@ -198,7 +198,7 @@ namespace AV.Hierarchy
                 
                 hoverPreview.SetPosition(localMousePosition, actualWindow.position);
             }
-
+            
             HandleObjectPreview();
         }
 
