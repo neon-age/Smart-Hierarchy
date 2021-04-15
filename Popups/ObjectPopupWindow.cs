@@ -132,7 +132,7 @@ namespace AV.Hierarchy
         private void FitToRootWidth()
         {
             var xMax = position.x + layout.width;
-            var rootWidth = root.layout.width - 14;
+            var rootWidth = root.layout.width;
 
             if (xMax > rootWidth)
                 style.left = layout.x + (rootWidth - layout.xMax);

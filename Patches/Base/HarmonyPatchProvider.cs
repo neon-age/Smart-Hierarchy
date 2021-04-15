@@ -14,7 +14,7 @@ namespace AV.Hierarchy
     {
         protected static Assembly EditorAssembly { get; } = typeof(Editor).Assembly;
         
-        protected static Harmony harmony { get; } = new Harmony(nameof(T));
+        protected static Harmony harmony { get; } = new Harmony(typeof(T).FullName);
 
         private static T instance;
 
@@ -32,6 +32,9 @@ namespace AV.Hierarchy
 
         protected static void Patch(MethodInfo methodInfo, string prefix = null, string postfix = null)
         {
+            if (methodInfo == null)
+                throw new NullReferenceException($"Provided null method for Patching.");
+            
             var prefixMethod = GetMethod(prefix);
             var postfixMethod = GetMethod(postfix);
             
@@ -46,7 +49,7 @@ namespace AV.Hierarchy
             var method = typeof(T).GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
             
             if (method == null)
-                throw new NullReferenceException($"Provided invalid method name for patching: '{methodName}'");
+                throw new NullReferenceException($"Provided invalid method name for Patching: '{methodName}'");
             
             return new HarmonyMethod(method);
         }
