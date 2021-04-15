@@ -24,12 +24,14 @@ namespace AV.Hierarchy
             
             if (selections.Length == 1)
             {
-                var components = selections[0].GetComponents<Component>();
+                var selection = selections[0];
+                var components = selection.GetComponents<Component>();
                 var mainComponent = Components.ChooseMainComponent(components);
+                var isPrefab = PrefabUtility.IsPartOfAnyPrefab(selection);
             
-                if (!mainComponent || mainComponent is Transform)
+                if (!isPrefab && (mainComponent != null || mainComponent is Transform))
                 {
-                    Undo.AddComponent<Collection>(selections[0]);
+                    Undo.AddComponent<Collection>(selection);
                     isExecuted = true;
                     return;
                 }
