@@ -7,32 +7,30 @@ using UnityEngine;
 
 namespace AV.Hierarchy
 {
-    [InitializeOnLoad]
-    internal static class SceneHierarchyWindowPatch
+    internal class SceneHierarchyWindowPatch : HarmonyPatchProvider<SceneHierarchyWindowPatch>
     {
         private static Texture2D filterIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath("15da02c18233ca44f89e8255124491de"));
         private static GUIContent buttonContent = new GUIContent();
         private static GUIStyle dropdownStyle;
+
+        [InitializeOnLoadMethod]
+        static void OnLoad() => Initialize();
         
-        static SceneHierarchyWindowPatch()
+        protected override void OnInitialize()
         {
-            var type = typeof(Editor).Assembly.GetType("UnityEditor.SceneHierarchyWindow");
+            var type = EditorAssembly.GetType("UnityEditor.SceneHierarchyWindow");
             
-            var harmony = new Harmony("SceneHierarchyWindow Patch");
-
             var doToolbarLayout = type.GetMethod("DoToolbarLayout", BindingFlags.NonPublic | BindingFlags.Instance);
-            var prefix = typeof(SceneHierarchyWindowPatch).GetMethod("Prefix", BindingFlags.Public | BindingFlags.Static);
-            var postfix = typeof(SceneHierarchyWindowPatch).GetMethod("Postfix", BindingFlags.Public | BindingFlags.Static);
 
-            harmony.Patch(doToolbarLayout, new HarmonyMethod(prefix), new HarmonyMethod(postfix));
+            Patch(doToolbarLayout, nameof(DoToolbarLayout_Prefix), nameof(DoToolbarLayout_Postfix));
         }
 
-        public static void Prefix()
+        private static void DoToolbarLayout_Prefix()
         {
             GUILayout.BeginHorizontal(EditorStyles.toolbar);
         }
 
-        public static void Postfix()
+        private static void DoToolbarLayout_Postfix()
         {
             if (dropdownStyle == null)
                 dropdownStyle = new GUIStyle("ToolbarCreateAddNewDropDown")

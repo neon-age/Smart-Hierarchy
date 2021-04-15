@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace AV.Hierarchy
 {
-    internal static class SceneVisGUIPatch
+    internal class SceneVisGUIPatch : HarmonyPatchProvider<SceneVisGUIPatch>
     {
         private static HierarchyPreferences prefs => HierarchySettingsProvider.Preferences;
         private static HierarchyOptions options => HierarchyOptions.instance;
@@ -20,10 +20,8 @@ namespace AV.Hierarchy
         private static readonly Type type = typeof(Editor).Assembly.GetType("UnityEditor.SceneVisibilityHierarchyGUI");
         
         
-        public static void Initialize()
+        protected override void OnInitialize()
         {
-            var harmony = new Harmony("SceneVis GUI Patch");
-
             var doItemGUI = type.GetMethod("DoItemGUI", BindingFlags.Public | BindingFlags.Static);
             var drawBackground = type.GetMethod("DrawBackground", BindingFlags.Public | BindingFlags.Static);
             var drawItemBackground = type.GetMethod("DrawItemBackground", BindingFlags.NonPublic | BindingFlags.Static);
@@ -34,19 +32,14 @@ namespace AV.Hierarchy
             var drawSceneItemPicking = type.GetMethod("DrawSceneItemPicking", BindingFlags.NonPublic | BindingFlags.Static);
 
             
-            harmony.Patch(doItemGUI, GetMethod(nameof(DoItemGUI)));
-            harmony.Patch(drawBackground, GetMethod(nameof(DrawBackground)));
-            harmony.Patch(drawItemBackground, GetMethod(nameof(DrawItemBackground)));
+            Patch(doItemGUI, nameof(DoItemGUI));
+            Patch(drawBackground, nameof(DrawBackground));
+            Patch(drawItemBackground, nameof(DrawItemBackground));
             
-            harmony.Patch(drawGameObjectItemVisibility, GetMethod(nameof(DrawGameObjectItemVisibility)));
-            harmony.Patch(drawGameObjectItemPicking, GetMethod(nameof(DrawGameObjectItemPicking)));
-            harmony.Patch(drawSceneItemVisibility, GetMethod(nameof(DrawSceneItemVisibility)));
-            harmony.Patch(drawSceneItemPicking, GetMethod(nameof(DrawSceneItemPicking)));
-        }
-
-        private static HarmonyMethod GetMethod(string methodName)
-        {
-            return new HarmonyMethod(typeof(SceneVisGUIPatch).GetMethod(methodName, BindingFlags.Public | BindingFlags.Static));
+            Patch(drawGameObjectItemVisibility, nameof(DrawGameObjectItemVisibility));
+            Patch(drawGameObjectItemPicking, nameof(DrawGameObjectItemPicking));
+            Patch(drawSceneItemVisibility, nameof(DrawSceneItemVisibility));
+            Patch(drawSceneItemPicking, nameof(DrawSceneItemPicking));
         }
         
         public static void DoItemGUI(ref Rect rect)
