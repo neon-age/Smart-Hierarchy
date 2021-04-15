@@ -40,11 +40,14 @@ namespace AV.Hierarchy
                         collectionPopup.Close();
                 }
             }
+
+            if (item.gameObject == null)
+                return;
             
             var fullWidthRect = new Rect(rect) { x = 0, width = Screen.width };
             var toggleRect = new Rect(fullWidthRect) { x = SmartHierarchy.active.baseIndent };
 
-            var isDragged = activationToggle.IsObjectDragged(item.instance);
+            var isDragged = activationToggle.IsObjectDragged(item.gameObject);
 
             if (isDragged)
             {
@@ -52,7 +55,7 @@ namespace AV.Hierarchy
                 EditorGUI.DrawRect(toggleRect, new Color(c.r, c.g, c.b, 0.0666f));
             }
 
-            activationToggle.DoActivationToggle(toggleRect, item.instance, isHover || isDragged);
+            activationToggle.DoActivationToggle(toggleRect, item.gameObject, isHover || isDragged);
         }
         
         public static void DrawIcon(this ViewItem item, Rect rect, bool isOn)

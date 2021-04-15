@@ -7,6 +7,7 @@ using UnityEditor.IMGUI.Controls;
 using UnityEditor.SceneManagement;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
+using Object = UnityEngine.Object;
 
 namespace AV.Hierarchy
 {
@@ -49,13 +50,10 @@ namespace AV.Hierarchy
             hierarchy.ReassignCallbacks();
             
             guiContainer = root.parent.Query<IMGUIContainer>().First();
-            
-            // onGUIHandler is called after hierarchy GUI, thus has a slight delay
-            guiContainer.onGUIHandler += OnAfterGUI;
-            var guiAction = guiContainer.onGUIHandler;
+            var originalGUI = guiContainer.onGUIHandler;
 
             guiContainer.onGUIHandler = OnBeforeGUI;
-            guiContainer.onGUIHandler += guiAction;
+            guiContainer.onGUIHandler += originalGUI;
             guiContainer.onGUIHandler += OnAfterGUI;
 
             root.Add(hoverPreview);
@@ -105,31 +103,7 @@ namespace AV.Hierarchy
             EditorApplication.RepaintHierarchyWindow();
         }
         
-        private void OnBeforeGUI()
-        {
-            if (!prefs.enableSmartHierarchy)
-            {
-                if (isInitialized)
-                    OnDisable();
-                return;
-            }
-
-            isInitialized = true;
-
-            if (requiresGUISetup)
-            {
-                requiresGUISetup = false;
-                OnGUISetup();
-            }
-            hierarchy.EnsureValidData();
-
-            ItemsData.TryGetValue(hoveredItemId, out hoveredItem);
-
-            CopyPasteCommands.ExecuteCommands();
-            SetupBaseIndent();
-            HideDefaultIcon();
-        }
-
+       
         private static void OnHierarchyItemGUI(int id, Rect rect)
         {
             if (!prefs.enableSmartHierarchy)
@@ -154,34 +128,53 @@ namespace AV.Hierarchy
 
         private void SetupBaseIndent()
         {
-            var visibility = options.showVisibilityToggle;
-            var picking = options.showPickingToggle;
-            
-            var indent = !visibility && !picking ? 6 : 0;
+            var indent = 0;
 
             if (options.showVisibilityToggle)
                 indent += 16;
             
             if (options.showPickingToggle)
                 indent += 16;
+
+            indent = Mathf.Max(6, indent);
             
             controller.gui.SetBaseIndent(indent);
         }
         
+        private void OnBeforeGUI()
+        {
+            if (!prefs.enableSmartHierarchy)
+            {
+                if (isInitialized)
+                    OnDisable();
+                return;
+            }
+
+            isInitialized = true;
+
+            if (requiresGUISetup)
+            {
+                requiresGUISetup = false;
+                OnGUISetup();
+            }
+            hierarchy.EnsureValidData();
+
+            ItemsData.TryGetValue(hoveredItemId, out hoveredItem);
+
+            CopyPasteCommands.ExecuteCommands();
+            SetupBaseIndent();
+            HideDefaultIcon();
+        }
+        
         private void OnItemGUI(int id, Rect rect)
         {
-            var instance = EditorUtility.InstanceIDToObject(id) as GameObject;
+            var instance = EditorUtility.InstanceIDToObject(id);
 
-            if (!instance)
-                return;
-                
-            GetInstanceViewItem(id, instance, rect, out var item);
+            GetInstanceViewItem(id, instance, out var item);
             
             // Happens to be null when entering prefab mode
             if (!item.EnsureViewExist(hierarchy))
                 return;
-            
-            HideDefaultIcon();
             
             var isSelected = controller.IsSelected(item.view);
             var isHover = hierarchy.hoveredItem == item.view;
@@ -243,11 +236,11 @@ namespace AV.Hierarchy
             }
         }
         
-        private void GetInstanceViewItem(int id, GameObject instance, Rect rect, out ViewItem item)
+        private void GetInstanceViewItem(int id, Object instance, out ViewItem item)
         {
             if (!ItemsData.TryGetValue(id, out item))
             {
-                item = new ViewItem(instance) { rect = rect };
+                item = new ViewItem(id, instance);
 
                 ItemsData.Add(id, item);
             }
