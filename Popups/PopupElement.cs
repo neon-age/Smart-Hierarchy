@@ -8,13 +8,13 @@ using PopupWindow = UnityEngine.UIElements.PopupWindow;
 
 namespace AV.Hierarchy
 {
-    public abstract class ObjectPopupWindow : VisualElement
+    public abstract class PopupElement : VisualElement
     {
         private static StyleSheet styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(AssetDatabase.GUIDToAssetPath("d7461833a510d124191fbed727ac19f0"));
         private static Texture2D arrowIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath("70cf301939ec64147b3b646ec72c2cf2"));
 
-        private static ObjectPopupWindow active;
-        private static Dictionary<Type, ObjectPopupWindow> activePopups = new Dictionary<Type, ObjectPopupWindow>();
+        private static PopupElement active;
+        private static Dictionary<Type, PopupElement> activePopups = new Dictionary<Type, PopupElement>();
 
         public string title
         {
@@ -35,7 +35,7 @@ namespace AV.Hierarchy
         private Color backgroundColor => isProSkin ? new Color32(35, 35, 35, 230) : new Color32(165, 165, 165, 230);
         
         
-        protected ObjectPopupWindow()
+        protected PopupElement()
         {
             styleSheets.Add(styleSheet);
             style.backgroundColor = backgroundColor;
@@ -67,7 +67,7 @@ namespace AV.Hierarchy
             activePopups.Add(type, this);
         }
         
-        public static T GetPopup<T>() where T : ObjectPopupWindow
+        public static T GetPopup<T>() where T : PopupElement
         {
             activePopups.TryGetValue(typeof(T), out var popup);
             return (T)popup;

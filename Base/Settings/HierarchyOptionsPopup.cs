@@ -8,7 +8,7 @@ using static UnityEditor.EditorGUIUtility;
 
 namespace AV.Hierarchy
 {
-    internal class HierarchyOptionsPopup : ObjectPopupWindow
+    internal class HierarchyOptionsPopup : PopupElement
     {
         private class GUIImage : IMGUIContainer
         {

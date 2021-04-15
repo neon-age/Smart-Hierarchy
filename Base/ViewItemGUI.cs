@@ -26,7 +26,7 @@ namespace AV.Hierarchy
             {
                 if (OnIconClick(rect))
                 {
-                    var collectionPopup = ObjectPopupWindow.GetPopup<CollectionPopup>();
+                    var collectionPopup = PopupElement.GetPopup<CollectionPopup>();
                     if (collectionPopup == null)
                     {
                         var popup = new CollectionPopup(item.collection);
