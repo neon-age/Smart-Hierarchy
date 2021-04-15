@@ -5,16 +5,20 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using HarmonyLib;
+using UnityEditor;
 using UnityEngine;
 
 namespace AV.Hierarchy
 {
     internal abstract class HarmonyPatchBase<T> where T : HarmonyPatchBase<T>, new()
     {
+        protected static Assembly EditorAssembly { get; } = typeof(Editor).Assembly;
+        
         protected static Harmony harmony { get; } = new Harmony(nameof(T));
 
         private static T instance;
 
+        
         public static void Initialize()
         {
             if (instance != null)
