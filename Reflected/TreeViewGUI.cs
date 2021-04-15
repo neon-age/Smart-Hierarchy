@@ -12,6 +12,7 @@ namespace AV.Hierarchy
         
         private static Type type;
         private static FieldInfo baseIndentField;
+        private static FieldInfo indentWidthField;
         private static FieldInfo iconWidthField;
         private static FieldInfo iconSpaceField;
         private static FieldInfo halfDropBetweenHeightField;
@@ -19,6 +20,9 @@ namespace AV.Hierarchy
         private static PropertyInfo lineHeightProperty;
         private static PropertyInfo foldoutStyleProperty;
         private static PropertyInfo spaceBeforeIconProperty;
+        
+        private static Func<object, float> getIndentWidth;
+        private static Action<object, float> setIndentWidth;
         
         private static MethodInfo isSubSceneHeader;
 
@@ -33,6 +37,7 @@ namespace AV.Hierarchy
             type = typeof(TreeView).Assembly.GetType("UnityEditor.IMGUI.Controls.TreeViewGUI");
 
             baseIndentField = type.GetField("k_BaseIndent");
+            indentWidthField = type.GetField("k_IndentWidth");
             iconWidthField = type.GetField("k_IconWidth");
             iconSpaceField = type.GetField("k_SpaceBetweenIconAndText");
             halfDropBetweenHeightField = type.GetField("k_HalfDropBetweenHeight");
@@ -75,6 +80,11 @@ namespace AV.Hierarchy
         public float GetBaseIndent()
         {
             return (float)baseIndentField.GetValue(gui);
+        }
+        
+        public void SetIndentWidth(float indent)
+        {
+            indentWidthField.SetValue(gui, indent);
         }
         
         public void SetIconWidth(float width)

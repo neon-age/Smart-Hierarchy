@@ -125,18 +125,27 @@ namespace AV.Hierarchy
             actualWindow.SetAntiAliasing(8);
             SceneVisGUIPatch.Initialize();
         }
+        
+        private void SetupLinesLayout()
+        {
+            var indentWidth = options.layout.indentWidth;
+            var lineHeight = options.layout.lineHeight;
+            
+            controller.gui.SetIndentWidth(indentWidth);
+            controller.gui.SetLineHeight(lineHeight);
+        }
 
         private void SetupBaseIndent()
         {
             var indent = 0;
+            var minIndent = options.layout.minimalIndent;
 
             if (options.showVisibilityToggle)
                 indent += 16;
-            
             if (options.showPickingToggle)
                 indent += 16;
 
-            indent = Mathf.Max(6, indent);
+            indent = Mathf.Max(minIndent, indent);
             
             controller.gui.SetBaseIndent(indent);
         }
@@ -162,6 +171,7 @@ namespace AV.Hierarchy
             ItemsData.TryGetValue(hoveredItemId, out hoveredItem);
 
             CopyPasteCommands.ExecuteCommands();
+            SetupLinesLayout();
             SetupBaseIndent();
             HideDefaultIcon();
         }
