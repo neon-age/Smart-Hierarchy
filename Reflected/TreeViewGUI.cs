@@ -8,7 +8,7 @@ namespace AV.Hierarchy
 {
     internal class TreeViewGUI
     {
-        private object gui;
+        private object instance;
         
         private static Type type;
         private static FieldInfo baseIndentField;
@@ -18,6 +18,7 @@ namespace AV.Hierarchy
         private static FieldInfo halfDropBetweenHeightField;
         
         private static PropertyInfo lineHeightProperty;
+        private static PropertyInfo lineStyleProperty;
         private static PropertyInfo foldoutStyleProperty;
         private static PropertyInfo spaceBeforeIconProperty;
         
@@ -43,18 +44,19 @@ namespace AV.Hierarchy
             halfDropBetweenHeightField = type.GetField("k_HalfDropBetweenHeight");
             
             lineHeightProperty = type.GetProperty("k_LineHeight");
+            lineStyleProperty = type.GetProperty("lineStyle", BindingFlags.NonPublic | BindingFlags.Instance);
             foldoutStyleProperty = type.GetProperty("foldoutStyle", BindingFlags.NonPublic | BindingFlags.Instance);
             spaceBeforeIconProperty = type.GetProperty("extraSpaceBeforeIconAndLabel");
             
             isSubSceneHeader = typeof(Editor).Assembly.GetType("SubSceneGUI").GetMethod("IsSubSceneHeader", BindingFlags.NonPublic | BindingFlags.Static);
         }
 
-        public TreeViewGUI(object gui)
+        public TreeViewGUI(object instance)
         {
-            this.gui = gui;
+            this.instance = instance;
             
-            defaultIconWidth = (float)iconWidthField.GetValue(gui);
-            defaultSpaceBeforeIcon = (float)iconSpaceField.GetValue(gui);
+            defaultIconWidth = (float)iconWidthField.GetValue(instance);
+            defaultSpaceBeforeIcon = (float)iconSpaceField.GetValue(instance);
         }
 
         public static bool IsSubSceneHeader(GameObject gameObject)
@@ -64,37 +66,42 @@ namespace AV.Hierarchy
 
         public void SetLineHeight(float height)
         {
-            lineHeightProperty.SetValue(gui, height);
+            lineHeightProperty.SetValue(instance, height);
+        }
+
+        public GUIStyle GetLineStyle()
+        {
+            return lineStyleProperty.GetValue(instance) as GUIStyle;
         }
 
         public void ResetCustomStyling()
         {
-            iconWidthField.SetValue(gui, defaultIconWidth);
-            iconSpaceField.SetValue(gui, defaultSpaceBeforeIcon);
+            iconWidthField.SetValue(instance, defaultIconWidth);
+            iconSpaceField.SetValue(instance, defaultSpaceBeforeIcon);
         }
         
         public void SetBaseIndent(float indent)
         {
-            baseIndentField.SetValue(gui, indent);
+            baseIndentField.SetValue(instance, indent);
         }
         public float GetBaseIndent()
         {
-            return (float)baseIndentField.GetValue(gui);
+            return (float)baseIndentField.GetValue(instance);
         }
         
         public void SetIndentWidth(float indent)
         {
-            indentWidthField.SetValue(gui, indent);
+            indentWidthField.SetValue(instance, indent);
         }
         
         public void SetIconWidth(float width)
         {
-            iconWidthField.SetValue(gui, width);
+            iconWidthField.SetValue(instance, width);
         }
 
         public void SetSpaceBetweenIconAndText(float space)
         {
-            iconSpaceField.SetValue(gui, space);
+            iconSpaceField.SetValue(instance, space);
         }
         
         /*

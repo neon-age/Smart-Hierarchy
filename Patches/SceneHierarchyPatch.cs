@@ -8,6 +8,10 @@ namespace AV.Hierarchy
 {
     internal class SceneHierarchyPatch : HarmonyPatchProvider<SceneHierarchyPatch>
     {
+        private static HierarchyOptions options => HierarchyOptions.instance;
+        
+        private static GUIStyle sceneHeaderBg;
+        
         [InitializeOnLoadMethod]
         static void OnLoad() => Initialize();
         
@@ -22,6 +26,12 @@ namespace AV.Hierarchy
 
         private static void OnGUI_Prefix(EditorWindow ___m_EditorWindow, Rect rect)
         {
+            if (sceneHeaderBg == null)
+            {
+                sceneHeaderBg = "SceneTopBarBg";
+                sceneHeaderBg.fixedHeight = 0;
+            }
+
             HierarchyInitialization.GerOrCreateForWindow(___m_EditorWindow, out var hierarchy);
             HierarchyInitialization.ActiveWindow = ___m_EditorWindow;
             

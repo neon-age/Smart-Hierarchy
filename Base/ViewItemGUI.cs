@@ -6,6 +6,7 @@ namespace AV.Hierarchy
     internal static class ViewItemGUI
     {
         private static Event evt => Event.current;
+        private static HierarchyOptions options => HierarchyOptions.instance;
         
         private static Material iconMaterial;
         
@@ -43,9 +44,17 @@ namespace AV.Hierarchy
 
             if (item.gameObject == null)
                 return;
+
+            if (!options.showActivationToggle)
+                return;
             
             var fullWidthRect = new Rect(rect) { x = 0, width = Screen.width };
             var toggleRect = new Rect(fullWidthRect) { x = SmartHierarchy.active.baseIndent };
+            
+            var indentWidthMin = HierarchyOptions.Layout.IndentWidthMin;
+            var indentWidthMax = HierarchyOptions.Layout.IndentWidthMax;
+
+            toggleRect.x -= (int)Mathf.Lerp(7, 0, (options.layout.indentWidth - indentWidthMin) / (indentWidthMax - indentWidthMin));
 
             var isDragged = activationToggle.IsObjectDragged(item.gameObject);
 

@@ -20,10 +20,10 @@ namespace AV.Hierarchy
 
         internal SceneHierarchyWindow window { get; }
         internal SceneHierarchy hierarchy => window.hierarchy;
-        internal TreeViewState state => hierarchy.state;
         internal TreeViewController controller => hierarchy.controller;
-        internal float time => Time.realtimeSinceStartup;
-        internal float baseIndent => controller.gui.GetBaseIndent();
+        internal TreeViewState state => hierarchy.state;
+        internal TreeViewGUI gui => controller.gui;
+        internal float baseIndent => gui.GetBaseIndent() + GetOffsetForCustomIndentWidth(0);
         
         private EditorWindow actualWindow => window.actualWindow;
         private ViewItem hoveredItem;
@@ -37,6 +37,7 @@ namespace AV.Hierarchy
         private readonly HoverPreview hoverPreview;
         private readonly IMGUIContainer guiContainer;
         private readonly Dictionary<int, ViewItem> ItemsData = new Dictionary<int, ViewItem>();
+        
         
         public SmartHierarchy(EditorWindow window)
         {
@@ -138,7 +139,7 @@ namespace AV.Hierarchy
         private void SetupBaseIndent()
         {
             var indent = 0;
-            var minIndent = options.layout.minimalIndent;
+            var minIndent = options.layout.minIndent;
 
             if (options.showVisibilityToggle)
                 indent += 16;
@@ -148,6 +149,14 @@ namespace AV.Hierarchy
             indent = Mathf.Max(minIndent, indent);
             
             controller.gui.SetBaseIndent(indent);
+        }
+
+        internal static int GetOffsetForCustomIndentWidth(int minOffset)
+        {
+            var indentMin = HierarchyOptions.Layout.IndentWidthMin;
+            var indentMax = HierarchyOptions.Layout.IndentWidthMax;
+
+            return (int)Mathf.Lerp(minOffset + indentMax / 2, 0, (options.layout.indentWidth - indentMin) / (indentMax - indentMin));
         }
         
         internal void OnBeforeGUI()

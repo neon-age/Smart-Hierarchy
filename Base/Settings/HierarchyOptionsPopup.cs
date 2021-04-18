@@ -33,15 +33,14 @@ namespace AV.Hierarchy
         
         public HierarchyOptionsPopup()
         {
-            var toggles = new Toolbar();
+            var toggles = new Toolbar() { style = { flexGrow = 0 } };
 
             var options = HierarchyOptions.instance;
             serializedObject = new SerializedObject(options);
             
             this.Bind(serializedObject);
             
-            var togglesLabel = new Label("Toggles") { style = { flexGrow = 0 }};
-            togglesLabel.AddToClassList("label");
+            var togglesLabel = CreateLabel("Toggles");
             
             toggles.Add(CreateToggle(visibilityIcon, "showVisibilityToggle"));
             toggles.Add(CreateToggle(pickingIcon, "showPickingToggle"));
@@ -51,26 +50,26 @@ namespace AV.Hierarchy
             Add(togglesLabel);
             Add(toggles);
 
-            var optionsGUI = new IMGUIContainer(OnGUI);
-            Add(optionsGUI);
+            var layoutGUI = new IMGUIContainer(OnLayoutGUI);
+            Add(Space(10));
+            Add(CreateLabel("Layout"));
+            Add(layoutGUI);
             
             RegisterCallback<ChangeEvent<bool>>(evt => HierarchyOptions.instance.Save());
             RegisterCallback<ChangeEvent<int>>(evt => HierarchyOptions.instance.Save());
         }
 
-        private void OnGUI()
+        private void OnLayoutGUI()
         {
             EditorGUI.BeginChangeCheck();
 
             serializedObject.Update();
-            var layout = serializedObject.FindProperty("layout");
+            var layoutProp = serializedObject.FindProperty("layout");
             
-            GUILayout.Space(20);
-
-            var rect = GUILayoutUtility.GetRect(250, 0);
+            var rect = GUILayoutUtility.GetRect(200, 0);
 
             labelWidth /= 2;
-            SerializedPropertyUtil.DrawPropertyChildren(layout, rect);
+            SerializedPropertyUtil.DrawPropertyChildren(layoutProp, rect);
             labelWidth *= 2;
 
             if (EditorGUI.EndChangeCheck())
@@ -78,6 +77,18 @@ namespace AV.Hierarchy
                 serializedObject.ApplyModifiedProperties();
                 HierarchyOptions.instance.Save();
             }
+        }
+
+        private VisualElement Space(float height)
+        {
+            return new VisualElement { style = { height = height} };
+        }
+
+        private VisualElement CreateLabel(string text)
+        {
+            var label = new Label(text);
+            label.AddToClassList("label");
+            return label;
         }
 
         private ToolbarToggle CreateToggle(GUIContent content, string bindingPath)

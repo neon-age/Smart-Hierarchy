@@ -10,12 +10,17 @@ namespace AV.Hierarchy
         [Serializable]
         internal class Layout
         {
+            public const float IndentWidthMin = 6;
+            public const float IndentWidthMax = 14;
+            
             [Range(16, 24)]
             public int lineHeight = 16;
-            [Range(6, 14)]
+            
+            [Range(IndentWidthMin, IndentWidthMax)]
             public int indentWidth = 14;
+            
             [Range(6, 24)]
-            public int minimalIndent = 6;
+            public int minIndent = 6;
         }
         
         public bool showVisibilityToggle = true;

@@ -1,3 +1,4 @@
+  
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -24,9 +25,11 @@ namespace AV.Hierarchy
                 shurikenToggle = "ShurikenToggle";
             
             var style = isShown ? shurikenToggle : GUIStyle.none;
+
+            rect.width = 16;
+            var drawRect = new Rect(rect) { height = 16 };
             
-            var drawRect = new Rect(rect) { width = 16 };
-            drawRect = GetCenteredRect(drawRect, drawRect);
+            drawRect = GetCenteredRect(drawRect, rect);
             drawRect.y += 1;
             
             if (DoVerticalToggle(rect, instance.activeSelf, userData: instance, drawRect: drawRect, style: style))
