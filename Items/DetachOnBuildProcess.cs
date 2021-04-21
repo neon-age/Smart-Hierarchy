@@ -27,20 +27,24 @@ namespace AV.Hierarchy
                 
                 foreach (var collection in collections)
                 {
-                    if (collection.keepTransformHierarchy)
-                        continue;
-                    DetachRootChildren(collection.transform);
+                    var isSelfActive = collection.gameObject.activeSelf;
+                    var keepTransform = collection.keepTransformHierarchy;
+                    
+                    // Don't detach from *disabled* collection when 'Keep Transform' is unchecked.
+                    // We will destroy it with children on the next step.
+                    if (isSelfActive && !keepTransform)
+                        DetachRootChildren(collection.transform);
                 }
 
                 foreach (var collection in collections)
                 {
                     var gameObject = collection.gameObject;
-                    var keepTransformHierarchy = collection.keepTransformHierarchy;
+                    var keepTransform = collection.keepTransformHierarchy;
                     
                     if (!isPlaymode)
                         Object.DestroyImmediate(collection);
                     
-                    if (!keepTransformHierarchy)
+                    if (!keepTransform)
                         Object.DestroyImmediate(gameObject);
                 }
             }
