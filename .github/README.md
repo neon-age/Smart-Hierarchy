@@ -43,14 +43,14 @@ Customization is available in `Preferences > Workflow > Smart Hierarchy`.
 ## Features
 
 ### Icons
-[![Icons](.github/readme/Icons.png)](https://github.com/neon-age/Smart-Hierarchy/wiki/Icons)
+[![Icons](readme/Icons.png)](https://github.com/neon-age/Smart-Hierarchy/wiki/Icons)
 
 Most important components are shown to help you orientate visually.\
 [Types Priority](https://github.com/neon-age/Smart-Hierarchy/wiki/Icons#types-priority) 
 can be defined in Preferences.
 
 ### Collections
-[![Collections](.github/readme/Collections.png)](https://github.com/neon-age/Smart-Hierarchy/wiki/Collections)
+[![Collections](readme/Collections.png)](https://github.com/neon-age/Smart-Hierarchy/wiki/Collections)
 
 [Collection](https://github.com/neon-age/Smart-Hierarchy/wiki/Collections) 
 is used to organize game-objects in Editor.\
@@ -59,12 +59,12 @@ Unlike game-object parent, it does not affect runtime transform hierarchy.
 
 
 ### Activation Toggle
-[![Activation Toggle](.github/readme/ActivationToggle.png)](https://github.com/neon-age/Smart-Hierarchy/wiki/Activation-Toggle)
+[![Activation Toggle](readme/ActivationToggle.png)](https://github.com/neon-age/Smart-Hierarchy/wiki/Activation-Toggle)
 
 Lets you (de)activate game-objects while keeping your selection.
 
 ### Hover Preview
-[![Hover Preview](.github/readme/HoverPreview.png)](https://github.com/neon-age/Smart-Hierarchy/wiki/Hover-Preview)
+[![Hover Preview](readme/HoverPreview.png)](https://github.com/neon-age/Smart-Hierarchy/wiki/Hover-Preview)
 
 
 ### And more...
@@ -80,6 +80,6 @@ I want to share my tools with everyone, without hiding behind a paywall.\
 If you like my work and feel generous — consider supporting [me](https://twitter.com/_neonage) financially!
 
 [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L4L02M51R)
-[![patreon](.github/become-a-patron.png)](https://www.patreon.com/neonage?fan_landing=true)
+[![patreon](become-a-patron.png)](https://www.patreon.com/neonage?fan_landing=true)
 
-![ko-fi](.github/coffee%20cup.png)
+![ko-fi](coffee%20cup.png)
