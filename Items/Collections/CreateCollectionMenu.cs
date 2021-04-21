@@ -21,22 +21,29 @@ namespace AV.Hierarchy
             EditorApplication.delayCall += () => isExecuted = false;
             
             var selections = Selection.gameObjects;
-            
+
             if (selections.Length == 1)
             {
                 var selection = selections[0];
                 var components = selection.GetComponents<Component>();
                 var mainComponent = Components.ChooseMainComponent(components);
+
                 var isPrefab = PrefabUtility.IsPartOfAnyPrefab(selection);
-            
-                if (!isPrefab && (mainComponent != null || mainComponent is Transform))
+                var isCollection = mainComponent is Collection;
+                
+                var isDummy = mainComponent == null;
+                var isPivot = mainComponent is Transform;
+                
+                var isValidTarget = (!isPrefab || !isCollection) && (isDummy || isPivot);
+
+                if (isValidTarget)
                 {
                     Undo.AddComponent<Collection>(selection);
                     isExecuted = true;
                     return;
                 }
             }
-            
+
             var collection = new GameObject("New Collection", typeof(Collection));
             Undo.RegisterCreatedObjectUndo(collection, "Create Collection");
             
