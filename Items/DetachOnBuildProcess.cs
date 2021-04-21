@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
@@ -14,27 +15,33 @@ namespace AV.Hierarchy
         public void OnProcessScene(Scene scene, BuildReport report)
         {
             var preferences = HierarchySettingsProvider.Preferences;
-
-            if (Application.isEditor && preferences.keepCollectionsInPlaymode)
-                return;
+            var isPlaymode = EditorApplication.isPlayingOrWillChangePlaymode;
                 
+            if (isPlaymode && preferences.keepCollectionsInPlaymode)
+                return;
+            
             var sceneRoots = scene.GetRootGameObjects();
             foreach (var root in sceneRoots)
             {
-                var folders = root.GetComponentsInChildren<Collection>(true);
+                var collections = root.GetComponentsInChildren<Collection>(true);
                 
-                foreach (var folder in folders)
+                foreach (var collection in collections)
                 {
-                    if (folder.keepTransformHierarchy)
+                    if (collection.keepTransformHierarchy)
                         continue;
-                    DetachRootChildren(folder.transform);
+                    DetachRootChildren(collection.transform);
                 }
 
-                foreach (var folder in folders)
+                foreach (var collection in collections)
                 {
-                    if (folder.keepTransformHierarchy)
-                        continue;
-                    Object.DestroyImmediate(folder.gameObject);
+                    var gameObject = collection.gameObject;
+                    var keepTransformHierarchy = collection.keepTransformHierarchy;
+                    
+                    if (!isPlaymode)
+                        Object.DestroyImmediate(collection);
+                    
+                    if (!keepTransformHierarchy)
+                        Object.DestroyImmediate(gameObject);
                 }
             }
         }
