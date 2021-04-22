@@ -12,12 +12,19 @@ namespace AV.Hierarchy
     internal class SceneVisGUIPatch : HarmonyPatchProvider<SceneVisGUIPatch>
     {
         private static HierarchyPreferences prefs => HierarchySettingsProvider.Preferences;
-        private static HierarchyOptions options => HierarchyOptions.instance;
+        private static HierarchyOptions options => HierarchyOptions.Instance;
+        
         private static bool pluginEnabled => prefs.enableSmartHierarchy;
-        private static bool visibility => options.showVisibilityToggle;
-        private static bool picking => options.showPickingToggle;
+        
+        private static SceneVisibilityTool visibilityTool => options.GetTool<SceneVisibilityTool>();
+        private static ScenePickingTool pickingTool => options.GetTool<ScenePickingTool>();
+
+        private static bool visibility => options.IsToolEnabled<SceneVisibilityTool>();
+        private static bool drawBackground => visibilityTool.drawBackground;
+        private static bool picking => options.IsToolEnabled<ScenePickingTool>();
 
         private static GUIStyle sceneVisibilityStyle;
+        
         
         protected override void OnInitialize()
         {
@@ -72,53 +79,57 @@ namespace AV.Hierarchy
                 rect.xMin -= 32;
         }
         
-        public static void DrawBackground(ref Rect rect)
+        public static bool DrawBackground(ref Rect rect)
         {
             if (!pluginEnabled)
-                return;
+                return true;
 
             if (!visibility || !picking)
                 rect.xMin -= 16;
             
             if (!visibility && !picking)
                 rect.xMin -= 32;
+            
+            return drawBackground;
         }
         
-        public static void DrawItemBackground(ref Rect rect)
+        public static bool DrawItemBackground(ref Rect rect)
         {
             if (!pluginEnabled)
-                return;
+                return true;
             
             if (visibility && !picking)
                 rect.xMin -= 16;
+            
+            return drawBackground;
         }
         
         public static bool DrawGameObjectItemVisibility()
         {
             if (!pluginEnabled)
                 return true;
-            return options.showVisibilityToggle;
+            return visibility;
         }
         
         public static bool DrawGameObjectItemPicking()
         {
             if (!pluginEnabled)
                 return true;
-            return options.showPickingToggle;
+            return picking;
         }
         
         public static bool DrawSceneItemVisibility()
         {
             if (!pluginEnabled)
                 return true;
-            return options.showVisibilityToggle;
+            return visibility;
         }
         
         public static bool DrawSceneItemPicking()
         {
             if (!pluginEnabled)
                 return true;
-            return options.showPickingToggle;
+            return picking;
         }
     }
 }

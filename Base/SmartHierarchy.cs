@@ -14,7 +14,7 @@ namespace AV.Hierarchy
     internal class SmartHierarchy
     {
         internal static HierarchyPreferences prefs => HierarchySettingsProvider.Preferences;
-        internal static HierarchyOptions options => HierarchyOptions.instance;
+        internal static HierarchyOptions options => HierarchyOptions.Instance;
         internal static Event evt => Event.current;
         internal static SmartHierarchy active { get; private set; }
 
@@ -141,9 +141,9 @@ namespace AV.Hierarchy
             var indent = 0;
             var minIndent = options.layout.minIndent;
 
-            if (options.showVisibilityToggle)
+            if (options.IsToolEnabled<SceneVisibilityTool>())
                 indent += 16;
-            if (options.showPickingToggle)
+            if (options.IsToolEnabled<ScenePickingTool>())
                 indent += 16;
 
             indent = Mathf.Max(minIndent, indent);

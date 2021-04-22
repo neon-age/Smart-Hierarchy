@@ -8,7 +8,7 @@ namespace AV.Hierarchy
 {
     internal class SceneHierarchyPatch : HarmonyPatchProvider<SceneHierarchyPatch>
     {
-        private static HierarchyOptions options => HierarchyOptions.instance;
+        private static HierarchyOptions options => HierarchyOptions.Instance;
         
         private static GUIStyle sceneHeaderBg;
         

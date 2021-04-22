@@ -6,7 +6,7 @@ namespace AV.Hierarchy
     internal static class ViewItemGUI
     {
         private static Event evt => Event.current;
-        private static HierarchyOptions options => HierarchyOptions.instance;
+        private static HierarchyOptions options => HierarchyOptions.Instance;
         
         private static Material iconMaterial;
         
@@ -45,7 +45,7 @@ namespace AV.Hierarchy
             if (item.gameObject == null)
                 return;
 
-            if (!options.showActivationToggle)
+            if (!options.IsToolEnabled<ActivationToggleTool>())
                 return;
             
             var fullWidthRect = new Rect(rect) { x = 0, width = Screen.width };

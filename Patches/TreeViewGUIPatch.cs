@@ -9,7 +9,7 @@ namespace AV.Hierarchy
 {
     internal class TreeViewGUIPatch : HarmonyPatchProvider<TreeViewGUIPatch>
     {
-        private static HierarchyOptions options => HierarchyOptions.instance;
+        private static HierarchyOptions options => HierarchyOptions.Instance;
 
        
         [InitializeOnLoadMethod]

@@ -32,7 +32,7 @@ namespace AV.Hierarchy
         private Vector2 position;
         private VisualElement root;
 
-        private Color backgroundColor => isProSkin ? new Color32(35, 35, 35, 230) : new Color32(165, 165, 165, 230);
+        private Color backgroundColor => isProSkin ? new Color32(50, 50, 50, 230) : new Color32(165, 165, 165, 230);
         
         
         protected PopupElement()
