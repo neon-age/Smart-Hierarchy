@@ -68,7 +68,7 @@ namespace AV.Hierarchy
                     position.x += 1;
                     position.y += 32;
 
-                    filterPopup.ShowInsideWindow(position, SmartHierarchy.active.root);
+                    filterPopup.ShowInsideWindow(position, SmartHierarchy.active.window.actualWindow);
                 }
             }
 

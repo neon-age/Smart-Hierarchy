@@ -10,6 +10,8 @@ namespace AV.Hierarchy
 {
     public abstract class PopupElement : VisualElement
     {
+        private class BlurZone : VisualElement {}
+        
         private static StyleSheet styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(AssetDatabase.GUIDToAssetPath("d7461833a510d124191fbed727ac19f0"));
         private static Texture2D arrowIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath("70cf301939ec64147b3b646ec72c2cf2"));
 
@@ -28,9 +30,11 @@ namespace AV.Hierarchy
 
         private TextElement titleText;
         private VisualElement contextArrow;
+        private VisualElement blurZone;
 
         private Vector2 position;
         private VisualElement root;
+        private EditorWindow window;
 
         private Color backgroundColor => isProSkin ? new Color32(50, 50, 50, 230) : new Color32(165, 165, 165, 230);
         
@@ -82,28 +86,36 @@ namespace AV.Hierarchy
 
         public void Close()
         {
+            EditorApplication.update -= OnUpdate;
+            
             RemoveFromHierarchy();
+            blurZone.RemoveFromHierarchy();
+            
             activePopups.Remove(GetType());
         }
+
+        private void OnUpdate()
+        {
+            if (EditorWindow.focusedWindow != window)
+                Close();
+        }
         
-        public void ShowInsideWindow(Vector2 position, VisualElement root)
+        public void ShowInsideWindow(Vector2 position, EditorWindow window, VisualElement rootVisualElement = null)
         {
             active = this;
+            EditorApplication.update += OnUpdate;
             
             position.x -= 7;
             position.y -= 5;
-            
-            this.root = root;
+
+            this.root = rootVisualElement ?? window.rootVisualElement;
+            this.window = window;
             this.position = position;
+
+            CreateBlurZoneInRoot();
             
             root.Add(this);
-            
-            GUI.SetNextControlName("PopupElement");
-            GUI.FocusControl("PopupElement");
             Focus();
-            
-            // BUG: All children must be NOT focusable, or they will steal the focus and blur event will not be sent.
-            RegisterCallback<BlurEvent>(evt => Close());
             
             root.RegisterCallback<GeometryChangedEvent>(OnRootGeometryChange);
             RegisterCallback<GeometryChangedEvent>(OnGeometryChange);
@@ -115,6 +127,15 @@ namespace AV.Hierarchy
             contextArrow.AddToClassList("context-arrow");
             
             hierarchy.Insert(0, contextArrow);
+        }
+
+        private void CreateBlurZoneInRoot()
+        {
+            blurZone = new BlurZone { name = "PopupBlurZone" };
+            blurZone.RegisterCallback<MouseDownEvent>(evt => Close());
+            
+            root.Add(blurZone);
+            blurZone.StretchToParentSize();
         }
 
         private void OnRootGeometryChange(GeometryChangedEvent evt)

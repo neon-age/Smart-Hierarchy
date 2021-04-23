@@ -35,7 +35,7 @@ namespace AV.Hierarchy
                         var scrollPos = hierarchy.state.scrollPos.y;
                         var position = new Vector2(rect.x, rect.yMax - scrollPos + 32);
                         
-                        popup.ShowInsideWindow(position, hierarchy.root);
+                        popup.ShowInsideWindow(position, hierarchy.window.actualWindow);
                     }
                     else
                         collectionPopup.Close();
