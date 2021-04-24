@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -10,7 +11,13 @@ namespace AV.Hierarchy
 {
     internal class HierarchyOptionsPopup : PopupElement
     {
-        private static string UIPath = AssetDatabase.GUIDToAssetPath("f0d92e1f03926664991b2f7fbfbd6268") + "/";
+        private class TabToggle : ToolbarToggle
+        {
+            protected override void ToggleValue()
+            {
+                // Ignore left click toggling
+            }
+        }
         
         private class GUIImage : IMGUIContainer
         {
@@ -25,12 +32,19 @@ namespace AV.Hierarchy
                 };
             }
         }
+
+        private static Texture2D HelpIcon = IconContent("_Help").image as Texture2D;
+        private static string UIPath = AssetDatabase.GUIDToAssetPath("f0d92e1f03926664991b2f7fbfbd6268") + "/";
         
         private Foldout activeToolGroup;
+        private VisualElement activeToolTab;
         private VisualElement activeToolMarker;
         private IMGUIContainer activeToolGUI;
+        
+        private TooltipElement tooltipElement = new TooltipElement();
 
         private readonly SerializedObject serializedObject;
+        
         
         public HierarchyOptionsPopup()
         {
@@ -43,7 +57,7 @@ namespace AV.Hierarchy
                 height = 2
             }};
             
-            var toggles = new Toolbar { style = { flexGrow = 0 } };
+            var toolsTabs = new Toolbar { style = { flexGrow = 0 } };
 
             var options = HierarchyOptions.Instance;
             serializedObject = new SerializedObject(options);
@@ -51,7 +65,7 @@ namespace AV.Hierarchy
             this.Bind(serializedObject);
             
             var togglesLabel = CreateLabel("Tools Options");
-            activeToolGroup = CreateActiveToolGroup();
+            CreateActiveToolGroup();
 
             var toolsProp = serializedObject.FindProperty("tools").FindPropertyRelative("list");
             
@@ -67,24 +81,47 @@ namespace AV.Hierarchy
                 var property = toolsProp.GetArrayElementAtIndex(i);
                 var enabledProp = property.FindPropertyRelative("enabled");
 
-                var toggle = CreateToggle(content, enabledProp);
-                toggles.Add(toggle);
+                var tab = CreateTabToggle(content, enabledProp);
+                toolsTabs.Add(tab);
+
+                var tooltip = $"{tool.title}";
                 
-                toggle.RegisterCallback<ClickEvent>(evt => SetActiveTool(toggle, tool, property));
-                toggle.RegisterCallback<MouseDownEvent>(evt => SetActiveToolRightClick(toggle, tool, property));
+                if (tool.tooltip != "")
+                    tooltip += $"{Environment.NewLine}{tool.tooltip}";
+
+                tab.tooltip = tool.title;
+                //tooltipElement.SetTooltipFor(tab, tooltip);
+                
+                tab.RegisterCallback<ClickEvent>(evt =>
+                {
+                    if (evt.button != (int)MouseButton.LeftMouse)
+                        return;
+                    
+                    //if (activeToolTab == tab)
+                        tab.value = !tab.value;
+                    
+                    //SetActiveToolAndExpand(tab, tool, property);
+                });
+                
+                tab.RegisterCallback<MouseDownEvent>(evt =>
+                {
+                    if (evt.button != (int) MouseButton.RightMouse)
+                        return;
+                    
+                    if (activeToolTab != tab)
+                        SetActiveToolAndExpand(tab, tool, property);
+                    else
+                        ResetActiveToolGroup();
+                });
             }
             
-            // toggles.Add(CreateToggle(pickingIcon, "showPickingToggle"));
-            // toggles.Add(CreateToggle(toggleIcon, "showActivationToggle"));
-            // toggles.Add(CreateToggle(prefabModeIcon, "showPrefabModeToggle"));
-            
             Add(togglesLabel);
-            Add(toggles);
+            Add(toolsTabs);
             Add(Space(5));
             Add(activeToolGroup);
 
             var layoutGUI = new IMGUIContainer(OnLayoutGUI);
-            Add(Space(10));
+            Add(Space(5));
             
             var layout = CreateGroupFoldout("Layout");
             layout.Add(layoutGUI);
@@ -94,60 +131,57 @@ namespace AV.Hierarchy
             RegisterCallback<ChangeEvent<int>>(evt => HierarchyOptions.Instance.Save());
         }
 
-        private Foldout CreateGroupFoldout(string text)
+        protected override void OnAttach(AttachToPanelEvent evt)
         {
-            var foldout = new Foldout { text = text };
-            //foldout.Add(CreateGroupBackground());
-            
-            foldout.Query(className: "unity-toggle").First().style.marginLeft = 0;
-            foldout.contentContainer.style.marginLeft = 0;
-
-            return foldout;
+            root.Add(tooltipElement);
         }
 
-        private Foldout CreateActiveToolGroup()
+        private void CreateActiveToolGroup()
         {
-            var foldout = CreateGroupFoldout("No Active Tool");
-            foldout.value = false;
-            foldout.SetEnabled(false);
+            activeToolGroup = CreateGroupFoldout("Active Tool");
             
             activeToolGUI = new IMGUIContainer();
-            foldout.Add(activeToolGUI);
-
-            return foldout;
+            activeToolGroup.Add(activeToolGUI);
+            activeToolGroup.Add(Space(5));
+            
+            ResetActiveToolGroup();
         }
 
-        private static VisualElement CreateGroupBackground()
+        private void ResetActiveToolGroup()
         {
-            var background = new VisualElement { style = { opacity = 0.08f, backgroundColor = new Color(1, 1, 1, 1) }};
-           
-            background.style.position = Position.Absolute;
-            background.style.top = -1;
-            background.style.left = -7;
-            background.style.right = -7;
-            background.style.bottom = -1;
+            activeToolTab = null;
+            
+            activeToolGroup.text = "No Selected Tool";
+            activeToolGroup.tooltip = "Right click on toggle to show options.";
+            
+            activeToolGroup.value = false;
+            activeToolGroup.style.opacity = 0.5f;
 
-            return background;
+            activeToolGUI.style.display = DisplayStyle.None;
+            
+            activeToolMarker.RemoveFromHierarchy();
         }
 
-        private void SetActiveToolRightClick(VisualElement sender, HierarchyTool tool, SerializedProperty property)
+        private void SetActiveToolAndExpand(VisualElement sender, HierarchyTool tool, SerializedProperty property)
         {
             activeToolGroup.value = true;
             SetActiveTool(sender, tool, property);
         }
 
-        private void SetActiveTool(VisualElement sender, HierarchyTool tool, SerializedProperty property)
+        private void SetActiveTool(VisualElement tab, HierarchyTool tool, SerializedProperty property)
         {
+            activeToolTab = tab;
+            
             activeToolGroup.text = tool.title;
-            activeToolGroup.SetEnabled(true);
-
-            //var label = activeToolGroup.Query<Label>().First();
-            //label.style.opacity = tool.enabled ? 1 : 0.5f;
-
+            activeToolGroup.tooltip = tool.tooltip;
+            activeToolGroup.style.opacity = 1;
+            
             activeToolMarker.RemoveFromHierarchy();
-            sender.Add(activeToolMarker);
+            tab.Add(activeToolMarker);
             
             activeToolGUI.onGUIHandler = () => OnToolGUI(tool, property);
+            
+            activeToolGUI.style.display = DisplayStyle.Flex;
         }
 
         private void OnToolGUI(HierarchyTool tool, SerializedProperty property)
@@ -157,9 +191,15 @@ namespace AV.Hierarchy
             var rect = GUILayoutUtility.GetRect(200, 0);
 
             labelWidth /= 1.25f;
-            SerializedPropertyUtil.DrawPropertyChildren(property, rect);
+            SerializedPropertyUtil.DrawPropertyChildren(property, out var hasVisibleFields, rect);
             //SerializedPropertyUtil.DrawPropertyChildren(property, rect);
             labelWidth *= 1.25f;
+
+            if (!hasVisibleFields)
+            {
+                using (new GUIColorScope(new Color(1, 1, 1, 0.5f)))
+                    GUILayout.Label("This tool has no custom options.");
+            }
 
             if (EndChangeCheck())
                 tool.OnValidate();
@@ -174,7 +214,7 @@ namespace AV.Hierarchy
             var rect = GUILayoutUtility.GetRect(200, 0);
 
             labelWidth /= 2f;
-            SerializedPropertyUtil.DrawPropertyChildren(layoutProp, rect);
+            SerializedPropertyUtil.DrawPropertyChildren(layoutProp, out _, rect);
             labelWidth *= 2f;
 
             EndChangeCheck();
@@ -208,9 +248,9 @@ namespace AV.Hierarchy
             return label;
         }
 
-        private static ToolbarToggle CreateToggle(GUIContent content, SerializedProperty property)
+        private static TabToggle CreateTabToggle(GUIContent content, SerializedProperty property)
         {
-            var toggle = new ToolbarToggle { focusable = false };
+            var toggle = new TabToggle();
             
             toggle.BindProperty(property);
             toggle.AddToClassList("active-toggle");
@@ -221,6 +261,30 @@ namespace AV.Hierarchy
             toggle.Add(image);
             
             return toggle;
+        }
+        
+        private Foldout CreateGroupFoldout(string text)
+        {
+            var foldout = new Foldout { text = text };
+            //foldout.Add(CreateGroupBackground());
+            
+            foldout.Query(className: "unity-toggle").First().style.marginLeft = 0;
+            foldout.contentContainer.style.marginLeft = 0;
+
+            return foldout;
+        }
+        
+        private static VisualElement CreateGroupBackground()
+        {
+            var background = new VisualElement { style = { opacity = 0.08f, backgroundColor = new Color(1, 1, 1, 1) }};
+           
+            background.style.position = Position.Absolute;
+            background.style.top = -1;
+            background.style.left = -7;
+            background.style.right = -7;
+            background.style.bottom = -1;
+
+            return background;
         }
     }
 }

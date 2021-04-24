@@ -5,8 +5,9 @@ namespace AV.Hierarchy
 {
     internal static class SerializedPropertyUtil
     {
-        public static void DrawPropertyChildren(SerializedProperty property, Rect rect = default)
+        public static void DrawPropertyChildren(SerializedProperty property, out bool hasVisibleFields, Rect rect = default)
         {
+            hasVisibleFields = false;
             var iterator = property.Copy();
 
             if (rect == default)
@@ -22,6 +23,8 @@ namespace AV.Hierarchy
 
             while (iterator.NextVisible(enterChildren) && !SerializedProperty.EqualContents(iterator, endProperty))
             {
+                hasVisibleFields = true;
+                
                 elementRect.height = EditorGUI.GetPropertyHeight(iterator, false);
                 EditorGUI.indentLevel = iterator.depth + relativeIndent - 1;
 

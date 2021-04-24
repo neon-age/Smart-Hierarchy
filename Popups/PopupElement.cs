@@ -33,8 +33,8 @@ namespace AV.Hierarchy
         private VisualElement blurZone;
 
         private Vector2 position;
-        private VisualElement root;
-        private EditorWindow window;
+        protected VisualElement root;
+        protected EditorWindow window;
 
         private Color backgroundColor => isProSkin ? new Color32(50, 50, 50, 230) : new Color32(165, 165, 165, 230);
         
@@ -53,7 +53,7 @@ namespace AV.Hierarchy
             titleContainer = new VisualElement();
             titleContainer.AddToClassList("title-container");
             
-            titleText = new TextElement { name = "Title" };
+            titleText = new TextElement { name = "Title", style = { minHeight = 0 }};
             titleContainer.Add(titleText);
             
             hierarchy.Add(titleContainer);
@@ -69,6 +69,16 @@ namespace AV.Hierarchy
                 activePopup.Close();
 
             activePopups.Add(type, this);
+        }
+
+        private void AttachToPanel(AttachToPanelEvent evt)
+        {
+            OnAttach(evt);
+            UnregisterCallback<AttachToPanelEvent>(AttachToPanel);
+        }
+
+        protected virtual void OnAttach(AttachToPanelEvent evt)
+        {
         }
         
         public static T GetPopup<T>() where T : PopupElement
@@ -89,7 +99,7 @@ namespace AV.Hierarchy
             EditorApplication.update -= OnUpdate;
             
             RemoveFromHierarchy();
-            blurZone.RemoveFromHierarchy();
+            blurZone?.RemoveFromHierarchy();
             
             activePopups.Remove(GetType());
         }
@@ -113,6 +123,8 @@ namespace AV.Hierarchy
             this.position = position;
 
             CreateBlurZoneInRoot();
+            
+            RegisterCallback<AttachToPanelEvent>(AttachToPanel);
             
             root.Add(this);
             Focus();
