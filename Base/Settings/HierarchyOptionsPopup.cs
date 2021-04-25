@@ -13,27 +13,21 @@ namespace AV.Hierarchy
     {
         private class TabToggle : ToolbarToggle
         {
-            /*
-            protected override void ToggleValue()
+            public TabToggle(Texture icon)
             {
-                // Ignore left click toggling
-            }*/
-        }
-        
-        private class GUIImage : IMGUIContainer
-        {
-            public override bool canGrabFocus => false;
-
-            public GUIImage(Texture texture)
-            {
-                onGUIHandler = () =>
+                var iconGUI = new IMGUIContainer(() =>
                 {
                     GUI.color = new Color(1, 1, 1, resolvedStyle.opacity);
-                    ViewItemGUI.DrawIconTexture(new Rect(0, 0, 16, 16), texture, Color.white, true);
-                };
+
+                    ViewItemGUI.DrawFlatIcon(new Rect(0, 0, 16, 16), icon, GUIColors.FlatIcon, isOn: value);
+                });
+                
+                iconGUI.AddToClassList("active-toggle-icon");
+                
+                Add(iconGUI);
             }
         }
-
+        
         private static Texture2D HelpIcon = IconContent("_Help").image as Texture2D;
         private static string UIPath = AssetDatabase.GUIDToAssetPath("f0d92e1f03926664991b2f7fbfbd6268") + "/";
         
@@ -254,16 +248,11 @@ namespace AV.Hierarchy
 
         private static TabToggle CreateTabToggle(GUIContent content, SerializedProperty property)
         {
-            var toggle = new TabToggle();
+            var toggle = new TabToggle(content.image);
             
             toggle.BindProperty(property);
             toggle.AddToClassList("active-toggle");
 
-            var image = new GUIImage(content.image);
-            image.AddToClassList("active-toggle-icon");
-            
-            toggle.Add(image);
-            
             return toggle;
         }
         

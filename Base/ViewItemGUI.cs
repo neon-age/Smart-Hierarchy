@@ -9,8 +9,7 @@ namespace AV.Hierarchy
         private static HierarchyOptions options => HierarchyOptions.Instance;
         
         private static Material iconMaterial;
-        
-        private static readonly Color32 OnColor = new Color32(240, 240, 240, 255);
+        private static Material iconFlatMaterial;
         
         private static readonly int ColorID = Shader.PropertyToID("_Color");
         private static readonly int OnColorID = Shader.PropertyToID("_OnColor");
@@ -91,15 +90,32 @@ namespace AV.Hierarchy
                 DrawIconTexture(iconRect, item.overlayIcon, color);
         }
         
-        public static void DrawIconTexture(Rect position, Texture texture, Color color, bool isOn = false)
+        public static void DrawIconTexture(Rect position, Texture texture, Color color, bool isOn = false, Color? onColor = null)
         {
             if (iconMaterial == null)
                 iconMaterial = new Material(Shader.Find("Hidden/Internal-IconClip"));
 
+            var iconOnColor = onColor ?? GUIColors.FocusedIcon;
+
             iconMaterial.SetColor(ColorID, color);
-            iconMaterial.SetColor(OnColorID, isOn ? OnColor : (Color32)Color.white);
+            iconMaterial.SetColor(OnColorID, isOn ? iconOnColor : Color.white);
             iconMaterial.SetInt(IsOnID, isOn ? 1 : 0);
+            
             EditorGUI.DrawPreviewTexture(position, texture, iconMaterial);
+        }
+        
+        public static void DrawFlatIcon(Rect position, Texture texture, Color color, bool isOn = false, Color? onColor = null)
+        {
+            if (iconFlatMaterial == null)
+                iconFlatMaterial = new Material(Shader.Find("Hidden/Internal-IconFlatColor"));
+
+            var iconOnColor = onColor ?? GUIColors.FocusedIcon;
+
+            iconFlatMaterial.SetColor(ColorID, color);
+            iconFlatMaterial.SetColor(OnColorID, iconOnColor);
+            iconFlatMaterial.SetInt(IsOnID, isOn ? 1 : 0);
+            
+            EditorGUI.DrawPreviewTexture(position, texture, iconFlatMaterial);
         }
         
         public static bool OnIconClick(Rect rect)

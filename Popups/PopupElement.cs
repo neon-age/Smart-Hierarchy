@@ -36,7 +36,7 @@ namespace AV.Hierarchy
         protected VisualElement root;
         protected EditorWindow window;
 
-        private Color backgroundColor => isProSkin ? new Color32(50, 50, 50, 230) : new Color32(165, 165, 165, 230);
+        private Color backgroundColor => isProSkin ? new Color32(50, 50, 50, 230) : new Color32(185, 185, 185, 230);
         
         
         protected PopupElement()

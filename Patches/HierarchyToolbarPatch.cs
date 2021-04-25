@@ -58,7 +58,7 @@ namespace AV.Hierarchy
             var rect = GUILayoutUtility.GetRect(32, 18, toolbarButtonRight);
             //rect.yMin += 2;
 
-            using (new GUIContentColorScope(GUIColors.FlatIconColor))
+            using (new GUIContentColorScope(GUIColors.FlatIcon))
             {
                 if (EditorGUI.DropdownButton(rect, buttonContent, FocusType.Passive, dropdownStyle))
                 {
