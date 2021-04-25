@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace AV.Hierarchy
 {
-    [Serializable]
     internal class ScenePickingTool : HierarchyTool
     {
         public bool drawBackground = true;
@@ -13,5 +12,10 @@ namespace AV.Hierarchy
         protected internal override string tooltip => "Game-objects pickability in Scene.";
         //protected internal override Texture2D icon => GetEditorIcon("scenepicking_pickable");
         protected internal override Texture2D icon => GetEditorIcon("scenepicking_pickable_hover");
+        
+        public override void OnBeforeSave()
+        {
+            options.GetTool<SceneVisibilityTool>().drawBackground = drawBackground;
+        }
     }
 }

@@ -7,8 +7,7 @@ using Object = UnityEngine.Object;
 
 namespace AV.Hierarchy
 {
-    [Serializable]
-    public class HierarchyTool
+    public class HierarchyTool : ScriptableObject
     {
         [SerializeField] 
         [HideInInspector]
@@ -21,7 +20,7 @@ namespace AV.Hierarchy
         protected internal virtual string tooltip => "";
         protected internal virtual Texture2D icon => GetEditorIcon("SceneViewTools");
 
-        public virtual void OnValidate() {}
+        public virtual void OnBeforeSave() {}
         
 
         protected static T LoadAssetFromGUID<T>(string guid) where T : Object

@@ -40,17 +40,61 @@ namespace AV.Hierarchy
             [Range(6, 24)]
             public int minIndent = 6;
         }
+
+        [Serializable]
+        internal class FoldoutStateLookup : SerializableLookup<string, bool> {}
         
         //public bool showVisibilityToggle = true;
         //public bool showPickingToggle = true;
         //public bool showActivationToggle = true;
         //public bool showPrefabModeToggle = true;
 
-        public Layout layout;
+        public Layout layout = new Layout();
         
         [SerializeField]
-        internal HierarchyToolsList tools = new HierarchyToolsList();
+        public List<HierarchyTool> tools = new List<HierarchyTool>();
+
+        [SerializeField]
+        internal FoldoutStateLookup foldouts = new FoldoutStateLookup();
+
+        //public HierarchyTool this[int index] => tools[index];
         
+        private readonly Dictionary<Type, HierarchyTool> toolsLookup = new Dictionary<Type, HierarchyTool>();
+
+        private static TypeCache.TypeCollection ToolTypes = TypeCache.GetTypesDerivedFrom<HierarchyTool>();
+        
+        
+        public void InitializeToolsList()
+        {
+            for (int i = tools.Count - 1; i >= 0; i--)
+            {
+                if (tools[i] == null)
+                    tools.RemoveAt(i);
+            }
+            
+            foreach (var toolType in ToolTypes)
+            {
+                if (tools.Any(x => x.GetType() == toolType))
+                    continue;
+                    
+                //var instance = Activator.CreateInstance(toolType) as HierarchyTool;
+                var toolInstance = CreateInstance(toolType) as HierarchyTool;
+                tools.Add(toolInstance);
+            }
+
+            tools = tools.OrderBy(x => x.order).ToList();
+
+            toolsLookup.Clear();
+            
+            foreach (var tool in tools)
+                toolsLookup.Add(tool.GetType(), tool);
+        }
+
+        
+        private void OnLoad()
+        {
+            InitializeToolsList();
+        }
         
         public void Save()
         {
@@ -61,15 +105,19 @@ namespace AV.Hierarchy
         public void Load()
         {
             if (!File.Exists(assetPath))
+            {
                 Save();
-            
+                OnLoad();
+                return;
+            }
+
             EditorJsonUtility.FromJsonOverwrite(File.ReadAllText(assetPath), this);
             OnLoad();
         }
 
         public HierarchyTool GetTool(Type toolType)
         {
-            tools.lookup.TryGetValue(toolType, out var tool);
+            toolsLookup.TryGetValue(toolType, out var tool);
             return tool;
         }
         public T GetTool<T>() where T : HierarchyTool
@@ -79,15 +127,10 @@ namespace AV.Hierarchy
         
         public bool IsToolEnabled<T>() where T : HierarchyTool
         {
-            var hasTool = tools.lookup.TryGetValue(typeof(T), out var tool);
+            var hasTool = toolsLookup.TryGetValue(typeof(T), out var tool);
             if (!hasTool)
                 return false;
             return ((T)tool).enabled;
-        }
-
-        private void OnLoad()
-        {
-           tools.Initialize();
         }
     }
 }

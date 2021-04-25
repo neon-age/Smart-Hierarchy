@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace AV.Hierarchy
 {
-    [Serializable]
     public class ItemExpandTool : HierarchyTool
     {
         public bool swiping;

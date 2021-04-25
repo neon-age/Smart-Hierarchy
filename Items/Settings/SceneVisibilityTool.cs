@@ -5,7 +5,6 @@ using UnityEngine;
 
 namespace AV.Hierarchy
 {
-    [Serializable]
     internal class SceneVisibilityTool : HierarchyTool
     {
         public bool drawBackground;
@@ -16,10 +15,9 @@ namespace AV.Hierarchy
         //protected internal override Texture2D icon => GetEditorIcon("scenevis_visible");
         protected internal override Texture2D icon => GetEditorIcon("animationvisibilitytoggleon");
 
-        public override void OnValidate()
+        public override void OnBeforeSave()
         {
             options.GetTool<ScenePickingTool>().drawBackground = drawBackground;
-            options.Save();
         }
     }
 }

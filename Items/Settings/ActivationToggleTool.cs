@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace AV.Hierarchy
 {
-    [Serializable]
     internal class ActivationToggleTool : HierarchyTool
     {
         public bool swiping;

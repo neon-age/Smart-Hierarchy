@@ -13,10 +13,11 @@ namespace AV.Hierarchy
     {
         private class TabToggle : ToolbarToggle
         {
+            /*
             protected override void ToggleValue()
             {
                 // Ignore left click toggling
-            }
+            }*/
         }
         
         private class GUIImage : IMGUIContainer
@@ -43,11 +44,15 @@ namespace AV.Hierarchy
         
         private TooltipElement tooltipElement = new TooltipElement();
 
+        private readonly HierarchyOptions options;
         private readonly SerializedObject serializedObject;
         
         
         public HierarchyOptionsPopup()
         {
+            options = HierarchyOptions.Instance;
+            serializedObject = new SerializedObject(options);
+            
             activeToolMarker = new VisualElement { style =
             {
                 backgroundColor = new Color(0.9f, 0.5f, 0.4f, 1),
@@ -59,15 +64,12 @@ namespace AV.Hierarchy
             
             var toolsTabs = new Toolbar { style = { flexGrow = 0 } };
 
-            var options = HierarchyOptions.Instance;
-            serializedObject = new SerializedObject(options);
-            
             this.Bind(serializedObject);
             
             var togglesLabel = CreateLabel("Tools Options");
             CreateActiveToolGroup();
 
-            var toolsProp = serializedObject.FindProperty("tools").FindPropertyRelative("list");
+            var toolsProp = serializedObject.FindProperty("tools");
             
             for (int i = 0; i < toolsProp.arraySize; i++)
             {
@@ -78,20 +80,23 @@ namespace AV.Hierarchy
                 
                 var content = new GUIContent(tool.title, tool.icon, tool.tooltip);
                 
-                var property = toolsProp.GetArrayElementAtIndex(i);
-                var enabledProp = property.FindPropertyRelative("enabled");
+                var toolSerialized = new SerializedObject(toolsProp.GetArrayElementAtIndex(i).objectReferenceValue);
+                var toolIterator = toolSerialized.GetIterator();
+                
+                var enabledProp = toolSerialized.FindProperty("enabled");
 
                 var tab = CreateTabToggle(content, enabledProp);
                 toolsTabs.Add(tab);
 
-                var tooltip = $"{tool.title}";
-                
-                if (tool.tooltip != "")
-                    tooltip += $"{Environment.NewLine}{tool.tooltip}";
+                //var tooltip = $"{tool.title}";
+                //
+                //if (tool.tooltip != "")
+                //    tooltip += $"{Environment.NewLine}{tool.tooltip}";
 
-                tab.tooltip = tool.title;
+                //tab.tooltip = tool.title;
                 //tooltipElement.SetTooltipFor(tab, tooltip);
                 
+                /*
                 tab.RegisterCallback<ClickEvent>(evt =>
                 {
                     if (evt.button != (int)MouseButton.LeftMouse)
@@ -102,6 +107,7 @@ namespace AV.Hierarchy
                     
                     //SetActiveToolAndExpand(tab, tool, property);
                 });
+                */
                 
                 tab.RegisterCallback<MouseDownEvent>(evt =>
                 {
@@ -109,7 +115,7 @@ namespace AV.Hierarchy
                         return;
                     
                     if (activeToolTab != tab)
-                        SetActiveToolAndExpand(tab, tool, property);
+                        SetActiveToolAndExpand(tab, tool, toolIterator);
                     else
                         ResetActiveToolGroup();
                 });
@@ -123,9 +129,11 @@ namespace AV.Hierarchy
             var layoutGUI = new IMGUIContainer(OnLayoutGUI);
             Add(Space(5));
             
-            var layout = CreateGroupFoldout("Layout");
+            var layout = CreateFoldoutSaveState("Layout", true);
             layout.Add(layoutGUI);
             Add(layout);
+            
+            Add(new VisualElement { style = { width = 200, height = 1 } });
             
             RegisterCallback<ChangeEvent<bool>>(evt => HierarchyOptions.Instance.Save());
             RegisterCallback<ChangeEvent<int>>(evt => HierarchyOptions.Instance.Save());
@@ -138,7 +146,7 @@ namespace AV.Hierarchy
 
         private void CreateActiveToolGroup()
         {
-            activeToolGroup = CreateGroupFoldout("Active Tool");
+            activeToolGroup = CreateFoldout("Active Tool");
             
             activeToolGUI = new IMGUIContainer();
             activeToolGroup.Add(activeToolGUI);
@@ -191,18 +199,23 @@ namespace AV.Hierarchy
             var rect = GUILayoutUtility.GetRect(200, 0);
 
             labelWidth /= 1.25f;
-            SerializedPropertyUtil.DrawPropertyChildren(property, out var hasVisibleFields, rect);
+            //SerializedPropertyUtil.DrawSerializedObject(serialized, out var hasVisibleFields, rect);
+            //activeToolEditor.OnInspectorGUI();
+            SerializedPropertyUtil.DrawDefaultInspector(property.serializedObject, out bool hasVisibleFields);
             //SerializedPropertyUtil.DrawPropertyChildren(property, rect);
             labelWidth *= 1.25f;
 
             if (!hasVisibleFields)
             {
                 using (new GUIColorScope(new Color(1, 1, 1, 0.5f)))
-                    GUILayout.Label("This tool has no custom options.");
+                    GUILayout.Label("This tool has no options.");
             }
 
-            if (EndChangeCheck())
-                tool.OnValidate();
+            if (EditorGUI.EndChangeCheck())
+            {
+                tool.OnBeforeSave();
+                ApplyPropertiesAndSave();
+            }
         }
 
         private void OnLayoutGUI()
@@ -217,7 +230,8 @@ namespace AV.Hierarchy
             SerializedPropertyUtil.DrawPropertyChildren(layoutProp, out _, rect);
             labelWidth *= 2f;
 
-            EndChangeCheck();
+            if (EditorGUI.EndChangeCheck())
+                ApplyPropertiesAndSave();
         }
 
         private void BeginChangeCheck()
@@ -225,20 +239,10 @@ namespace AV.Hierarchy
             EditorGUI.BeginChangeCheck();
             serializedObject.Update();
         }
-        private bool EndChangeCheck()
-        {
-            if (EditorGUI.EndChangeCheck())
-            {
-                serializedObject.ApplyModifiedProperties();
-                HierarchyOptions.Instance.Save();
-                return true;
-            }
-            return false;
-        }
 
         private static VisualElement Space(float height)
         {
-            return new VisualElement { style = { height = height} };
+            return new VisualElement { style = { height = height } };
         }
 
         private static VisualElement CreateLabel(string text)
@@ -263,13 +267,27 @@ namespace AV.Hierarchy
             return toggle;
         }
         
-        private Foldout CreateGroupFoldout(string text)
+        private Foldout CreateFoldout(string text)
         {
             var foldout = new Foldout { text = text };
+                
             //foldout.Add(CreateGroupBackground());
             
             foldout.Query(className: "unity-toggle").First().style.marginLeft = 0;
             foldout.contentContainer.style.marginLeft = 0;
+
+            return foldout;
+        }
+        
+        private Foldout CreateFoldoutSaveState(string text, bool expandedByDefault = false)
+        {
+            var foldout = CreateFoldout(text);
+            
+            if (!options.foldouts.TryGetValue(text, out var expanded))
+                options.foldouts.Add(text, expanded = expandedByDefault);
+            
+            foldout.value = expanded;
+            foldout.RegisterCallback<ChangeEvent<bool>>(evt => SaveOptions());
 
             return foldout;
         }
@@ -285,6 +303,17 @@ namespace AV.Hierarchy
             background.style.bottom = -1;
 
             return background;
+        }
+
+
+        private void ApplyPropertiesAndSave()
+        {
+            serializedObject.ApplyModifiedProperties();
+            SaveOptions();
+        }
+        private static void SaveOptions()
+        {
+            HierarchyOptions.Instance.Save();
         }
     }
 }
