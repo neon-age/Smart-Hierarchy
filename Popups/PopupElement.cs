@@ -127,6 +127,10 @@ namespace AV.Hierarchy
             RegisterCallback<AttachToPanelEvent>(AttachToPanel);
             
             root.Add(this);
+
+            var typeName = GetType().Name;
+            GUI.SetNextControlName(typeName);
+            GUI.FocusControl(typeName);
             Focus();
             
             root.RegisterCallback<GeometryChangedEvent>(OnRootGeometryChange);
