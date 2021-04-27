@@ -1,6 +1,6 @@
 {
   "name": "com.av.smart-hierarchy",
-  "version": "0.3.1-pre.9",
+  "version": "0.3.1-pre.10",
   "displayName": "Smart Hierarchy",
   "description": "Brings intuitive features and important visual elements for Hierarchy.\nFocused on solving most pain points and improving overall Unity workflow.",
   "keywords": [
@@ -11,7 +11,6 @@
     "utility",
     "extensions"
   ],
-  
   "documentationUrl": "https://github.com/neon-age/Smart-Hierarchy/wiki",
   "changelogUrl": "https://github.com/neon-age/Smart-Hierarchy/wiki/Changelog",
   "licensesUrl": "https://github.com/neon-age/Smart-Hierarchy/blob/master/LICENSE.md",
@@ -22,7 +21,6 @@
   "repository": {
     "url": "https://github.com/neon-age/Smart-Hierarchy"
   },
-  
   "author": {
     "name": "Alternative Visual",
     "email": "alternativevisualgames@gmail.com",
