@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static UnityEditor.EditorGUIUtility;
@@ -10,6 +11,26 @@ namespace AV.Hierarchy
 {
     public abstract class PopupElement : VisualElement
     {
+        public class TabToggle : ToolbarToggle
+        {
+            public TabToggle(Texture icon)
+            {
+                var iconGUI = default(IMGUIContainer);
+                iconGUI = new IMGUIContainer(() =>
+                {
+                    GUI.color = new Color(1, 1, 1, resolvedStyle.opacity);
+
+                    var rect = RectUtils.GetCenteredRect(new Rect(0, 0, 16, 16), iconGUI.layout);
+
+                    ViewItemGUI.DrawFlatIcon(rect, icon, GUIColors.FlatIcon, isOn: value);
+                });
+                
+                iconGUI.AddToClassList("tab-toggle-icon");
+                
+                Add(iconGUI);
+            }
+        }
+        
         private class BlurZone : VisualElement {}
 
         private static UIResources Resource => UIResources.Index;
@@ -64,13 +85,13 @@ namespace AV.Hierarchy
             //hierarchy.Add(boxShadow);
             hierarchy.Add(background);
             
-            var borderColor = isProSkin ? new Color(0, 0, 0, 1) : new Color(0, 0, 0, 1);
+            var borderColor = new Color(0, 0, 0, 1);
             
             background.StretchToParentSize();
-            background.style.borderTopColor = borderColor * new Color32(255, 255, 255, 22);
-            background.style.borderLeftColor = borderColor * new Color32(255, 255, 255, 32);
-            background.style.borderRightColor = borderColor * new Color32(255, 255, 255, 32);
-            background.style.borderBottomColor = borderColor * new Color32(255, 255, 255, 36);
+            background.style.borderTopColor = borderColor * new Color(1, 1, 1, 0.085f);
+            background.style.borderLeftColor = borderColor * new Color(1, 1, 1, 0.125f);
+            background.style.borderRightColor = borderColor * new Color(1, 1, 1, 0.125f);
+            background.style.borderBottomColor = borderColor * new Color(1, 1, 1, 0.14f);
             background.style.SetBorderRadius(8);
             background.style.SetBorderWidth(1);
             
@@ -127,19 +148,6 @@ namespace AV.Hierarchy
 
         protected virtual void OnAttach(AttachToPanelEvent evt)
         {
-        }
-        
-        public static T GetPopup<T>() where T : PopupElement
-        {
-            activePopups.TryGetValue(typeof(T), out var popup);
-            return (T)popup;
-        }
-
-        public static VisualElement CreateSeparator()
-        {
-            var separator = new VisualElement();
-            separator.AddToClassList("separator");
-            return separator;
         }
 
         public void Close()
@@ -217,6 +225,69 @@ namespace AV.Hierarchy
                 style.left = layout.x + (rootWidth - layout.xMax);
             else
                 style.left = position.x;
+        }
+        
+        public static T GetPopup<T>() where T : PopupElement
+        {
+            activePopups.TryGetValue(typeof(T), out var popup);
+            return (T)popup;
+        }
+        
+        public static VisualElement CreateSpace(float height)
+        {
+            return new VisualElement { style = { height = height } };
+        }
+
+        public static VisualElement CreateLabel(string text)
+        {
+            var label = new Label(text);
+            label.AddToClassList("label");
+            return label;
+        }
+
+        public static VisualElement CreateSeparator()
+        {
+            var separator = new VisualElement();
+            separator.AddToClassList("separator");
+            return separator;
+        }
+        
+        public static Foldout CreateFoldout(string text)
+        {
+            var foldout = new Foldout { text = text };
+            
+            foldout.Query(className: "unity-toggle").First().style.marginLeft = 0;
+            foldout.contentContainer.style.marginLeft = 0;
+
+            return foldout;
+        }
+
+        public static Toolbar CreateTabsToolbar()
+        {
+            var toolbar = new Toolbar();
+            toolbar.AddToClassList("tabs-toolbar");
+            return toolbar;
+        }
+        
+        public static TabToggle CreateTabToggle(GUIContent content, SerializedProperty property)
+        {
+            var toggle = new TabToggle(content.image);
+
+            // Bug in 2020.3.1~5 - checkmark is visible on ToolbarToggle
+            var checkmark = toggle.Query(className: "unity-toggle__input").First();
+            checkmark?.RemoveFromHierarchy();
+
+            toggle.BindProperty(property);
+            toggle.AddToClassList("tab-toggle");
+
+            return toggle;
+        }
+
+        public static VisualElement CreateActiveToggleMarker()
+        {
+            var marker = new VisualElement { name = "ActiveToggleMarker" };
+            marker.AddToClassList("active-toggle-marker");
+            return marker;
         }
     }
 }

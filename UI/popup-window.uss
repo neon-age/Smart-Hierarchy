@@ -60,20 +60,14 @@
     margin-bottom: 4;
 }
 
-.unity-toolbar {
-    padding: 0;
-    border-radius: 4;
-    overflow: hidden;
-}
-
 .highlight-button {
     width: 20;
     height: 20;
-    
+
     border-width: 0;
     border-radius: 4;
     margin: 0;
-    
+
     background-color: rgba(100, 100, 100, 0);
     align-items: center;
 }
@@ -82,48 +76,67 @@
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-.active-toggle-icon {
-    width: 16;
-    height: 16;
-    margin-right: 1;
-    margin-bottom: 2;
+.unity-toolbar {
+    padding: 0;
+    border-radius: 4;
+    overflow: hidden;
 }
 
-.active-toggle {
-    width: 25;
-    height: 20;
-    margin: 0;
-    padding-top: 2;
-    flex-direction: initial;
+.tabs-toolbar {
+    max-width: 200;
+    border-bottom-width: 0.5;
+    height: auto;
+    align-self: auto;
+    flex-wrap: wrap;
+}
 
-    border-width: 0 0 0 1;
+.tab-toggle-icon {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    position: absolute;
+    margin-bottom: 1;
+}
+
+.tab-toggle {
+    height: 22;
+    margin: 0.5;
+    margin-top: 0;
+    border-width: 0;
+    
+    width: 26;
+    flex-direction: initial;
 
     background-color: rgba(255, 255, 255, 0.15);
     align-items: center;
 }
 
-.active-toggle-marker {
-    background-color: rgba(240, 140, 110, 1)
-}
-
-.active-toggle:hover {
+.tab-toggle:hover {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-.active-toggle:checked {
-    background-color: rgba(72, 105, 160, 1);
-    background-color: rgb(62, 95, 150);
+.tab-toggle:checked {
     background-color: rgba(58, 114, 176, 0.85);
 }
 
-.active-toggle:checked:hover {
+.tab-toggle:checked:hover {
     background-color: rgba(66, 122, 184, 0.85);
 }
 
-.active-toggle > .active-toggle-icon {
+.tab-toggle > .active-toggle-icon {
     opacity: 0.75;
 }
 
-.active-toggle:checked > .active-toggle-icon {
+.tab-toggle:checked > .active-toggle-icon {
     opacity: 1;
+}
+
+.active-toggle-marker {
+    background-color: rgba(240, 140, 110, 1);
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2;
 }

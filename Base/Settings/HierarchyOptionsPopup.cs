@@ -11,28 +11,11 @@ namespace AV.Hierarchy
 {
     internal class HierarchyOptionsPopup : PopupElement
     {
-        private class TabToggle : ToolbarToggle
-        {
-            public TabToggle(Texture icon)
-            {
-                var iconGUI = new IMGUIContainer(() =>
-                {
-                    GUI.color = new Color(1, 1, 1, resolvedStyle.opacity);
-
-                    ViewItemGUI.DrawFlatIcon(new Rect(0, 0, 16, 16), icon, GUIColors.FlatIcon, isOn: value);
-                });
-                
-                iconGUI.AddToClassList("active-toggle-icon");
-                
-                Add(iconGUI);
-            }
-        }
-        
         protected override string helpURL => "https://github.com/neon-age/Smart-Hierarchy/wiki";
 
         private Foldout activeToolGroup;
         private VisualElement activeToolTab;
-        private VisualElement activeToolMarker;
+        private VisualElement activeToolMarker = CreateActiveToggleMarker();
         private IMGUIContainer activeToolGUI;
         
         private TooltipElement tooltipElement = new TooltipElement();
@@ -45,29 +28,18 @@ namespace AV.Hierarchy
         {
             options = HierarchyOptions.Instance;
             serializedObject = new SerializedObject(options);
-            
-            activeToolMarker = new VisualElement { style =
-            {
-                //backgroundColor = new Color(0.9f, 0.5f, 0.4f, 1),
-                position = Position.Absolute,
-                left = 0, right = 0,
-                bottom = 0,
-                height = 2
-            }};
-            activeToolMarker.AddToClassList("active-toggle-marker");
-            
-            var toolTabsBar = new Toolbar { style = { flexGrow = 0 } };
 
             this.Bind(serializedObject);
             
             //var togglesLabel = CreateLabel("Tools Options");
-
             title = "Tools Options";
             
+            var toolTabsBar = CreateTabsToolbar();
             CreateActiveToolGroup();
 
             var toolsProp = serializedObject.FindProperty("tools");
             
+            //for (int d = 0; d < 3; d++)
             for (int i = 0; i < toolsProp.arraySize; i++)
             {
                 var tool = options.tools[i];
@@ -119,11 +91,11 @@ namespace AV.Hierarchy
             
             //Add(togglesLabel);
             Add(toolTabsBar);
-            Add(Space(5));
+            Add(CreateSpace(5));
             Add(activeToolGroup);
 
             var layoutGUI = new IMGUIContainer(OnLayoutGUI);
-            Add(Space(5));
+            Add(CreateSpace(5));
             
             var layout = CreateFoldoutSaveState("Layout", true);
             layout.Add(layoutGUI);
@@ -131,8 +103,8 @@ namespace AV.Hierarchy
             
             Add(new VisualElement { style = { width = 200, height = 1 } });
             
-            RegisterCallback<ChangeEvent<bool>>(evt => HierarchyOptions.Instance.Save());
-            RegisterCallback<ChangeEvent<int>>(evt => HierarchyOptions.Instance.Save());
+            RegisterCallback<ChangeEvent<bool>>(evt => SaveOptions());
+            RegisterCallback<ChangeEvent<int>>(evt => SaveOptions());
         }
 
         protected override void OnAttach(AttachToPanelEvent evt)
@@ -146,7 +118,7 @@ namespace AV.Hierarchy
             
             activeToolGUI = new IMGUIContainer();
             activeToolGroup.Add(activeToolGUI);
-            activeToolGroup.Add(Space(5));
+            activeToolGroup.Add(CreateSpace(5));
             
             ResetActiveToolGroup();
         }
@@ -235,44 +207,6 @@ namespace AV.Hierarchy
             EditorGUI.BeginChangeCheck();
             serializedObject.Update();
         }
-
-        private static VisualElement Space(float height)
-        {
-            return new VisualElement { style = { height = height } };
-        }
-
-        private static VisualElement CreateLabel(string text)
-        {
-            var label = new Label(text);
-            label.AddToClassList("label");
-            return label;
-        }
-
-        private static TabToggle CreateTabToggle(GUIContent content, SerializedProperty property)
-        {
-            var toggle = new TabToggle(content.image);
-
-            // Bug in 2020.3.1~5 - checkmark is visible on ToolbarToggle
-            var checkmark = toggle.Query(className: "unity-toggle__input").First();
-            checkmark?.RemoveFromHierarchy();
-
-            toggle.BindProperty(property);
-            toggle.AddToClassList("active-toggle");
-
-            return toggle;
-        }
-        
-        private Foldout CreateFoldout(string text)
-        {
-            var foldout = new Foldout { text = text };
-                
-            //foldout.Add(CreateGroupBackground());
-            
-            foldout.Query(className: "unity-toggle").First().style.marginLeft = 0;
-            foldout.contentContainer.style.marginLeft = 0;
-
-            return foldout;
-        }
         
         private Foldout CreateFoldoutSaveState(string text, bool expandedByDefault = false)
         {
@@ -285,19 +219,6 @@ namespace AV.Hierarchy
             foldout.RegisterCallback<ChangeEvent<bool>>(evt => SaveOptions());
 
             return foldout;
-        }
-        
-        private static VisualElement CreateGroupBackground()
-        {
-            var background = new VisualElement { style = { opacity = 0.08f, backgroundColor = new Color(1, 1, 1, 1) }};
-           
-            background.style.position = Position.Absolute;
-            background.style.top = -1;
-            background.style.left = -7;
-            background.style.right = -7;
-            background.style.bottom = -1;
-
-            return background;
         }
 
 
