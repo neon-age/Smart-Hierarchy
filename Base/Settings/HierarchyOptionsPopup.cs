@@ -161,7 +161,7 @@ namespace AV.Hierarchy
 
             if (!string.IsNullOrEmpty(tool.commentary))
             {
-                activeToolGroup.Add(CreateHelpBox(tool.commentary));
+                activeToolGroup.Add(CreateMiniHelpBox(tool.commentary));
             }
             activeToolGroup.Add(activeToolGUI);
             activeToolGroup.Add(CreateSpace(5));

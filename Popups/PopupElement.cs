@@ -33,7 +33,7 @@ namespace AV.Hierarchy
         
         private class BlurZone : VisualElement {}
 
-        private static UIResources Resource => UIResources.Index;
+        private static UIResources UIResource => UIResources.Index;
         
         private static Texture2D InfoIcon = IconContent("console.infoicon.sml").image as Texture2D;
         private static Texture2D HelpIcon = IconContent("_Help").image as Texture2D;
@@ -67,7 +67,7 @@ namespace AV.Hierarchy
         
         protected PopupElement()
         {
-            styleSheets.Add(Resource.popupElementStyle);
+            styleSheets.Add(UIResource.popupElementStyle);
             style.backgroundColor = new Color(0, 0, 0, 0.01f);
             AddToClassList("popup-window");
 
@@ -80,7 +80,7 @@ namespace AV.Hierarchy
                 left = -ShadowSize, right = -ShadowSize, 
                 top = -ShadowSize, bottom = -ShadowSize,
                 opacity = 0.1f, 
-                backgroundImage = Resource.boxShadow
+                backgroundImage = UIResource.boxShadow
             }};
             boxShadow.style.SetSlice(12);
             //hierarchy.Add(boxShadow);
@@ -98,7 +98,7 @@ namespace AV.Hierarchy
             
             contextArrow = new VisualElement { style = 
             {
-                backgroundImage = Resource.contextArrow, 
+                backgroundImage = UIResource.contextArrow, 
                 position = Position.Absolute
             }};
             contextArrow.style.unityBackgroundImageTintColor = backgroundColor;
@@ -262,7 +262,7 @@ namespace AV.Hierarchy
             return label;
         }
         
-        public static VisualElement CreateHelpBox(string text)
+        public static VisualElement CreateMiniHelpBox(string text)
         {
             var helpBox = new VisualElement();
             helpBox.styleSheets.Add(UIResources.Index.helpBoxStyle);
