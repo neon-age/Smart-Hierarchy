@@ -66,7 +66,7 @@ namespace AV.Hierarchy
 
                     var position = rect.position;
                     position.x += 1;
-                    position.y += 32;
+                    position.y += 31;
 
                     filterPopup.ShowInsideWindow(position, SmartHierarchy.active.window.actualWindow);
                 }

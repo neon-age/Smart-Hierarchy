@@ -13,7 +13,9 @@ namespace AV.Hierarchy
         private class BlurZone : VisualElement {}
         
         private static StyleSheet styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(AssetDatabase.GUIDToAssetPath("d7461833a510d124191fbed727ac19f0"));
+        private static Texture2D helpIcon = IconContent("_Help").image as Texture2D;
         private static Texture2D arrowIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath("70cf301939ec64147b3b646ec72c2cf2"));
+        private static Texture2D boxShadowIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath("625e4f8d140fb9a418b7c4628a013499"));
 
         private static PopupElement active;
         private static Dictionary<Type, PopupElement> activePopups = new Dictionary<Type, PopupElement>();
@@ -28,23 +30,57 @@ namespace AV.Hierarchy
 
         public override bool canGrabFocus => true;
 
+        protected virtual string helpURL { get; }
+
         private TextElement titleText;
         private VisualElement contextArrow;
         private VisualElement blurZone;
 
         private Vector2 position;
         protected VisualElement root;
+        protected VisualElement boxShadow;
         protected EditorWindow window;
 
-        private Color backgroundColor => isProSkin ? new Color32(50, 50, 50, 230) : new Color32(185, 185, 185, 230);
+        private Color backgroundColor => isProSkin ? new Color32(50, 50, 50, 250) : new Color32(190, 190, 190, 250);
         
         
         protected PopupElement()
         {
             styleSheets.Add(styleSheet);
-            style.backgroundColor = backgroundColor;
-            
+            style.backgroundColor = new Color(0, 0, 0, 0.01f);
             AddToClassList("popup-window");
+
+            var background = new VisualElement { style = { backgroundColor = backgroundColor }};
+            
+            const int ShadowSize = 8;
+            boxShadow = new VisualElement { style =
+            {
+                position = Position.Absolute,
+                left = -ShadowSize, right = -ShadowSize, 
+                top = -ShadowSize, bottom = -ShadowSize,
+                opacity = 0.1f, 
+                backgroundImage = boxShadowIcon
+            }};
+            boxShadow.style.SetSlice(10);
+            hierarchy.Add(boxShadow);
+            hierarchy.Add(background);
+            
+            var borderColor = isProSkin ? new Color(0, 0, 0, 1) : new Color(0, 0, 0, 1);
+            
+            background.StretchToParentSize();
+            background.style.borderTopColor = borderColor * new Color32(255, 255, 255, 16);
+            background.style.borderLeftColor = borderColor * new Color32(255, 255, 255, 32);
+            background.style.borderRightColor = borderColor * new Color32(255, 255, 255, 32);
+            background.style.borderBottomColor = borderColor * new Color32(255, 255, 255, 36);
+            background.style.SetBorderRadius(8);
+            background.style.SetBorderWidth(1);
+            
+            contextArrow = new VisualElement { style = { backgroundImage = arrowIcon, position = Position.Absolute } };
+            contextArrow.style.unityBackgroundImageTintColor = backgroundColor;
+            contextArrow.AddToClassList("context-arrow");
+            
+            hierarchy.Add(contextArrow);
+            
             
             contentContainer = new VisualElement();
             
@@ -53,14 +89,20 @@ namespace AV.Hierarchy
             titleContainer = new VisualElement();
             titleContainer.AddToClassList("title-container");
             
-            titleText = new TextElement { name = "Title", style = { minHeight = 0 }};
+            titleText = new TextElement { name = "Title" };
             titleContainer.Add(titleText);
             
             hierarchy.Add(titleContainer);
-            
-            if (!string.IsNullOrEmpty(title))
-                hierarchy.Add(CreateSeparator());
-            
+
+            if (!string.IsNullOrEmpty(helpURL))
+            {
+                var helpButton = new VisualElement { style = { opacity = 0.9f, backgroundImage = helpIcon, width = 16, height = 16 }};
+                helpButton.tooltip = "Open Documentation";
+                helpButton.RegisterCallback<MouseUpEvent>(evt => Application.OpenURL(helpURL));
+
+                titleContainer.Add(helpButton);
+            }
+
             hierarchy.Add(contentContainer);
 
             var type = GetType();
@@ -87,7 +129,7 @@ namespace AV.Hierarchy
             return (T)popup;
         }
 
-        public VisualElement CreateSeparator()
+        public static VisualElement CreateSeparator()
         {
             var separator = new VisualElement();
             separator.AddToClassList("separator");
@@ -106,8 +148,8 @@ namespace AV.Hierarchy
 
         private void OnUpdate()
         {
-            if (EditorWindow.focusedWindow != window)
-                Close();
+            //if (EditorWindow.focusedWindow != window)
+            //    Close();
         }
         
         public void ShowInsideWindow(Vector2 position, EditorWindow window, VisualElement rootVisualElement = null)
@@ -137,12 +179,6 @@ namespace AV.Hierarchy
             RegisterCallback<GeometryChangedEvent>(OnGeometryChange);
 
             style.top = position.y;
-            
-            contextArrow = new VisualElement { style = { backgroundImage = arrowIcon, position = Position.Absolute } };
-            contextArrow.style.unityBackgroundImageTintColor = backgroundColor;
-            contextArrow.AddToClassList("context-arrow");
-            
-            hierarchy.Insert(0, contextArrow);
         }
 
         private void CreateBlurZoneInRoot()

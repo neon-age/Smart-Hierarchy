@@ -23,7 +23,15 @@
 }
 
 #Title {
+    flex-grow: 1;
+    margin-top: 2;
+    margin-left: 2;
+    height: 21;
     opacity: 0.75;
+}
+
+.title-container {
+    flex-direction: row;
 }
 
 .label {
@@ -64,17 +72,6 @@
     background-color: rgba(255, 255, 255, 0.15);
 }
 
-.active-toggle {
-    width: 25;
-    height: 20;
-    flex-direction: initial;
-
-    border-width: 0 0 0 1;
-
-    background-color: rgba(255, 255, 255, 0.1);
-    align-items: center;
-}
-
 .active-toggle-icon {
     width: 16;
     height: 16;
@@ -82,12 +79,33 @@
     margin-bottom: 2;
 }
 
-.active-toggle:hover {
+.active-toggle {
+    width: 25;
+    height: 20;
+    flex-direction: initial;
+
+    border-width: 0 0 0 1;
+
     background-color: rgba(255, 255, 255, 0.15);
+    align-items: center;
+}
+
+.active-toggle-marker {
+    background-color: rgba(240, 140, 110, 1)
+}
+
+.active-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .active-toggle:checked {
     background-color: rgba(72, 105, 160, 1);
+    background-color: rgb(62, 95, 150);
+    background-color: rgba(58, 114, 176, 0.85);
+}
+
+.active-toggle:checked:hover {
+    background-color: rgba(66, 122, 184, 0.85);
 }
 
 .active-toggle > .active-toggle-icon {

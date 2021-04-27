@@ -28,9 +28,8 @@ namespace AV.Hierarchy
             }
         }
         
-        private static Texture2D HelpIcon = IconContent("_Help").image as Texture2D;
-        private static string UIPath = AssetDatabase.GUIDToAssetPath("f0d92e1f03926664991b2f7fbfbd6268") + "/";
-        
+        protected override string helpURL => "https://github.com/neon-age/Smart-Hierarchy/wiki";
+
         private Foldout activeToolGroup;
         private VisualElement activeToolTab;
         private VisualElement activeToolMarker;
@@ -49,18 +48,22 @@ namespace AV.Hierarchy
             
             activeToolMarker = new VisualElement { style =
             {
-                backgroundColor = new Color(0.9f, 0.5f, 0.4f, 1),
+                //backgroundColor = new Color(0.9f, 0.5f, 0.4f, 1),
                 position = Position.Absolute,
                 left = 0, right = 0,
                 bottom = 0,
                 height = 2
             }};
+            activeToolMarker.AddToClassList("active-toggle-marker");
             
-            var toolsTabs = new Toolbar { style = { flexGrow = 0 } };
+            var toolTabsBar = new Toolbar { style = { flexGrow = 0 } };
 
             this.Bind(serializedObject);
             
-            var togglesLabel = CreateLabel("Tools Options");
+            //var togglesLabel = CreateLabel("Tools Options");
+
+            title = "Tools Options";
+            
             CreateActiveToolGroup();
 
             var toolsProp = serializedObject.FindProperty("tools");
@@ -80,7 +83,7 @@ namespace AV.Hierarchy
                 var enabledProp = toolSerialized.FindProperty("enabled");
 
                 var tab = CreateTabToggle(content, enabledProp);
-                toolsTabs.Add(tab);
+                toolTabsBar.Add(tab);
 
                 //var tooltip = $"{tool.title}";
                 //
@@ -90,18 +93,11 @@ namespace AV.Hierarchy
                 //tab.tooltip = tool.title;
                 //tooltipElement.SetTooltipFor(tab, tooltip);
                 
-                /*
-                tab.RegisterCallback<ClickEvent>(evt =>
+                tab.RegisterCallback<MouseEnterEvent>(evt =>
                 {
-                    if (evt.button != (int)MouseButton.LeftMouse)
-                        return;
-                    
-                    //if (activeToolTab == tab)
-                        tab.value = !tab.value;
-                    
-                    //SetActiveToolAndExpand(tab, tool, property);
+                    if (activeToolTab == null)
+                        activeToolGroup.text = "Right click to show options...";
                 });
-                */
                 
                 tab.RegisterCallback<MouseDownEvent>(evt =>
                 {
@@ -115,8 +111,14 @@ namespace AV.Hierarchy
                 });
             }
             
-            Add(togglesLabel);
-            Add(toolsTabs);
+            toolTabsBar.RegisterCallback<MouseLeaveEvent>(evt =>
+            {
+                if (activeToolTab == null)
+                    ResetActiveToolGroup();
+            });
+            
+            //Add(togglesLabel);
+            Add(toolTabsBar);
             Add(Space(5));
             Add(activeToolGroup);
 
@@ -154,7 +156,7 @@ namespace AV.Hierarchy
             activeToolTab = null;
             
             activeToolGroup.text = "No Selected Tool";
-            activeToolGroup.tooltip = "Right click on toggle to show options.";
+            activeToolGroup.tooltip = "";
             
             activeToolGroup.value = false;
             activeToolGroup.style.opacity = 0.5f;

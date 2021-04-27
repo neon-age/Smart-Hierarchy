@@ -4,12 +4,30 @@ using UnityEngine.UIElements;
 
 public static class IStyleExtensions
 {
+    public static void SetSlice(this IStyle style, int pixels)
+    {
+        SetSlice(style, pixels, pixels, pixels, pixels);
+    }
+    
+    public static void SetSlice(this IStyle style, int top, int left, int right, int bottom)
+    {
+        style.unitySliceTop = top;
+        style.unitySliceLeft = left;
+        style.unitySliceRight = right;
+        style.unitySliceBottom = bottom;
+    }
+    
     public static void SetBorderColor(this IStyle style, Color color)
     {
-        style.borderTopColor = color;
-        style.borderLeftColor = color;
-        style.borderRightColor = color;
-        style.borderBottomColor = color;
+        SetBorderColor(style, color, color, color, color);
+    }
+    
+    public static void SetBorderColor(this IStyle style, Color? top = default, Color? left = default, Color? right = default, Color? bottom = default)
+    {
+        style.borderTopColor = top ?? style.borderTopColor;
+        style.borderLeftColor = left ?? style.borderTopColor;
+        style.borderRightColor = right ?? style.borderTopColor;
+        style.borderBottomColor = bottom ?? style.borderTopColor;
     }
     
     public static void SetBorderWidth(this IStyle style, float width)
