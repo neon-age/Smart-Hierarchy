@@ -24,14 +24,24 @@
 
 #Title {
     flex-grow: 1;
-    margin-top: 2;
+    margin-top: 1;
     margin-left: 2;
-    height: 21;
+    height: 22;
     opacity: 0.75;
 }
 
 .title-container {
     flex-direction: row;
+}
+
+.title-button {
+    opacity: 0.75;
+    width: 16;
+    height: 16;
+}
+.title-button:hover {
+    border-radius: 4;
+    background-color: rgba(255, 255, 255, 0.15);
 }
 
 .label {
@@ -68,8 +78,8 @@
     align-items: center;
 }
 
-.highlight-button :hover {
-    background-color: rgba(255, 255, 255, 0.15);
+.highlight-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .active-toggle-icon {

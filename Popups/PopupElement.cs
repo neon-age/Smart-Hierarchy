@@ -99,8 +99,11 @@ namespace AV.Hierarchy
 
             if (!string.IsNullOrEmpty(helpURL))
             {
-                var helpButton = new VisualElement { style = { opacity = 0.9f, backgroundImage = helpIcon, width = 16, height = 16 }};
+                var helpButton = new VisualElement { style = { backgroundImage = helpIcon }};
+                
+                helpButton.AddToClassList("title-button");
                 helpButton.tooltip = "Open Documentation";
+                
                 helpButton.RegisterCallback<MouseUpEvent>(evt => Application.OpenURL(helpURL));
 
                 titleContainer.Add(helpButton);

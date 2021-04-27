@@ -8,6 +8,8 @@ namespace AV.Hierarchy
 {
     internal class CollectionPopup : PopupElement
     {
+        protected override string helpURL => "https://github.com/neon-age/Smart-Hierarchy/wiki/Collections";
+
         private SerializedObject serializedObject;
         private SerializedProperty colorTagProperty;
         
