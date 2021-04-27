@@ -15,6 +15,7 @@ MonoBehaviour:
   preferencesUxml: {fileID: 9197481963319205126, guid: 42da3cda26cb7f5478b3610daa0eafd3, type: 3}
   popupElementStyle: {fileID: 7433441132597879392, guid: d7461833a510d124191fbed727ac19f0, type: 3}
   preferencesStyle: {fileID: 7433441132597879392, guid: 51225b4c916017644a993630cb79dc8e, type: 3}
+  helpBoxStyle: {fileID: 7433441132597879392, guid: d23f3b0d4e030dc43a7d023bc53a5508, type: 3}
   foldoutHeaderStyle: {fileID: 7433441132597879392, guid: 2506268fd8f623f4a9626ac5d0a5b8e2, type: 3}
   foldoutHeaderDarkStyle: {fileID: 7433441132597879392, guid: 9ec36196e56fcea48a2cc3e7428572fa, type: 3}
   collectionIcon: {fileID: 2800000, guid: 6ee527fd28545e04593219b473dc26da, type: 3}

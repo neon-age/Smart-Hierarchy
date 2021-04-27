@@ -5,7 +5,6 @@ using UnityEngine.UIElements;
 
 namespace AV.Hierarchy
 {
-    [CreateAssetMenu]
     internal class UIResources : ScriptableResource<UIResources>
     {
         [Header("UXML")] 
