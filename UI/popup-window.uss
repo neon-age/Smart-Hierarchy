@@ -82,6 +82,8 @@
 .active-toggle {
     width: 25;
     height: 20;
+    margin: 0;
+    padding-top: 2;
     flex-direction: initial;
 
     border-width: 0 0 0 1;

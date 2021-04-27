@@ -251,7 +251,11 @@ namespace AV.Hierarchy
         private static TabToggle CreateTabToggle(GUIContent content, SerializedProperty property)
         {
             var toggle = new TabToggle(content.image);
-            
+
+            // Bug in 2020.3.1~5 - checkmark is visible on ToolbarToggle
+            var checkmark = toggle.Query(className: "unity-toggle__input").First();
+            checkmark?.RemoveFromHierarchy();
+
             toggle.BindProperty(property);
             toggle.AddToClassList("active-toggle");
 

@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 596cc0dea5238214b8b55b184b1215d6, type: 3}
+  m_Name: UI Resources
+  m_EditorClassIdentifier: 
+  popupElementStyle: {fileID: 7433441132597879392, guid: d7461833a510d124191fbed727ac19f0, type: 3}
+  contextArrow: {fileID: 21300000, guid: 70cf301939ec64147b3b646ec72c2cf2, type: 3}
+  boxShadow: {fileID: 2800000, guid: 625e4f8d140fb9a418b7c4628a013499, type: 3}
