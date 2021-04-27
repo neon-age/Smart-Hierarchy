@@ -19,6 +19,7 @@ namespace AV.Hierarchy
         private IMGUIContainer activeToolGUI;
         
         private TooltipElement tooltipElement = new TooltipElement();
+        private bool rightClickedOnTool;
 
         private readonly HierarchyOptions options;
         private readonly SerializedObject serializedObject;
@@ -64,9 +65,12 @@ namespace AV.Hierarchy
 
                 //tab.tooltip = tool.title;
                 //tooltipElement.SetTooltipFor(tab, tooltip);
+                    
                 
                 tab.RegisterCallback<MouseEnterEvent>(evt =>
                 {
+                    if (rightClickedOnTool)
+                        return;
                     if (activeToolTab == null)
                         activeToolGroup.text = "Right click to show options...";
                 });
@@ -75,6 +79,8 @@ namespace AV.Hierarchy
                 {
                     if (evt.button != (int) MouseButton.RightMouse)
                         return;
+
+                    rightClickedOnTool = true;
                     
                     if (activeToolTab != tab)
                         SetActiveToolAndExpand(tab, tool, toolIterator);
@@ -118,7 +124,6 @@ namespace AV.Hierarchy
             
             activeToolGUI = new IMGUIContainer();
             activeToolGroup.Add(activeToolGUI);
-            activeToolGroup.Add(CreateSpace(5));
             
             ResetActiveToolGroup();
         }
@@ -132,32 +137,36 @@ namespace AV.Hierarchy
             
             activeToolGroup.value = false;
             activeToolGroup.style.opacity = 0.5f;
-
-            activeToolGUI.style.display = DisplayStyle.None;
             
+            activeToolGroup.Clear();
             activeToolMarker.RemoveFromHierarchy();
         }
 
         private void SetActiveToolAndExpand(VisualElement sender, HierarchyTool tool, SerializedProperty property)
         {
-            activeToolGroup.value = true;
             SetActiveTool(sender, tool, property);
+            activeToolGroup.value = true;
         }
 
         private void SetActiveTool(VisualElement tab, HierarchyTool tool, SerializedProperty property)
         {
+            ResetActiveToolGroup();
+            
             activeToolTab = tab;
+            activeToolGUI.onGUIHandler = () => OnToolGUI(tool, property);
             
             activeToolGroup.text = tool.title;
             activeToolGroup.tooltip = tool.tooltip;
             activeToolGroup.style.opacity = 1;
+
+            if (!string.IsNullOrEmpty(tool.commentary))
+            {
+                activeToolGroup.Add(CreateHelpBox(tool.commentary));
+            }
+            activeToolGroup.Add(activeToolGUI);
+            activeToolGroup.Add(CreateSpace(5));
             
-            activeToolMarker.RemoveFromHierarchy();
             tab.Add(activeToolMarker);
-            
-            activeToolGUI.onGUIHandler = () => OnToolGUI(tool, property);
-            
-            activeToolGUI.style.display = DisplayStyle.Flex;
         }
 
         private void OnToolGUI(HierarchyTool tool, SerializedProperty property)

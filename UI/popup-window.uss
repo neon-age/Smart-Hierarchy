@@ -49,6 +49,20 @@
     padding: 0 0 4 0;
 }
 
+
+.help-box > #Icon {
+    opacity: 0.6;
+    margin-right: 0;
+    display: none;
+}
+
+.help-box > #Message {
+    opacity: 0.7;
+    -unity-text-align: middle-left;
+    white-space: normal;
+    padding: 1 2 0 2;
+}
+
 .separator {
     flex-grow: 1;
     height: 1;

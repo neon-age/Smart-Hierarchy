@@ -18,6 +18,7 @@ namespace AV.Hierarchy
         protected internal virtual int order => 100;
         protected internal virtual string title => ObjectNames.NicifyVariableName(GetType().Name);
         protected internal virtual string tooltip => "";
+        protected internal virtual string commentary => "";
         protected internal virtual Texture2D icon => GetEditorIcon("SceneViewTools");
 
         public virtual void OnBeforeSave() {}

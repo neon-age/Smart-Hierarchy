@@ -35,7 +35,8 @@ namespace AV.Hierarchy
 
         private static UIResources Resource => UIResources.Index;
         
-        private static Texture2D helpIcon = IconContent("_Help").image as Texture2D;
+        private static Texture2D InfoIcon = IconContent("console.infoicon.sml").image as Texture2D;
+        private static Texture2D HelpIcon = IconContent("_Help").image as Texture2D;
         
         private static PopupElement active;
         private static Dictionary<Type, PopupElement> activePopups = new Dictionary<Type, PopupElement>();
@@ -120,7 +121,7 @@ namespace AV.Hierarchy
 
             if (!string.IsNullOrEmpty(helpURL))
             {
-                var helpButton = new VisualElement { style = { backgroundImage = helpIcon }};
+                var helpButton = new VisualElement { style = { backgroundImage = HelpIcon }};
                 
                 helpButton.AddToClassList("title-button");
                 helpButton.tooltip = "Open Documentation";
@@ -237,6 +238,22 @@ namespace AV.Hierarchy
         {
             return new VisualElement { style = { height = height } };
         }
+        
+        public static VisualElement CreateSeparator()
+        {
+            var separator = new VisualElement();
+            separator.AddToClassList("separator");
+            return separator;
+        }
+        
+        public static VisualElement CreateImage(Texture2D texture)
+        {
+            return new VisualElement { style =
+            {
+                backgroundImage = texture, 
+                minWidth = 16, minHeight = 16 
+            }};
+        }
 
         public static VisualElement CreateLabel(string text)
         {
@@ -244,12 +261,24 @@ namespace AV.Hierarchy
             label.AddToClassList("label");
             return label;
         }
-
-        public static VisualElement CreateSeparator()
+        
+        public static VisualElement CreateHelpBox(string text)
         {
-            var separator = new VisualElement();
-            separator.AddToClassList("separator");
-            return separator;
+            var helpBox = new VisualElement();
+            helpBox.styleSheets.Add(UIResources.Index.helpBoxStyle);
+            helpBox.AddToClassList("help-box");
+            helpBox.AddToClassList("help-box-mini");
+            
+            var infoIcon = CreateImage(InfoIcon);
+            infoIcon.name = "Icon";
+            
+            var label = CreateLabel(text);
+            label.name = "Message";
+            
+            helpBox.Add(infoIcon);
+            helpBox.Add(label);
+            
+            return helpBox;
         }
         
         public static Foldout CreateFoldout(string text)

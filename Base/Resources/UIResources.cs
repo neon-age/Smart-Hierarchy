@@ -14,6 +14,7 @@ namespace AV.Hierarchy
         [Header("Style Sheets")]
         public StyleSheet popupElementStyle;
         public StyleSheet preferencesStyle;
+        public StyleSheet helpBoxStyle;
         public StyleSheet foldoutHeaderStyle;
         public StyleSheet foldoutHeaderDarkStyle;
         

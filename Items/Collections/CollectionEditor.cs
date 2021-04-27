@@ -190,14 +190,19 @@ namespace AV.Hierarchy
             if (componentsWarning == null)
             {
                 componentsWarning = new VisualElement { name = "ComponentsWarning" };
+                componentsWarning.AddToClassList("help-box");
                 
                 componentsWarning.style.SetBorderColor(isProSkin ? new Color(0, 0, 0, 0.5f) : new Color(0.33f, 0.33f, 0.33f, 0.5f));
                 componentsWarning.styleSheets.Add(helpBoxStyle);
                 
-                componentsWarning.Add(new Image { name = "Icon", image = IconContent("console.erroricon").image });
+                componentsWarning.Add(new Image
+                {
+                    name = "Icon", 
+                    image = IconContent("console.erroricon").image
+                });
                 componentsWarning.Add(new TextElement
                 {
-                    name = "Warning",
+                    name = "Message",
                     text = "Collection and components are stripped during build process.\n" +
                            "Use \"Keep Transform Hierarchy\" to keep this object in build.\n",
                     //#if UNITY_2019_3 || UNITY_2019_4
