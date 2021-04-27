@@ -5,7 +5,6 @@ using UnityEditor.IMGUI.Controls;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using static UnityEditor.AssetDatabase;
 using static UnityEditor.EditorGUIUtility;
 using Object = UnityEngine.Object;
 
@@ -40,7 +39,7 @@ namespace AV.Hierarchy
         private static MethodInfo getSceneByHandleInfo = typeof(EditorSceneManager).GetMethod("GetSceneByHandle", BindingFlags.NonPublic | BindingFlags.Static);
         private static Func<int, Scene> getSceneHandle = Delegate.CreateDelegate(typeof(Func<int, Scene>), getSceneByHandleInfo) as Func<int, Scene>;
        
-        private static readonly Texture2D collectionIcon = LoadAssetAtPath<Texture2D>(GUIDToAssetPath("6ee527fd28545e04593219b473dc26da"));
+        private static readonly Texture2D collectionIcon = UIResources.Index.collectionIcon;
         private static readonly Texture2D nullComponentIcon = IconContent("DefaultAsset Icon").image as Texture2D;
         private static readonly Texture2D sceneAssetIcon = IconContent("SceneAsset Icon").image as Texture2D;
         

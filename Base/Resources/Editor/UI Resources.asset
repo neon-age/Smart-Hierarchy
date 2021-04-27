@@ -12,6 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 596cc0dea5238214b8b55b184b1215d6, type: 3}
   m_Name: UI Resources
   m_EditorClassIdentifier: 
+  preferencesUxml: {fileID: 9197481963319205126, guid: 42da3cda26cb7f5478b3610daa0eafd3, type: 3}
   popupElementStyle: {fileID: 7433441132597879392, guid: d7461833a510d124191fbed727ac19f0, type: 3}
-  contextArrow: {fileID: 21300000, guid: 70cf301939ec64147b3b646ec72c2cf2, type: 3}
+  preferencesStyle: {fileID: 7433441132597879392, guid: 51225b4c916017644a993630cb79dc8e, type: 3}
+  foldoutHeaderStyle: {fileID: 7433441132597879392, guid: 2506268fd8f623f4a9626ac5d0a5b8e2, type: 3}
+  foldoutHeaderDarkStyle: {fileID: 7433441132597879392, guid: 9ec36196e56fcea48a2cc3e7428572fa, type: 3}
+  collectionIcon: {fileID: 2800000, guid: 6ee527fd28545e04593219b473dc26da, type: 3}
+  filterIcon: {fileID: 2800000, guid: 15da02c18233ca44f89e8255124491de, type: 3}
+  foldoutIcon: {fileID: 2800000, guid: ca7ad4c62f74dc042b3a35b034fa031c, type: 3}
+  contextArrow: {fileID: 2800000, guid: 656419f6574dbae4badb73b3faf3ee6c, type: 3}
   boxShadow: {fileID: 2800000, guid: 625e4f8d140fb9a418b7c4628a013499, type: 3}

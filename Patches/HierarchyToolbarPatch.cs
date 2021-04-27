@@ -11,7 +11,7 @@ namespace AV.Hierarchy
     {
         internal static HierarchyPreferences prefs => HierarchySettingsProvider.Preferences;
         
-        private static Texture2D filterIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath("15da02c18233ca44f89e8255124491de"));
+        private static Texture2D filterIcon = UIResources.Index.filterIcon;
         private static GUIContent buttonContent = new GUIContent { tooltip = "Options" };
         private static GUIStyle dropdownStyle;
         private static GUIStyle toolbarButtonRight;

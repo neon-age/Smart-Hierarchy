@@ -9,8 +9,9 @@ namespace AV.Hierarchy
     internal class HierarchySettingsProvider : SettingsProvider
     {
         private const string PreferencePath = "Preferences/Workflow/Smart Hierarchy";
-        private static string UIPath = AssetDatabase.GUIDToAssetPath("f0d92e1f03926664991b2f7fbfbd6268") + "/";
 
+        private static UIResources UIResource => UIResources.Index;
+        
         private static HierarchySettingsProvider provider;
         private static HierarchyPreferences preferences;
         
@@ -41,7 +42,7 @@ namespace AV.Hierarchy
             serializedObject = new SerializedObject(preferences);
             keywords = GetSearchKeywordsFromSerializedObject(serializedObject);
             
-            var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(UIPath + "smart_hierarchy_settings.uxml");
+            var visualTree = UIResource.preferencesUxml;
             visualTree.CloneTree(root);
             
             var scrollView = root.Query<ScrollView>().First();
@@ -76,16 +77,11 @@ namespace AV.Hierarchy
 
         private static void ApplyStyling(VisualElement root)
         {
-            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(UIPath + "preferences-style.uss");
-            var foldoutStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>(UIPath + "nice-foldout-header.uss");
-            root.styleSheets.Add(styleSheet);
-            root.styleSheets.Add(foldoutStyle);
+            root.styleSheets.Add(UIResource.preferencesStyle);
+            root.styleSheets.Add(UIResource.foldoutHeaderStyle);
 
             if (EditorGUIUtility.isProSkin)
-            {
-                var foldoutDarkStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>(UIPath + "nice-foldout-header_dark.uss");
-                root.styleSheets.Add(foldoutDarkStyle);
-            }
+                root.styleSheets.Add(UIResource.foldoutHeaderDarkStyle);
         }
         
         private static void LoadFromJson()

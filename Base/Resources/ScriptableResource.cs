@@ -7,6 +7,6 @@ namespace AV.Hierarchy
     internal class ScriptableResource<T> : ScriptableObject where T : ScriptableResource<T>
     {
         public static T Index => index ? index : Resources.Load<T>($"Editor/{ObjectNames.NicifyVariableName(typeof(T).Name)}");
-        public static T index;
+        private static T index;
     }
 }

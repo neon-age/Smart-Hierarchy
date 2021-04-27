@@ -8,8 +8,6 @@ namespace AV.Hierarchy
 {
     internal class CollectionPopup : PopupElement
     {
-        private static Texture2D collectionsIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath("6ee527fd28545e04593219b473dc26da"));
-
         private SerializedObject serializedObject;
         private SerializedProperty colorTagProperty;
         
@@ -31,7 +29,7 @@ namespace AV.Hierarchy
                 { 
                     style =
                     {
-                        backgroundImage = collectionsIcon,
+                        backgroundImage = UIResources.Index.collectionIcon,
                         unityBackgroundImageTintColor = color, 
                         width = 16, height = 16
                     }

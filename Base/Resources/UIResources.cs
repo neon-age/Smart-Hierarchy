@@ -8,8 +8,19 @@ namespace AV.Hierarchy
     [CreateAssetMenu]
     internal class UIResources : ScriptableResource<UIResources>
     {
-        public StyleSheet popupElementStyle;
+        [Header("UXML")] 
+        public VisualTreeAsset preferencesUxml;
         
+        [Header("Style Sheets")]
+        public StyleSheet popupElementStyle;
+        public StyleSheet preferencesStyle;
+        public StyleSheet foldoutHeaderStyle;
+        public StyleSheet foldoutHeaderDarkStyle;
+        
+        [Header("Icons")]
+        public Texture2D collectionIcon;
+        public Texture2D filterIcon;
+        public Texture2D foldoutIcon;
         public Texture2D contextArrow;
         public Texture2D boxShadow;
     }
