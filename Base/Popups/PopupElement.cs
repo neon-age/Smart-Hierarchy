@@ -15,19 +15,28 @@ namespace AV.Hierarchy
         {
             public TabToggle(Texture icon)
             {
-                var iconGUI = default(IMGUIContainer);
-                iconGUI = new IMGUIContainer(() =>
+                var flatIcon = new FlatIcon(icon);
+                flatIcon.AddToClassList("tab-toggle-icon");
+                Add(flatIcon);
+                
+                RegisterCallback<ChangeEvent<bool>>(evt => flatIcon.isOn = evt.newValue);
+            }
+        }
+
+        public class FlatIcon : IMGUIContainer
+        {
+            public bool isOn;
+            
+            public FlatIcon(Texture icon)
+            {
+                onGUIHandler = () =>
                 {
                     GUI.color = new Color(1, 1, 1, resolvedStyle.opacity);
 
-                    var rect = RectUtils.GetCenteredRect(new Rect(0, 0, 16, 16), iconGUI.layout);
+                    var rect = RectUtils.GetCenteredRect(new Rect(0, 0, 16, 16), layout);
 
-                    ViewItemGUI.DrawFlatIcon(rect, icon, GUIColors.FlatIcon, isOn: value);
-                });
-                
-                iconGUI.AddToClassList("tab-toggle-icon");
-                
-                Add(iconGUI);
+                    ViewItemGUI.DrawFlatIcon(rect, icon, GUIColors.FlatIcon, isOn: isOn);
+                };
             }
         }
         

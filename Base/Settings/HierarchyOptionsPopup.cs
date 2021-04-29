@@ -18,8 +18,8 @@ namespace AV.Hierarchy
         private VisualElement activeToolMarker = CreateActiveToggleMarker();
         private IMGUIContainer activeToolGUI;
         
+        private VisualElement RMBHint;
         private TooltipElement tooltipElement = new TooltipElement();
-        private bool rightClickedOnTool;
 
         private readonly HierarchyOptions options;
         private readonly SerializedObject serializedObject;
@@ -35,9 +35,13 @@ namespace AV.Hierarchy
             //var togglesLabel = CreateLabel("Tools Options");
             title = "Tools Options";
             
+            RMBHint = new VisualElement { style = { flexDirection = FlexDirection.Row }};
+            RMBHint.Add(new FlatIcon(UIResources.Index.RMBIcon) { style = { opacity = 0.8f, width = 16, height = 16 }});
+            //RMBHint.Add(CreateLabel("Options"));
+
             var toolTabsBar = CreateTabsToolbar();
             CreateActiveToolGroup();
-
+            
             var toolsProp = serializedObject.FindProperty("tools");
             
             //for (int d = 0; d < 3; d++)
@@ -69,10 +73,12 @@ namespace AV.Hierarchy
                 
                 tab.RegisterCallback<MouseEnterEvent>(evt =>
                 {
-                    if (rightClickedOnTool)
+                    if (activeToolTab != null)
                         return;
-                    if (activeToolTab == null)
-                        activeToolGroup.text = "Right click to show options...";
+                    
+                    activeToolGroup.text = tool.title;
+                    RMBHint.style.display = DisplayStyle.Flex;
+                    //activeToolGroup.text = "Right click to show options...";
                 });
                 
                 tab.RegisterCallback<MouseDownEvent>(evt =>
@@ -80,8 +86,6 @@ namespace AV.Hierarchy
                     if (evt.button != (int) MouseButton.RightMouse)
                         return;
 
-                    rightClickedOnTool = true;
-                    
                     if (activeToolTab != tab)
                         SetActiveToolAndExpand(tab, tool, toolIterator);
                     else
@@ -122,6 +126,13 @@ namespace AV.Hierarchy
         {
             activeToolGroup = CreateFoldout("Active Tool");
             
+            var foldout = activeToolGroup.Query(className: "unity-toggle__input").First();
+            var label = foldout.Query<Label>().First();
+
+            label.style.flexGrow = 1;
+
+            foldout.Add(RMBHint);
+            
             activeToolGUI = new IMGUIContainer();
             activeToolGroup.Add(activeToolGUI);
             
@@ -137,6 +148,8 @@ namespace AV.Hierarchy
             
             activeToolGroup.value = false;
             activeToolGroup.style.opacity = 0.5f;
+            
+            RMBHint.style.display = DisplayStyle.None;
             
             activeToolGroup.Clear();
             activeToolMarker.RemoveFromHierarchy();

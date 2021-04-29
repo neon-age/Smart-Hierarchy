@@ -23,5 +23,6 @@ namespace AV.Hierarchy
         public Texture2D foldoutIcon;
         public Texture2D contextArrow;
         public Texture2D boxShadow;
+        public Texture2D RMBIcon;
     }
 }
