@@ -1,3 +1,8 @@
+### The maintainer goes through hard times fighting his stomach diseases. Starting May 28th, it might take 4+ months of treatment to recover.
+### Any [donation](#Donation) will help him to pull through this and get any required medicine.
+
+---------------------------
+
 # Smart Hierarchy for Unity
 Brings intuitive features and important visual elements in the right place.\
 Focused on solving most pain points and improving overall Unity workflow. 
@@ -72,14 +77,11 @@ Lets you (de)activate game-objects while keeping your selection.
 - [Custom Paste / Duplicate](https://github.com/neon-age/Smart-Hierarchy/wiki/Custom-Paste---Duplicate)
 - [Auto Paste as Child](https://github.com/neon-age/Smart-Hierarchy/wiki/Custom-Paste---Duplicate)
 
-## Participation
-Feel free to fork / pull request or provide [feedback and ideas](https://github.com/neon-age/Smart-Hierarchy/discussions)!
-
-## Sharing is caring 💗
-I want to share my tools with everyone, without hiding behind a paywall.\
-If you like my work and feel generous — consider supporting [me](https://twitter.com/_neonage) financially!
+## Donation 💊
+[paypal.me/neonage](https://paypal.me/neonage)
 
 [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L4L02M51R)
 [![patreon](become-a-patron.png)](https://www.patreon.com/neonage?fan_landing=true)
-
-![ko-fi](coffee%20cup.png)
+## Author
+[Twitter](https://twitter.com/_neonage)\
+[Discord Channel](https://discord.gg/u6g6zUm9G4)
