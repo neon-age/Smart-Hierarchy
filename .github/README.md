@@ -1,5 +1,5 @@
 ### The maintainer goes through hard times fighting his stomach diseases. Starting May 28th, it might take 4+ months of treatment to recover.
-### Any [donation](#Donation) will help him to pull through this and get any required medicine.
+### Any [donation](#donation-) will help him to pull through this and get any required medicine.
 
 ---------------------------
 
