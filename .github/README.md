@@ -82,6 +82,6 @@ Lets you (de)activate game-objects while keeping your selection.
 
 [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L4L02M51R)
 [![patreon](become-a-patron.png)](https://www.patreon.com/neonage?fan_landing=true)
-## Author
-[Twitter](https://twitter.com/_neonage)\
-[Discord Channel](https://discord.gg/u6g6zUm9G4)
+## Contact
+[Twitter](https://twitter.com/_neonage) 
+• [Discord Channel](https://discord.gg/u6g6zUm9G4)
