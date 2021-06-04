@@ -40,19 +40,25 @@ namespace AV.Hierarchy
                         collectionPopup.Close();
                 }
             }
-            
-            var fullWidthRect = new Rect(rect) { x = 0, width = Screen.width };
-            var toggleRect = new Rect(fullWidthRect) { x = 32 };
 
-            var isDragged = activationToggle.IsObjectDragged(item.instance);
+            if (!item.instance)
+                return;
 
-            if (isDragged)
+            if (item.instance is GameObject gameObject)
             {
-                var c = EditorGUIUtility.isProSkin ? new Color(1, 1, 1, 1) : new Color(0, 0, 0, 1);
-                EditorGUI.DrawRect(toggleRect, new Color(c.r, c.g, c.b, 0.0666f));
-            }
+                var fullWidthRect = new Rect(rect) {x = 0, width = Screen.width};
+                var toggleRect = new Rect(fullWidthRect) {x = 32};
 
-            activationToggle.DoActivationToggle(toggleRect, item.instance, isHover || isDragged);
+                var isDragged = activationToggle.IsObjectDragged(gameObject);
+
+                if (isDragged)
+                {
+                    var c = EditorGUIUtility.isProSkin ? new Color(1, 1, 1, 1) : new Color(0, 0, 0, 1);
+                    EditorGUI.DrawRect(toggleRect, new Color(c.r, c.g, c.b, 0.0666f));
+                }
+
+                activationToggle.DoActivationToggle(toggleRect, gameObject, isHover || isDragged);
+            }
         }
         
         public static void DrawIcon(this ViewItem item, Rect rect, bool isOn)

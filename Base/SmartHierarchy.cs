@@ -7,6 +7,7 @@ using UnityEditor.IMGUI.Controls;
 using UnityEditor.SceneManagement;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
+using Object = UnityEngine.Object;
 
 namespace AV.Hierarchy
 {
@@ -18,15 +19,15 @@ namespace AV.Hierarchy
 
         internal SceneHierarchyWindow window { get; }
         internal SceneHierarchy hierarchy => window.hierarchy;
-        internal TreeViewState state => hierarchy.state;
         internal TreeViewController controller => hierarchy.controller;
-        internal float time => Time.realtimeSinceStartup;
+        internal TreeViewState state => hierarchy.state;
+        internal TreeViewGUI gui => controller.gui;
         
         private EditorWindow actualWindow => window.actualWindow;
         private ViewItem hoveredItem;
         private bool isHovering => hoveredItem != null;
         private int hoveredItemId => hierarchy.hoveredItem?.id ?? -1;
-        private bool requiresUpdateBeforeGUI;
+        private bool isInitialized = true;
         private bool requiresGUISetup = true;
         private Vector2 localMousePosition;
         
@@ -34,6 +35,7 @@ namespace AV.Hierarchy
         private readonly HoverPreview hoverPreview;
         private readonly IMGUIContainer guiContainer;
         private readonly Dictionary<int, ViewItem> ItemsData = new Dictionary<int, ViewItem>();
+        
         
         public SmartHierarchy(EditorWindow window)
         {
@@ -45,12 +47,7 @@ namespace AV.Hierarchy
             Initialize();
             RegisterCallbacks();
             hierarchy.ReassignCallbacks();
-            
-            guiContainer = root.parent.Query<IMGUIContainer>().First();
-            
-            // onGUIHandler is called after hierarchy GUI, thus has a slight delay
-            guiContainer.onGUIHandler += OnAfterGUI;
-            
+
             root.Add(hoverPreview);
         }
 
@@ -63,6 +60,11 @@ namespace AV.Hierarchy
         private static void OnInitialize()
         {
             EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyItemGUI;
+        }
+
+        internal void OnDisable()
+        {
+            isInitialized = false;
         }
 
         private void RegisterCallbacks()
@@ -86,47 +88,50 @@ namespace AV.Hierarchy
         {
             ItemsData.Clear();
         }
-        
+
         private static void ImmediateRepaint()
         {
-            EditorApplication.DirtyHierarchyWindowSorting();
+            EditorApplication.RepaintHierarchyWindow();
         }
+        
         
         private static void OnHierarchyItemGUI(int id, Rect rect)
         {
             if (!prefs.enableSmartHierarchy)
                 return;
             
-            active = HierarchyInitialization.GetLastHierarchy();
+            active = HierarchyInitialization.GetActiveHierarchy();
 
-            active.OnItemCallback(id, rect);
+            active?.OnItemCallback(id, rect);
         }
 
         private void OnItemCallback(int id, Rect rect)
         {
-            if (requiresGUISetup)
-            {
-                requiresGUISetup = false;
-                OnGUISetup();
-            }
-
-            if (requiresUpdateBeforeGUI)
-            {
-                requiresUpdateBeforeGUI = false;
-                OnBeforeGUI();
-            }
-            
             OnItemGUI(id, rect);
         }
 
         private void OnGUISetup()
         {
-            hierarchy.EnsureValidData();
+            //hierarchy.EnsureValidData();
             actualWindow.SetAntiAliasing(8);
         }
-        
-        private void OnBeforeGUI()
+
+        internal void OnBeforeGUI()
         {
+            if (!prefs.enableSmartHierarchy)
+            {
+                if (isInitialized)
+                    OnDisable();
+                return;
+            }
+
+            isInitialized = true;
+
+            if (requiresGUISetup)
+            {
+                requiresGUISetup = false;
+                OnGUISetup();
+            }
             hierarchy.EnsureValidData();
 
             ItemsData.TryGetValue(hoveredItemId, out hoveredItem);
@@ -135,21 +140,15 @@ namespace AV.Hierarchy
             HideDefaultIcon();
         }
         
-        
         private void OnItemGUI(int id, Rect rect)
         {
-            var instance = EditorUtility.InstanceIDToObject(id) as GameObject;
+            var instance = EditorUtility.InstanceIDToObject(id);
 
-            if (!instance)
-                return;
-                
-            GetInstanceViewItem(id, instance, rect, out var item);
+            GetInstanceViewItem(id, instance, out var item);
             
             // Happens to be null when entering prefab mode
             if (!item.EnsureViewExist(hierarchy))
                 return;
-            
-            HideDefaultIcon();
             
             var isSelected = controller.IsSelected(item.view);
             var isHover = hierarchy.hoveredItem == item.view;
@@ -158,11 +157,11 @@ namespace AV.Hierarchy
             item.DoItemGUI(this, rect, isHover, isOn);
         }
         
-        private void OnAfterGUI()
+        internal void OnAfterGUI()
         {
             if (!prefs.enableSmartHierarchy)
                 return;
-
+            
             // Makes sure other items like scene headers are not interrupted 
             controller.gui.ResetCustomStyling();
             
@@ -173,10 +172,8 @@ namespace AV.Hierarchy
                 
                 hoverPreview.SetPosition(localMousePosition, actualWindow.position);
             }
-
+            
             HandleObjectPreview();
-
-            requiresUpdateBeforeGUI = true;
         }
 
         private void HideDefaultIcon()
@@ -213,11 +210,11 @@ namespace AV.Hierarchy
             }
         }
         
-        private void GetInstanceViewItem(int id, GameObject instance, Rect rect, out ViewItem item)
+        private void GetInstanceViewItem(int id, Object instance, out ViewItem item)
         {
             if (!ItemsData.TryGetValue(id, out item))
             {
-                item = new ViewItem(instance) { rect = rect };
+                item = new ViewItem(id, instance);
 
                 ItemsData.Add(id, item);
             }
