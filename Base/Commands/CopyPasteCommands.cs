@@ -93,6 +93,8 @@ namespace AV.Hierarchy
                 SmartHierarchy.active.window.hierarchy.DuplicateGO();
                 return;
             }
+            if (Selection.count == 0)
+                return;
             
             GetSiblingsPlace(Selection.transforms, out var siblingIndex);
             
