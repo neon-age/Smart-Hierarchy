@@ -1,8 +1,3 @@
-### The maintainer goes through hard times fighting his stomach diseases. Starting May 28th, it might take 4+ months of treatment to recover.
-### Any [donation](#donation-) will help him to pull through this and get any required medicine.
-
----------------------------
-
 # Smart Hierarchy for Unity
 Brings intuitive features and important visual elements in the right place.\
 Focused on solving most pain points and improving overall Unity workflow. 
