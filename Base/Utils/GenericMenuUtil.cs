@@ -21,10 +21,17 @@ namespace AV.Hierarchy
         private static readonly FieldInfo menuItemFunc = menuItemType.GetField("func", BindingFlags.Public | BindingFlags.Instance);
         private static readonly FieldInfo menuItemFunc2 = menuItemType.GetField("func2", BindingFlags.Public | BindingFlags.Instance);
 
+#if UNITY_2021_1_OR_NEWER
+        public static IList GetItems(GenericMenu menu)
+        {
+            return (IList)menuItemsField.GetValue(menu);
+        }
+#else
         public static ArrayList GetItems(GenericMenu menu)
         {
             return (ArrayList)menuItemsField.GetValue(menu);
         }
+#endif
 
         public static GUIContent GetContent(object menuItem)
         {
