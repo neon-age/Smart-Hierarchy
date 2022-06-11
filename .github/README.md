@@ -1,6 +1,6 @@
 # Smart Hierarchy for Unity
 
-### ! ***Will soon be entirely rewritten with introduction of Open Labs Core*** !
+### ! ***Will soon be entirely rewritten with introduction of Open Labs Core package*** !
 
 Brings intuitive features and important visual elements in the right place.\
 Focused on solving most pain points and improving overall Unity workflow. 
