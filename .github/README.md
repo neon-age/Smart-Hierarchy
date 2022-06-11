@@ -1,4 +1,7 @@
 # Smart Hierarchy for Unity
+
+### ! ***Will soon be entirely rewritten with introduction of Open Labs Core*** !
+
 Brings intuitive features and important visual elements in the right place.\
 Focused on solving most pain points and improving overall Unity workflow. 
 
@@ -6,6 +9,13 @@ Focused on solving most pain points and improving overall Unity workflow.
 • [🗺 Roadmap](https://github.com/neon-age/Smart-Hierarchy/projects/1) 
 • [💬 Discussions](https://github.com/neon-age/Smart-Hierarchy/discussions)
 • [📚 Wiki](https://github.com/neon-age/Smart-Hierarchy/wiki) •
+
+## Contact
+[![twitter](https://img.shields.io/twitter/follow/_neonage?style=social)](https://twitter.com/_neonage)\
+[![discord online](https://img.shields.io/discord/830405926078644254?label=Open%20Labs&logo=discord&style=social)](https://discord.gg/wWpqvwuf8J)
+
+[![join discord](https://user-images.githubusercontent.com/29812914/121816656-0cb93080-cca7-11eb-954a-344cfd31f530.png)](https://discord.gg/wWpqvwuf8J)
+ 
 
 ## Installation
 Requires Unity **2019.4** or higher.
@@ -72,11 +82,5 @@ Lets you (de)activate game-objects while keeping your selection.
 - [Custom Paste / Duplicate](https://github.com/neon-age/Smart-Hierarchy/wiki/Custom-Paste---Duplicate)
 - [Auto Paste as Child](https://github.com/neon-age/Smart-Hierarchy/wiki/Custom-Paste---Duplicate)
 
-## Donation 💊
-[paypal.me/neonage](https://paypal.me/neonage)
-
-[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L4L02M51R)
-[![patreon](become-a-patron.png)](https://www.patreon.com/neonage?fan_landing=true)
-## Contact
-[Twitter](https://twitter.com/_neonage) 
-• [Discord Channel](https://discord.gg/u6g6zUm9G4)
+## Donation? 💊
+No idea how I can receive them in the current situation.
