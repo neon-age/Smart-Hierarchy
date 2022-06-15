@@ -8,7 +8,7 @@ namespace AV.Hierarchy
 {
     internal static class ObjectIconUtil
     {
-        private static MethodInfo getIconForObject = typeof(EditorGUIUtility).GetMethod("GetIconForObject", BindingFlags.NonPublic | BindingFlags.Static);
+        private static MethodInfo getIconForObject = typeof(EditorGUIUtility).GetMethod("GetIconForObject", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         
         public static Texture2D GetIconForObject(Object obj)
         {
