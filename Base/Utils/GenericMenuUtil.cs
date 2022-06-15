@@ -11,14 +11,15 @@ namespace AV.Hierarchy
     {
         private static readonly Type menuItemType = typeof(GenericMenu).GetNestedType("MenuItem", BindingFlags.NonPublic | BindingFlags.Instance);
       
-        private static readonly FieldInfo menuItemsField = typeof(GenericMenu).GetField("menuItems", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly MemberInfo menuItemsField = typeof(GenericMenu).GetMember("menuItems", BindingFlags.NonPublic | BindingFlags.Instance)[0];
         private static readonly FieldInfo menuItemContent = menuItemType.GetField("content", BindingFlags.Public | BindingFlags.Instance);
         private static readonly FieldInfo menuItemFunc = menuItemType.GetField("func", BindingFlags.Public | BindingFlags.Instance);
         private static readonly FieldInfo menuItemFunc2 = menuItemType.GetField("func2", BindingFlags.Public | BindingFlags.Instance);
 
-        public static ArrayList GetItems(GenericMenu menu)
+        public static IList GetItems(GenericMenu menu)
         {
-            return (ArrayList)menuItemsField.GetValue(menu);
+            if (menuItemsField is FieldInfo field) return (IList)field.GetValue(menu);
+            if (menuItemsField is PropertyInfo prop) return (IList)prop.GetValue(menu); return null;
         }
 
         public static GUIContent GetContent(object menuItem)
